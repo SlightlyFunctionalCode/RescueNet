@@ -2,7 +2,7 @@
 
 ## Descrição do Projeto
 
-Este projeto é uma aplicação distribuída desenvolvida em Java para aprimorar a coordenação e comunicação entre diversas entidades em operações de emergência durante catástrofes naturais, como terremotos e inundações. A aplicação foi projetada para suportar cenários de crise, oferecendo uma plataforma segura e eficiente que conecta equipes de resposta em tempo real.
+Este projeto é uma aplicação distribuída desenvolvida em Java para melhorar a coordenação e comunicação entre diversas entidades em operações de emergência durante catástrofes naturais, como terremotos e inundações. A aplicação foi projetada para suportar cenários de crise, oferecendo uma plataforma segura e eficiente que conecta equipes de resposta em tempo real.
 
 ## Funcionalidades
 
