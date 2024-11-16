@@ -1,19 +1,18 @@
 package org.estg.ipp.pt.Classes;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import org.estg.ipp.pt.Classes.Enum.Permissions;
 
 @Entity
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String identifier;
     private String name;
-    private String profile;
+    private String email;
+    private Permissions permission;
     private String password;
 
     // Getters e setters
@@ -23,12 +22,12 @@ public class User {
         return id;
     }
 
-    public String getIdentifier() {
-        return identifier;
+    public String getEmail() {
+        return email;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getName() {
@@ -39,12 +38,12 @@ public class User {
         this.name = name;
     }
 
-    public String getProfile() {
-        return profile;
+    public Permissions getPermissions() {
+        return permission;
     }
 
-    public void setProfile(String profile) {
-        this.profile = profile;
+    public void setPermissions(Permissions permission) {
+        this.permission = permission;
     }
 
     public String getPassword() {

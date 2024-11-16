@@ -31,19 +31,30 @@ public class Client {
 
                 switch (choice) {
                     case 1 -> {
-                        System.out.print("Digite o nome de usuário: ");
+                        System.out.print("Digite o nome de utilizador: ");
                         String username = scanner.nextLine();
-                        System.out.print("Digite a senha: ");
+                        String email;
+                        while (true) {
+                            System.out.print("Digite um email: ");
+                            email = scanner.nextLine();
+
+                            if (isValidEmail(email)) {
+                                break; // Email válido, sai do loop
+                            } else {
+                                System.out.println("Email inválido. Certifique-se de que contém '@' e '.' após o '@'. Tente novamente.");
+                            }
+                        }
+                        System.out.print("Digite a palavra-passe: ");
                         String password = scanner.nextLine();
-                        out.println("REGISTER:" + username + "," + password);
+                        out.println("REGISTER:" + username + "," + email + "," + password);
                         System.out.println(in.readLine());
                     }
                     case 2 -> {
-                        System.out.print("Digite o nome de usuário: ");
-                        String username = scanner.nextLine();
+                        System.out.print("Digite o nome de utilizar/email: ");
+                        String usernameOremail = scanner.nextLine();
                         System.out.print("Digite a senha: ");
                         String password = scanner.nextLine();
-                        out.println("LOGIN:" + username + "," + password);
+                        out.println("LOGIN:" + usernameOremail + "," + password);
                         System.out.println(in.readLine());
                     }
                     case 3 -> {
@@ -60,6 +71,12 @@ public class Client {
                 }
             }
         }
+    }
+
+    private static boolean isValidEmail(String email) {
+        // Expressão regular para validar email
+        String emailRegex = "^[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$";
+        return email.matches(emailRegex);
     }
 }
 

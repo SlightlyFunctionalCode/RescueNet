@@ -1,25 +1,30 @@
 package org.estg.ipp.pt;
 
 
+import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Services.UserService;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
-import java.util.HashMap;
+import java.sql.SQLOutput;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-public class Server {
+@SpringBootApplication
+public class Server{
 
-    private static final Map<String, String> userDatabase = new HashMap<>();
     private static final Set<String> loggedUsers = new HashSet<>();
 
     public static void main(String[] args) throws IOException {
+        SpringApplication.run(Server.class, args);
         int serverPort = 5000; // Porta do servidor
         ServerSocket serverSocket = new ServerSocket(serverPort);
 
@@ -33,6 +38,7 @@ public class Server {
         }
     }
 
+
     private static void handleClient(Socket clientSocket) {
         try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -44,7 +50,6 @@ public class Server {
                 String[] parts = request.split(":", 2);
                 String command = parts[0];
                 String payload = parts.length > 1 ? parts[1] : "";
-
                 switch (command) {
                     case "REGISTER" -> out.println(registerUser(payload));
                     case "LOGIN" -> out.println(loginUser(payload));
@@ -58,22 +63,31 @@ public class Server {
     }
 
     private static String registerUser(String payload) {
-        String[] parts = payload.split(",");
-        if (parts.length != 2) return "ERRO: Formato inválido para registro";
-
+        payload = payload.trim();
+        String[] parts = payload.split(",",3);
+        if (parts.length != 3) {
+            return "ERRO: Formato inválido para registro";
+        }
         String username = parts[0];
-        String password = parts[1];
+        String email = parts[1];
+        String password = parts[2];
 
+
+        System.out.println(email);
         User user = new User();
         UserService userService = new UserService();
         user.setName(username);
         user.setPassword(password);
-        user.setIdentifier("teste");
-        user.setProfile("teste");
+        user.setEmail(email);
+        user.setPermissions(Permissions.LOW_LEVEL);
 
         try {
-            userService.register(user);
-            return "SUCESSO: Usuário registrado com sucesso";
+            if(userService.register(user) == 0){
+                return "FAILED: Usuário com nome ou email já existente";
+            }else{
+                return "SUCESSO: Usuário registrado com sucesso";
+            }
+
         } catch (Exception e) {
             return "ERRO: Falha ao registrar usuário - " + e.getMessage();
         }
@@ -84,22 +98,22 @@ public class Server {
         String[] parts = payload.split(",");
         if (parts.length != 2) return "ERRO: Formato inválido para login";
 
-        String username = parts[0];
+        String usernameOremail = parts[0];
         String password = parts[1];
 
+        UserService userService = new UserService();
+        User user;
+        user = userService.authenticate(usernameOremail, password);
 
-
-
+        if(user == null){
+            return "FAILED: User invalid!";
+        }
         return "SUCESSO: Login realizado";
     }
 
     private static String logoutUser(String username) {
-        if (!loggedUsers.contains(username)) {
-            return "ERRO: Usuário não está logado";
-        }
 
-        loggedUsers.remove(username);
-        return "SUCESSO: Logout realizado";
+        return null;
     }
 }
 
