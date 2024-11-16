@@ -108,7 +108,29 @@ public class Server{
         if(user == null){
             return "FAILED: User invalid!";
         }
-        return "SUCESSO: Login realizado";
+
+        //Atribuir grupo com base nas permissões
+        String groupAddress;
+        int port;
+        switch (user.getPermissions()) {
+            case LOW_LEVEL -> {
+                groupAddress = "230.0.0.1";
+                port = 4446;
+            }
+            case MEDIUM_LEVEL -> {
+                groupAddress = "230.0.0.2";
+                port = 4447;
+            }
+            case HIGH_LEVEL -> {
+                groupAddress = "230.0.0.3";
+                port = 4448;
+            }
+            default -> {
+                return "ERRO: Permissão desconhecida";
+            }
+
+        }
+        return "SUCESSO: Login realizado. Grupo: " + groupAddress + ":" + port;
     }
 
     private static String logoutUser(String username) {

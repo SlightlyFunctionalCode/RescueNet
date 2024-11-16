@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.SQLOutput;
 import java.util.Scanner;
 
 
@@ -55,7 +56,22 @@ public class Client {
                         System.out.print("Digite a senha: ");
                         String password = scanner.nextLine();
                         out.println("LOGIN:" + usernameOremail + "," + password);
-                        System.out.println(in.readLine());
+
+                        String response = in.readLine();
+                        System.out.println(response);
+
+                        if(response.startsWith("SUCESSO")){
+                            String[] parts = response.split("Grupo: ", 2);
+                            if(parts.length == 2){
+                                String[] groupDetails = parts[1].split(":");
+                                String groupAddress = groupDetails[0];
+                                int port = Integer.parseInt(groupDetails[1]);
+
+                                Chat.startChat(groupAddress, port, usernameOremail);
+                            }
+                        }else{
+                            System.out.println("ERROR: Something went wrong");
+                        }
                     }
                     case 3 -> {
                         System.out.print("Digite o nome de usuário: ");
