@@ -21,14 +21,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // MySQL Connector
-    runtimeOnly 'mysql:mysql-connector-java:8.0.29'
-
+    // PostgreSQL Connector
+    implementation 'org.postgresql:postgresql:42.7.2' // Use the latest stable version
     // Spring Boot Starter Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // JWT
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
-
 }
 
 test {
