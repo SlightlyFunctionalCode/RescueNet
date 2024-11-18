@@ -82,14 +82,14 @@ public class Notifications {
         // Verifica se o usuário está na lista de usuários online com permissões
         if (usersWithPermissionsOnline.contains(username)) {
             // O usuário está online, agora vamos notificar
-            System.out.println("Notificação enviada para o usuário " + username + ": " + message);
+            System.out.println("Notificação enviada para o utilizador " + username + ": " + message);
 
             // Enviar a mensagem para o chat ou algum outro mecanismo de comunicação
             // Supondo que você tenha algum serviço de mensagens, como um chat
             sendNotificationToGroupHIGH_LEVEL(message, groups.get(2));
         } else {
             // Se o usuário não está online, você pode decidir se ainda assim quer registrar a notificação
-            System.out.println("Usuário não está online, aguardando conexão...");
+            System.out.println("Utilizador não está online, aguardando conexão...");
             // Aqui você pode salvar a notificação em algum local de espera ou log, se necessário
             // Exemplo:
             saveNotificationForLater(username, message);

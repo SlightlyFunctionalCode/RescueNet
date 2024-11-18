@@ -23,7 +23,7 @@ public class Client {
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 System.out.println("\nMENU");
-                System.out.println("1. Registrar");
+                System.out.println("1. Registar");
                 System.out.println("2. Login");
                 System.out.println("3. Logout");
                 System.out.println("4. Sair");
@@ -52,7 +52,7 @@ public class Client {
                         System.out.println(in.readLine());
                     }
                     case 2 -> {
-                        System.out.print("Digite o nome de utilizar/email: ");
+                        System.out.print("Digite o nome de utilizador/email: ");
                         String usernameOremail = scanner.nextLine();
                         System.out.print("Digite a senha: ");
                         String password = scanner.nextLine();
@@ -70,12 +70,12 @@ public class Client {
 
                                 Chat.startChat(groupAddress, port, usernameOremail);
                             }
-                        }else{
+                        }else if (!response.startsWith("FAILED")){
                             System.out.println("ERROR: Something went wrong");
                         }
                     }
                     case 3 -> {
-                        System.out.print("Digite o nome de usuário: ");
+                        System.out.print("Digite o nome de utilizador: ");
                         String username = scanner.nextLine();
                         out.println("LOGOUT:" + username);
                         System.out.println(in.readLine());

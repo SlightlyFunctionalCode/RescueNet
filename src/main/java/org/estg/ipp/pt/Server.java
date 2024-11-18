@@ -91,13 +91,10 @@ public class Server {
                             // Usuário autenticado com sucesso
                             String username = payload.split(",")[0]; // Obtém o nome de usuário
                             User user = userService.getUserByName(username);
-                            System.out.println("ola");
                             if (user != null && (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL)) {
                                 usersWithPermissionsOnline.add(username);
-                                System.out.println("ola2");
                                 // Enviar notificações de pedidos pendentes
                                 for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
-                                    System.out.println("ola1");
                                     String requestingUser = entry.getKey();
                                     String operationName = entry.getValue();
                                     notifyUser(username, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, multicastGroups);
