@@ -12,7 +12,11 @@ public enum RegexPatterns {
     SERVER_ERROR("^ERRO:(.*)"),             // Match server response "ERRO:<error_message>"
     SERVER_APPROVE("^APPROVE"),             // Match server response "APPROVE"
     SERVER_REJECT("^REJECT"),               // Match server response "REJECT"
-    SEND_TO("^SEND TO:(.*)");               // Match "SEND TO:<username>"
+    SEND_TO("^SEND TO:(.*)"),               // Match "SEND TO:<username>"
+    EMAIL("^[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$"),        // Email validation
+    LOGIN_SUCCESS("^SUCESSO\\s.*Grupo: ([\\d\\.]+):(\\d+)$"), // Match "SUCESSO Grupo: <address>:<port>"
+    LOGIN_FAILED("^FAILED"),                             // Match "FAILED" response
+    GENERIC_RESPONSE("^(SUCESSO|FAILED|ERROR):.*");      // Generic server response validation
 
     private final Pattern pattern;
 
