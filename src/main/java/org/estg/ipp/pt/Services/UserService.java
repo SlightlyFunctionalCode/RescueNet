@@ -73,4 +73,10 @@ public class UserService {
         }
         return null;
     }
+
+    public User getUserByName(String username) {
+
+           Optional<User> user = userRepository.findByName(username);
+        return user.orElse(null);
+    }
 }
