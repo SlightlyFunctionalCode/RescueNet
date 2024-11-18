@@ -1,6 +1,7 @@
 package org.estg.ipp.pt.Services;
 
 import jdk.swing.interop.SwingInterOpUtils;
+import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Chat {
     public static void startChat(String groupAddress, int port, String name) throws IOException {
@@ -26,11 +29,12 @@ public class Chat {
                     socket.receive(packet);
                     String received = new String(packet.getData(), 0, packet.getLength());
 
-                    // Verifica se a mensagem é destinada ao usuário atual
-                    if (received.startsWith("USER: " + name)) {
-                        System.out.println("Mensagem direcionada a você: " + received.substring(("USER: " + name + " ").length()));
-                    } else if (received.startsWith("NOTIFICAÇÃO:")) {
-                        System.out.println("⚠️ " + received.substring(13)); // Exibe notificações
+                    if (RegexPatterns.DIRECTED_MESSAGE.matcher(received).matches()) {
+                        System.out.println("Mensagem direcionada a você: " +
+                                RegexPatterns.DIRECTED_MESSAGE.matcher(received).replaceFirst("$2"));
+                    } else if (RegexPatterns.NOTIFICATION.matcher(received).matches()) {
+                        System.out.println("⚠️ " +
+                                RegexPatterns.NOTIFICATION.matcher(received).replaceFirst("$1").trim());
                     } else {
                         System.out.println(received);
                     }
@@ -57,19 +61,21 @@ public class Chat {
                 try (Socket serverSocket = new Socket("localhost", 5000);
                      PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()))) {
-                    out.println(msg + ":" + name); // Nome do usuário + comando
+                    out.println(msg + ":" + name); // Nome do user + comando
                     String serverResponse = in.readLine();
 
-                    if (serverResponse.startsWith("PENDENTE")) {
+                    // Use regex enums to process server responses
+                    if (RegexPatterns.SERVER_PENDING.matches(serverResponse)) {
                         System.out.println("Aguardando aprovação...");
-                    } else if (serverResponse.startsWith("SUCESSO")) {
+                    } else if (RegexPatterns.SERVER_SUCCESS.matches(serverResponse)) {
                         System.out.println("Comando aprovado e executado.");
-                    } else if (serverResponse.startsWith("ERRO")) {
-                        System.out.println("Erro: " + serverResponse);
-                    }else if(serverResponse.startsWith("APPROVE")){
+                    } else if (RegexPatterns.SERVER_ERROR.matcher(serverResponse).matches()) {
+                        System.out.println("Erro: " +
+                                RegexPatterns.SERVER_ERROR.matcher(serverResponse).replaceFirst("$1"));
+                    } else if (RegexPatterns.SERVER_APPROVE.matches(serverResponse)) {
                         System.out.println("Aprovado e executado.");
-                    }else if(serverResponse.startsWith("REJECT")){
-                        System.out.println("Rejectado e executado.");
+                    } else if (RegexPatterns.SERVER_REJECT.matches(serverResponse)) {
+                        System.out.println("Rejeitado.");
                     } else {
                         System.out.println(serverResponse);
                     }
@@ -77,16 +83,19 @@ public class Chat {
                     System.err.println("Erro ao comunicar com o servidor: " + e.getMessage());
                 }
             } else {
-                // Verifica se é uma mensagem dirigida a um usuário específico
-                if (msg.startsWith("SEND TO:")) {
-                    String targetUser = msg.split(":")[1].trim();
-                    String fullMsg = "USER: " + targetUser + " " + name + ": " + msg.substring(targetUser.length() + 9); // Inclui o nome do usuário como destinatário
+                Pattern sendToPattern = Pattern.compile("^SEND TO:(.*)");
+
+                Matcher sendToMatcher = sendToPattern.matcher(msg);
+                if (sendToMatcher.find()) {
+                    String targetUser = RegexPatterns.SEND_TO.matcher(msg).replaceFirst("$1").trim();
+                    String fullMsg = "USER: " + targetUser + " " + name + ": " +
+                            msg.substring(("SEND TO:" + targetUser).length()).trim();
                     byte[] buffer = fullMsg.getBytes();
 
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
                     socket.send(packet);
                 } else {
-                    // Caso contrário, envia para o grupo
+                    // Otherwise, send it to the group
                     String fullMsg = name + ": " + msg;
                     byte[] buffer = fullMsg.getBytes();
 
@@ -98,10 +107,7 @@ public class Chat {
     }
 
     private static boolean isCommand(String msg) {
-        return msg.equalsIgnoreCase("MASS_EVACUATION") ||
-                msg.equalsIgnoreCase("EMERGENCY_COMM") ||
-                msg.equalsIgnoreCase("RESOURCE_DISTRIBUTION")||
-                msg.startsWith("APPROVE") ||
-                msg.startsWith("REJECT");
+        String commandRegex = "^(MASS_EVACUATION|EMERGENCY_COMM|RESOURCE_DISTRIBUTION|APPROVE.*|REJECT.*)$";
+        return Pattern.matches(commandRegex, msg);
     }
 }
