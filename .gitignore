@@ -30,3 +30,5 @@ bin/
 /.gradle
 /.idea
 /.idea
+src/main/resources/application.properties
+/build
