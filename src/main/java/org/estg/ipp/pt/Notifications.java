@@ -10,11 +10,14 @@ import java.net.*;
 import java.util.*;
 
 import static org.estg.ipp.pt.Server.*;
+import static org.estg.ipp.pt.Services.ExecuteInternalCommands.getGroupAddressAndPort;
+import static org.estg.ipp.pt.Services.ExecuteInternalCommands.getUserSocket;
+import static org.estg.ipp.pt.Services.ExecuteUserCommands.saveNotificationForLater;
 
 
 public class Notifications {
 
-    protected static void sendNotificationToGroups(String message, List<AbstractMap.SimpleEntry<String, Integer>> multicastGroups) {
+    public static void sendNotificationToGroups(String message, List<AbstractMap.SimpleEntry<String, Integer>> multicastGroups) {
         try {
             DatagramSocket socket = new DatagramSocket();
 
@@ -75,7 +78,8 @@ public class Notifications {
         socket.close();
     }
 
-    protected static void notifyUser(String username, String message, Set<String> usersWithPermissionsOnline, List<AbstractMap.SimpleEntry<String, Integer>> groups) {
+    public static void notifyUser(String username, String message, Set<String> usersWithPermissionsOnline,
+                                  List<AbstractMap.SimpleEntry<String, Integer>> groups) {
         // Log para debug
         System.out.println("Tentando notificar " + username + ": " + message);
 
@@ -116,7 +120,7 @@ public class Notifications {
         }
     }
 
-    protected static void sendNotificationToUserInGroup(String username, String message, Set<String> usersWithPermissionsOnline, UserService userService) {
+    public static void sendNotificationToUserInGroup(String username, String message, Set<String> usersWithPermissionsOnline, UserService userService) {
         // Verifica se o usuário está online
         if (!usersWithPermissionsOnline.contains(username)) {
             System.out.println("Usuário " + username + " não está online ou não tem permissões.");

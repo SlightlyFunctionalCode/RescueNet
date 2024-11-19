@@ -57,7 +57,7 @@ public class Chat {
                 break;
             }
 
-            if (isCommand(msg)) {
+            if (msg.startsWith("/")) {
                 try (Socket serverSocket = new Socket("localhost", 5000);
                      PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()))) {
@@ -106,8 +106,4 @@ public class Chat {
         }
     }
 
-    private static boolean isCommand(String msg) {
-        String commandRegex = "^(MASS_EVACUATION|EMERGENCY_COMM|RESOURCE_DISTRIBUTION|APPROVE.*|REJECT.*)$";
-        return Pattern.matches(commandRegex, msg);
-    }
 }
