@@ -5,11 +5,11 @@ import org.estg.ipp.pt.Classes.User;
 public class ApprovalManager {
 
     public boolean approveOperation(User user, Operation operation){
-        if(user.getPermissions().ordinal() >= operation.getRequiredPermission().ordinal()){
-            System.out.println("Operação aprovada: " + operation.getName());
+        if(user.getPermissions().ordinal() >= operation.requiredPermission().ordinal()){
+            System.out.println("Operação aprovada: " + operation.name());
             return true;
         }else{
-            System.out.println("Operação negada. Permissão insuficiente para: " + operation.getName());
+            System.out.println("Operação negada. Permissão insuficiente para: " + operation.name());
             return false;
         }
     }

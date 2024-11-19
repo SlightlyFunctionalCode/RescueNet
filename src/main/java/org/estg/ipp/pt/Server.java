@@ -3,7 +3,6 @@ package org.estg.ipp.pt;
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Classes.User;
-import org.estg.ipp.pt.Services.Chat;
 import org.estg.ipp.pt.Services.Operation;
 import org.estg.ipp.pt.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,9 +272,9 @@ public class Server {
             return;
         }
 
-        if (user.getPermissions().ordinal() >= operation.getRequiredPermission().ordinal()) {
+        if (user.getPermissions().ordinal() >= operation.requiredPermission().ordinal()) {
             // Permissão suficiente - executar a operação
-            sendNotificationToGroups("Comando executado: " + operation.getName() + " (por " + username + ")", multicastGroups);
+            sendNotificationToGroups("Comando executado: " + operation.name() + " (por " + username + ")", multicastGroups);
             out.println("SUCESSO: Operação realizada.");
         } else {
             if (usersWithPermissionsOnline.isEmpty()) {

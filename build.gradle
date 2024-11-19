@@ -13,6 +13,9 @@ repositories {
 }
 
 dependencies {
+    // PDF Generator
+    implementation 'org.apache.pdfbox:pdfbox:2.0.27'  // Apache PDFBox for PDF generation
+
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
