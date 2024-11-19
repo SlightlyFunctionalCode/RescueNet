@@ -1,7 +1,9 @@
 package org.estg.ipp.pt;
 
 import org.estg.ipp.pt.Classes.Enum.Permissions;
+import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Classes.User;
+import org.estg.ipp.pt.Services.Chat;
 import org.estg.ipp.pt.Services.Operation;
 import org.estg.ipp.pt.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.*;
+import java.util.regex.Matcher;
 
 import static java.lang.System.out;
 import static org.estg.ipp.pt.Notifications.*;
@@ -72,46 +75,68 @@ public class Server {
             String request;
             while ((request = in.readLine()) != null) {
                 System.out.println("Solicitação recebida: " + request);
-                String[] parts = request.split(":", 2);
-                String command = parts[0];
-                String[] mini_parts = command.split( " ", 2);
-                String command2 = mini_parts.length == 2 ? mini_parts[0]: "";
-                String requester = mini_parts.length == 2 ? mini_parts[1]: "";
-                String payload = parts.length > 1 ? parts[1] : "";
-                if(!command2.isEmpty()){
-                    command = command2;
-                    payload = command + ":" + payload;
-                }
 
-                switch (command) {
-                    case "REGISTER" -> out.println(registerUser(payload));
-                    case "LOGIN" -> {String response = handleLogin(payload, out, clientSocket);
-                        out.println(response);
-                        if (response.startsWith("SUCESSO")) {
-                            // Usuário autenticado com sucesso
-                            String username = payload.split(",")[0]; // Obtém o nome de usuário
-                            User user = userService.getUserByName(username);
-                            if (user != null && (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL)) {
-                                usersWithPermissionsOnline.add(username);
-                                // Enviar notificações de pedidos pendentes
-                                for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
-                                    String requestingUser = entry.getKey();
-                                    String operationName = entry.getValue();
-                                    notifyUser(username, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, multicastGroups);
-                                }
+                // Use regex to parse the command, requester, and payload
+                Matcher requestMatcher = RegexPatterns.REQUEST.matcher(request);
+
+                if (requestMatcher.matches()) {
+                    String command = requestMatcher.group(1);        // Main command
+                    System.out.println("LOG COMMAND: " + command);
+
+                    String requester = requestMatcher.group(2);      // Optional requester
+                    System.out.println("LOG requester: " + requester);
+
+                    String payload = requestMatcher.group(3) != null ? requestMatcher.group(3) : ""; // Optional payload
+                    System.out.println("LOG payload: " + payload);
+
+
+                    switch (command) {
+                        case "REGISTER" -> {
+                            Matcher registerMatcher = RegexPatterns.REGISTER.matcher(request);
+                            if (registerMatcher.matches()) {
+                                String username = registerMatcher.group(1);  // Extract username/email
+                                String email = registerMatcher.group(2);         // Extract password
+                                String password = registerMatcher.group(3);         // Extract password
+
+                                out.println(registerUser(username, email, password));
+                            } else {
+                                out.println("ERRO: Formato inválido para REGISTER");
                             }
-
                         }
+                        case "LOGIN" -> {
+                            Matcher loginMatcher = RegexPatterns.LOGIN.matcher(request);
+                            if (loginMatcher.matches()) {
+                                String usernameOrEmail = loginMatcher.group(1);  // Extract username/email
+                                String password = loginMatcher.group(2);         // Extract password
+                                String response = handleLogin(usernameOrEmail, password, out, clientSocket);
+                                out.println(response);
+                            } else {
+                                out.println("ERRO: Formato inválido para LOGIN");
+                            }
+                        }
+                        case "LOGOUT" -> out.println(logoutUser(payload));
+                        case "MASS_EVACUATION", "RESOURCE_DISTRIBUTION", "EMERGENCY_COMM" -> {
+                            processOperationCommand(payload, command, out);
+                        }
+                        case "APPROVE" -> {
+                            if (RegexPatterns.APPROVE.matches(request)) {
+                                handleApprovalCommand(payload, requester, out);
+                            } else {
+                                out.println("ERRO: Formato inválido para APPROVE");
+                            }
+                        }
+                        case "REJECT" -> {
+                            if (RegexPatterns.REJECT.matches(request)) {
+                                handleApprovalCommand(payload, requester, out);
+                            } else {
+                                out.println("ERRO: Formato inválido para REJECT");
+                            }
+                        }
+                        default -> out.println("ERRO: Comando inválido");
                     }
-                    case "LOGOUT" -> out.println(logoutUser(payload));
-                    case "MASS_EVACUATION", "RESOURCE_DISTRIBUTION", "EMERGENCY_COMM" -> {
-                        // Processar comandos de operações
-                        processOperationCommand(payload, command, out);
-                    }
-                    case "APPROVE", "REJECT" -> handleApprovalCommand(payload, requester, out);
-                    default -> out.println("ERRO: Comando inválido");
+                } else {
+                    out.println("ERRO: Formato de solicitação inválido");
                 }
-
             }
         } catch (IOException e) {
             System.err.println("Erro ao comunicar com o cliente: " + e.getMessage());
@@ -119,28 +144,29 @@ public class Server {
     }
 
 
-    private String handleLogin(String payload, PrintWriter out, Socket clientSocket) {
-        String response = loginUser(payload);
+    private String handleLogin(String usernameOrEmail, String password, PrintWriter out, Socket clientSocket) {
+        String response = loginUser(usernameOrEmail, password);
         out.println(response);
         if (response.startsWith("SUCESSO")) {
             // Após o login bem-sucedido, armazena o socket do usuário
-            String username = payload.split(",")[0]; // Obtém o nome de usuário
-            userSockets.put(username, clientSocket);  // Armazena o socket
+            userSockets.put(usernameOrEmail, clientSocket);  // Armazena o socket
+
+            User user = userService.getUserByName(usernameOrEmail);
+            if (user != null && (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL)) {
+                usersWithPermissionsOnline.add(usernameOrEmail);
+                // Enviar notificações de pedidos pendentes
+                for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
+                    String requestingUser = entry.getKey();
+                    String operationName = entry.getValue();
+                    notifyUser(usernameOrEmail, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, multicastGroups);
+                }
+            }
         }
         return response;
     }
 
-    private String registerUser(String payload) {
-        payload = payload.trim();
-        String[] parts = payload.split(",", 3);
-        if (parts.length != 3) {
-            return "ERRO: Formato inválido para registro";
-        }
-        String username = parts[0];
-        String email = parts[1];
-        String password = parts[2];
-
-        out.println("Tentando registrar o usuário com email: " + email);
+    private String registerUser(String username, String email, String password) {
+        out.println("Tentando registrar o utilizador com email: " + email);
         User user = new User();
         user.setName(username);
         user.setPassword(password);
@@ -158,13 +184,7 @@ public class Server {
         }
     }
 
-    private String loginUser(String payload) {
-        String[] parts = payload.split(",");
-        if (parts.length != 2) return "ERRO: Formato inválido para login";
-
-        String usernameOrEmail = parts[0];
-        String password = parts[1];
-
+    private String loginUser(String usernameOrEmail, String password) {
         User user = userService.authenticate(usernameOrEmail, password);
 
         if (user == null) {
@@ -182,7 +202,7 @@ public class Server {
         return "SUCESSO: Login realizado. Grupo: " + groupAddress + ":" + port;
     }
 
-    protected static String getGroupAddressAndPort(User user){
+    protected static String getGroupAddressAndPort(User user) {
         String groupAddress;
         int port;
         switch (user.getPermissions()) {
@@ -211,7 +231,7 @@ public class Server {
     protected static Socket getUserSocket(String username) {
         Socket socket = userSockets.get(username);
         if (socket == null) {
-            out.println("Erro: Socket do usuário " + username + " não encontrado.");
+            out.println("Erro: Socket do utilizador " + username + " não encontrado.");
         }
         return socket;
     }
@@ -236,7 +256,8 @@ public class Server {
 
         Operation operation = switch (operationName.toUpperCase()) {
             case "MASS_EVACUATION" -> new Operation("Operação de evacuação em massa", Permissions.HIGH_LEVEL);
-            case "RESOURCE_DISTRIBUTION" -> new Operation("Distribuição de Recursos de Emergência", Permissions.LOW_LEVEL);
+            case "RESOURCE_DISTRIBUTION" ->
+                    new Operation("Distribuição de Recursos de Emergência", Permissions.LOW_LEVEL);
             case "EMERGENCY_COMM" -> new Operation("Ativação de comunicações de Emergência", Permissions.MEDIUM_LEVEL);
             default -> null;
         };
@@ -251,11 +272,11 @@ public class Server {
             sendNotificationToGroups("Comando executado: " + operation.getName() + " (por " + username + ")", multicastGroups);
             out.println("SUCESSO: Operação realizada.");
         } else {
-            if(usersWithPermissionsOnline.isEmpty()){
+            if (usersWithPermissionsOnline.isEmpty()) {
                 pendingApprovals.put(username, operationName);  // Salva a solicitação
                 out.println("PENDENTE: Solicitação enviada para aprovação.");
                 sendNotificationToUserInGroup(username, "PENDENTE: Solicitação enviada para aprovação.", usersWithPermissionsOnline, userService);
-            }else{
+            } else {
                 for (String approver : usersWithPermissionsOnline) {
                     notifyUser(approver, "Solicitação para aprovação do comando'" + operationName + "'por" + username, usersWithPermissionsOnline, multicastGroups);
                 }
@@ -280,7 +301,7 @@ public class Server {
         String operationName = pendingApprovals.remove(requester);
 
         if (action.equals("APPROVE")) {
-            sendNotificationToGroups("Comando executado: "  + operationName + " (por " + username + ")", multicastGroups);
+            sendNotificationToGroups("Comando executado: " + operationName + " (por " + username + ")", multicastGroups);
             notifyUser(requester, "SUCESSO: Sua solicitação de operação foi aprovada.", usersWithPermissionsOnline, multicastGroups);
             out.println("APPROVE: Aprovado com sucesso");
         } else if (action.equals("REJECT")) {

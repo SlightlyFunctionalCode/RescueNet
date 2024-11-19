@@ -4,6 +4,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum RegexPatterns {
+    REQUEST("^(\\w+)(?:\\s+(\\w+))?:(.*)?$"), // Command, requester (optional), payload (optional)
+    REGISTER("^REGISTER:(.+),(.+),(.+)$"),            // Register-specific regex
+    LOGIN("^LOGIN:(.+),(.+)$"),                  // Login-specific regex
+    APPROVE("^APPROVE\\s(.+)$"),              // Approve-specific regex
+    REJECT("^REJECT\\s(.+)$"),
     DIRECTED_MESSAGE("^USER: (\\w+)\\s(.*)"), // Match "USER: <username> <message>"
     NOTIFICATION("^NOTIFICAÇÃO:(.*)"),       // Match "NOTIFICAÇÃO:<message>"
     COMMAND("^(MASS_EVACUATION|EMERGENCY_COMM|RESOURCE_DISTRIBUTION|APPROVE.*|REJECT.*)$"), // Match valid commands
@@ -14,7 +19,7 @@ public enum RegexPatterns {
     SERVER_REJECT("^REJECT"),               // Match server response "REJECT"
     SEND_TO("^SEND TO:(.*)"),               // Match "SEND TO:<username>"
     EMAIL("^[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$"),        // Email validation
-    LOGIN_SUCCESS("^SUCESSO\\s.*Grupo: ([\\d\\.]+):(\\d+)$"), // Match "SUCESSO Grupo: <address>:<port>"
+    LOGIN_SUCCESS("^SUCESSO:.*Grupo:\\s([\\d\\.]+):(\\d+)$"), // Match "SUCESSO Grupo: <address>:<port>"
     LOGIN_FAILED("^FAILED"),                             // Match "FAILED" response
     GENERIC_RESPONSE("^(SUCESSO|FAILED|ERROR):.*");      // Generic server response validation
 
