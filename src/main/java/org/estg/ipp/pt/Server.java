@@ -80,13 +80,13 @@ public class Server {
                 Matcher requestMatcher = RegexPatterns.REQUEST.matcher(request);
 
                 if (requestMatcher.matches()) {
-                    String command = requestMatcher.group(1);        // Main command
+                    String command = requestMatcher.group("command");        // Main command
                     System.out.println("LOG COMMAND: " + command);
 
-                    String requester = requestMatcher.group(2);      // Optional requester
+                    String requester = requestMatcher.group("requester");      // Optional requester
                     System.out.println("LOG requester: " + requester);
 
-                    String payload = requestMatcher.group(3) != null ? requestMatcher.group(3) : ""; // Optional payload
+                    String payload = requestMatcher.group("payload") != null ? requestMatcher.group("payload") : ""; // Optional payload
                     System.out.println("LOG payload: " + payload);
 
 
@@ -94,9 +94,9 @@ public class Server {
                         case "REGISTER" -> {
                             Matcher registerMatcher = RegexPatterns.REGISTER.matcher(request);
                             if (registerMatcher.matches()) {
-                                String username = registerMatcher.group(1);  // Extract username/email
-                                String email = registerMatcher.group(2);         // Extract password
-                                String password = registerMatcher.group(3);         // Extract password
+                                String username = registerMatcher.group("username");  // Extract username/email
+                                String email = registerMatcher.group("email");         // Extract password
+                                String password = registerMatcher.group("password");         // Extract password
 
                                 out.println(registerUser(username, email, password));
                             } else {
@@ -106,8 +106,8 @@ public class Server {
                         case "LOGIN" -> {
                             Matcher loginMatcher = RegexPatterns.LOGIN.matcher(request);
                             if (loginMatcher.matches()) {
-                                String usernameOrEmail = loginMatcher.group(1);  // Extract username/email
-                                String password = loginMatcher.group(2);         // Extract password
+                                String usernameOrEmail = loginMatcher.group("username");  // Extract username/email
+                                String password = loginMatcher.group("password");         // Extract password
                                 String response = handleLogin(usernameOrEmail, password, out, clientSocket);
                                 out.println(response);
                             } else {
@@ -119,15 +119,21 @@ public class Server {
                             processOperationCommand(payload, command, out);
                         }
                         case "APPROVE" -> {
-                            if (RegexPatterns.APPROVE.matches(request)) {
-                                handleApprovalCommand(payload, requester, out);
+                            Matcher approveMatcher = RegexPatterns.APPROVE.matcher(request);
+                            if (approveMatcher.matches()) {
+                                String requester1 =  approveMatcher.group("requester");
+                                String username = approveMatcher.group("username");
+                                handleApprovalCommand(command, username, requester1, out);
                             } else {
                                 out.println("ERRO: Formato inválido para APPROVE");
                             }
                         }
                         case "REJECT" -> {
-                            if (RegexPatterns.REJECT.matches(request)) {
-                                handleApprovalCommand(payload, requester, out);
+                            Matcher approveMatcher = RegexPatterns.REJECT.matcher(request);
+                            if (approveMatcher.matches()) {
+                                String requester1 =  approveMatcher.group("requester");
+                                String username = approveMatcher.group("username");
+                                handleApprovalCommand(command, username, requester1, out);
                             } else {
                                 out.println("ERRO: Formato inválido para REJECT");
                             }
@@ -285,12 +291,7 @@ public class Server {
         }
     }
 
-    private static void handleApprovalCommand(String payload, String requester, PrintWriter out) {
-        System.out.println(payload);
-        String[] parts = payload.split(":", 2);
-        String action = parts[0];
-        String username = parts[1];
-
+    private static void handleApprovalCommand(String action, String username, String requester, PrintWriter out) {
         if (!pendingApprovals.containsKey(requester)) {
             notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, multicastGroups);
             out.println("ERRO: Comando desconhecido.");
