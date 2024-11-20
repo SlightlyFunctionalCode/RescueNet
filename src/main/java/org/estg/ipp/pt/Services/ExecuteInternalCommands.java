@@ -80,7 +80,11 @@ public class ExecuteInternalCommands {
 
             User user = userService.getUserByName(usernameOrEmail);
             // Após salvar o usuário, associa-o a um grupo padrão
-            groupService.addUserToGroup(user.getPermissions().toString(), user.getId());
+            if(user == null){
+                out.println("User inválido");
+            }else {
+                groupService.addUserToGroup(user.getPermissions().toString(), user.getId());
+            }
 
             String response = loginUser(usernameOrEmail, password, clientSocket, groupList);
             System.out.println(response);

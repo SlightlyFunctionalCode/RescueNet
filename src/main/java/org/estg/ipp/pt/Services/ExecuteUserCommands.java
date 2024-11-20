@@ -12,11 +12,6 @@ import org.springframework.stereotype.Component;
 import java.awt.*;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UncheckedIOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.AbstractMap;
@@ -74,6 +69,29 @@ public class ExecuteUserCommands {
                     System.out.println(name);
                     System.out.println(payload);
                     processJoinCommand(payload, name, out);
+                }
+            }
+            case "/change_permission" -> {
+                Matcher joinMatcher = RegexPatternsCommands.CHANGEPERMISSIONS.matcher(request);
+                if (joinMatcher.matches()) {
+                    String name = joinMatcher.group("name");
+                    String perm = joinMatcher.group("permission");
+                    System.out.println(name);
+                    System.out.println(perm);
+                    int permission = Integer.parseInt(perm);
+                    Permissions permissions = Permissions.fromValue(permission);
+                    processChangePermissionCommand(payload,name, permissions, out);
+                }
+            }
+
+            case "/create_group" -> {
+                Matcher joinMatcher = RegexPatternsCommands.CREATEGROUP.matcher(request);
+                if (joinMatcher.matches()) {
+                    String name = joinMatcher.group("name");
+                    String address = joinMatcher.group("address");
+                    String port = joinMatcher.group("port");
+
+                    processCreateGroupCommand(payload, name, address, port, out);
                 }
             }
             default -> out.println("ERRO: Comando de utilizador inválido");
@@ -215,6 +233,38 @@ public class ExecuteUserCommands {
             Chat.startChat(group.getAddress(), Integer.parseInt(group.getPort()), username); // Chama o método para iniciar o chat multicast
         } catch (IOException e) {
             out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
+        }
+    }
+
+    private void processChangePermissionCommand(String username, String name, Permissions permission, PrintWriter out) {
+        User userWithPermissions = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
+        if (userWithPermissions == null) {
+            out.println("ERRO: Usuário não encontrado");
+            return;
+        }
+        System.out.println(userWithPermissions.getPermissions());
+        if(Permissions.fromPermissions(userWithPermissions.getPermissions()) >= Permissions.fromPermissions(Permissions.HIGH_LEVEL)){
+            userService.updateUserPermissions(name, permission);
+            out.println("SUCESSO: Usuário " + name + " promovido para " + permission.name());
+        }else{
+            out.println("ERRO: Usuário sem permissões para usar este comando");
+            return;
+        }
+    }
+
+    private void processCreateGroupCommand(String username, String name, String address, String port, PrintWriter out) {
+        User userWithPermissions = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
+        if (userWithPermissions == null) {
+            out.println("ERRO: Usuário não encontrado");
+            return;
+        }
+
+        Group newGroup = groupService.addCustomGroup(name, address, port);
+        if (newGroup == null) {
+            out.println("ERRO: Grupo não pode ser criado");
+        } else {
+            groupService.addUserToGroup(newGroup.getName(), userWithPermissions.getId());
+            out.println("SUCESSO: Grupo " + name + " criado com sucesso");
         }
     }
 

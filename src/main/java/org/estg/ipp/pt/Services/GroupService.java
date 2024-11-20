@@ -113,4 +113,33 @@ public class GroupService {
         // Verificar se o usuário está associado ao grupo
         return group.getUsers().contains(user);
     }
+
+    public Group addCustomGroup(String name, String address, String port) {
+        // Verifica se já existe um grupo com o mesmo nome, endereço ou porta
+        boolean groupExists = groupRepository.findAll().stream().anyMatch(group ->
+                group.getName().equalsIgnoreCase(name) ||
+                        group.getAddress().equals(address) ||
+                        group.getPort().equals(port)
+        );
+
+        if (groupExists) {
+            throw new IllegalArgumentException("Já existe um grupo com o mesmo nome, endereço ou porta.");
+        }
+
+        // Criação do novo grupo
+        Group newGroup = new Group();
+        newGroup.setName(name);
+        newGroup.setAddress(address);
+        newGroup.setPort(port);
+
+        // Salvar o grupo no repositório
+        Group savedGroup = groupRepository.save(newGroup);
+
+        System.out.println("Grupo personalizado '" + name + "' criado com sucesso!");
+
+        // Retorna o grupo criado
+        return savedGroup;
+    }
+
+
 }

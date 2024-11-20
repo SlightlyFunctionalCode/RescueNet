@@ -93,4 +93,32 @@ public class UserService {
         Optional<User> user = userRepository.findByName(username);
         return user.orElse(null);
     }
+
+    /**
+     * Updates the permissions of a user.
+     *
+     * @param username The username of the user whose permissions need to be updated.
+     * @param newPermissions The new permissions to assign.
+     * @return true if the update was successful, false if the user was not found.
+     */
+    public boolean updateUserPermissions(String username, Permissions newPermissions) {
+        // Busca o utilizador pelo nome
+        Optional<User> userOptional = userRepository.findByName(username);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Atualizar as permissões
+            user.setPermissions(newPermissions);
+
+            // Salvar as alterações no banco de dados
+            userRepository.save(user);
+
+            System.out.println("Permissões do usuário atualizadas com sucesso.");
+            return true;
+        } else {
+            System.out.println("Usuário não encontrado.");
+            return false;
+        }
+    }
 }
