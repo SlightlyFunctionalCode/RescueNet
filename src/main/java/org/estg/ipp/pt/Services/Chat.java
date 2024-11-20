@@ -62,6 +62,7 @@ public class Chat {
                      PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()))) {
                     out.println(msg + ":" + name); // Nome do user + comando
+
                     String serverResponse = in.readLine();
 
                     // Use regex enums to process server responses
@@ -76,7 +77,15 @@ public class Chat {
                         System.out.println("Aprovado e executado.");
                     } else if (RegexPatterns.SERVER_REJECT.matches(serverResponse)) {
                         System.out.println("Rejeitado.");
-                    } else {
+                    } else if (RegexPatterns.SERVER_REJECT.matches(serverResponse)) {
+                        System.out.println("Rejeitado.");
+                    } else if (serverResponse.startsWith("--HELP--")) {
+                        String line;
+                        while ((line = in.readLine()) != null) {
+                            if (line.equals("--END HELP--")) break;
+                            System.out.println(line);
+                        }
+                    }else {
                         System.out.println(serverResponse);
                     }
                 } catch (IOException e) {

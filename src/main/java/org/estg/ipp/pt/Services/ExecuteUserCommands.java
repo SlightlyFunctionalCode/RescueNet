@@ -80,7 +80,7 @@ public class ExecuteUserCommands {
                     System.out.println(perm);
                     int permission = Integer.parseInt(perm);
                     Permissions permissions = Permissions.fromValue(permission);
-                    processChangePermissionCommand(payload,name, permissions, out);
+                    processChangePermissionCommand(payload, name, permissions, out);
                 }
             }
 
@@ -106,13 +106,16 @@ public class ExecuteUserCommands {
 
         if (exportHelpMatcher.matches()) {
             String help = """
-                    INFO: Os parâmetros que podem ser executados por /export são:
+                    --HELP--
+                    Os parâmetros que podem ser executados por /export são:
                     
                     <startDate> data e hora inicial (formato DD-MM-yyyyThh:mm:ss)
                     
                     <endDate> data e hora final (formato DD-MM-yyyyThh:mm:ss)
                     
-                    <tag> tag do tipo TagType\r""";
+                    <tag> tag do tipo TagType
+                    --END HELP--
+                    """;
             out.println(help);
         } else if (exportDateTagMatcher.matches()) {
             try {
@@ -255,10 +258,10 @@ public class ExecuteUserCommands {
             return;
         }
         System.out.println(userWithPermissions.getPermissions());
-        if(Permissions.fromPermissions(userWithPermissions.getPermissions()) >= Permissions.fromPermissions(Permissions.HIGH_LEVEL)){
+        if (Permissions.fromPermissions(userWithPermissions.getPermissions()) >= Permissions.fromPermissions(Permissions.HIGH_LEVEL)) {
             userService.updateUserPermissions(name, permission);
             out.println("SUCESSO: Usuário " + name + " promovido para " + permission.name());
-        }else{
+        } else {
             out.println("ERRO: Usuário sem permissões para usar este comando");
             return;
         }
