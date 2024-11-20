@@ -51,7 +51,83 @@ public class LogService {
         return logRepository.findByTagAndDateRange(tag, startDate, endDate);
     }
 
-    public void generatePdfReport(LocalDateTime startDate, LocalDateTime endDate, ByteArrayOutputStream byteArrayOutputStream) throws IOException {
+    public void generatePdfReportByDateRangeAndTag(LocalDateTime startDate, LocalDateTime endDate, TagType tag, ByteArrayOutputStream byteArrayOutputStream) throws IOException {
+        // Fetch logs from repository
+        List<Log> logs = logRepository.findByTagAndDateRange(tag, startDate, endDate);
+
+        // Create a new PDF document
+        PdfWriter writer = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        Document document = new Document(pdfDoc);
+
+        // Add title
+        Paragraph title = new Paragraph("Log Report")
+                .setFontSize(16)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
+        document.add(title);
+
+        // Create table
+        float[] columnWidths = {2, 1, 3}; // Adjust column widths as needed
+        Table table = new Table(UnitValue.createPercentArray(columnWidths))
+                .setWidth(UnitValue.createPercentValue(100));
+
+        // Add headers for the log table
+        addTableHeader(table, "Date");
+        addTableHeader(table, "Tag");
+        addTableHeader(table, "Message");
+
+        // Add logs to the table
+        for (Log log : logs) {
+            addTableRow(table, log.getDateTime(), log.getTag(), log.getMessage());
+        }
+
+        // Add the table to the document
+        document.add(table);
+
+        // Close the document
+        document.close();
+    }
+
+    public void generatePdfReportByTag(TagType tag, ByteArrayOutputStream byteArrayOutputStream) throws IOException {
+        // Fetch logs from repository
+        List<Log> logs = logRepository.findByTag(tag);
+
+        // Create a new PDF document
+        PdfWriter writer = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        Document document = new Document(pdfDoc);
+
+        // Add title
+        Paragraph title = new Paragraph("Log Report")
+                .setFontSize(16)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
+        document.add(title);
+
+        // Create table
+        float[] columnWidths = {2, 1, 3}; // Adjust column widths as needed
+        Table table = new Table(UnitValue.createPercentArray(columnWidths))
+                .setWidth(UnitValue.createPercentValue(100));
+
+        // Add headers for the log table
+        addTableHeader(table, "Date");
+        addTableHeader(table, "Tag");
+        addTableHeader(table, "Message");
+
+        // Add logs to the table
+        for (Log log : logs) {
+            addTableRow(table, log.getDateTime(), log.getTag(), log.getMessage());
+        }
+
+        // Add the table to the document
+        document.add(table);
+
+        // Close the document
+        document.close();
+    }
+
+    public void generatePdfReportByDateRange(LocalDateTime startDate, LocalDateTime endDate, ByteArrayOutputStream byteArrayOutputStream) throws IOException {
         // Fetch logs from repository
         List<Log> logs = logRepository.findByDateRange(startDate, endDate);
 

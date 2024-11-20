@@ -35,7 +35,6 @@ import static org.estg.ipp.pt.Server.usersWithPermissionsOnline;
 public class ExecuteUserCommands {
     @Autowired
     private UserService userService;
-
     @Autowired
     private LogService logService;
     @Autowired
@@ -66,22 +65,9 @@ public class ExecuteUserCommands {
                 }
             }
             case "/export" -> {
-                Matcher exportMatcher = RegexPatternsCommands.EXPORT.matcher(request);
-                if (exportMatcher.matches()) {
-                    try {
-                        LocalDateTime startDate = LocalDateTime.parse(exportMatcher.group("startDate"));
-                        LocalDateTime endDate = LocalDateTime.parse(exportMatcher.group("endDate"));
-                        String username = exportMatcher.group("username");
-
-                        processExportCommand(startDate, endDate, username, out);
-                    } catch (DateTimeParseException ex) {
-                        out.println("ERRO: Data inválida para Export. Deve ser DD-MM-YYThh:mm:ss");
-                    }
-                } else {
-                    out.println("ERRO: Formato inválido para Export");
-                }
+                processExport(request, out);
             }
-            case "/join" ->{
+            case "/join" -> {
                 Matcher joinMatcher = RegexPatternsCommands.JOIN.matcher(request);
                 if (joinMatcher.matches()) {
                     String name = joinMatcher.group("name");
@@ -89,16 +75,96 @@ public class ExecuteUserCommands {
                     System.out.println(payload);
                     processJoinCommand(payload, name, out);
                 }
-
             }
             default -> out.println("ERRO: Comando de utilizador inválido");
         }
     }
 
-    private void processExportCommand(LocalDateTime startDate, LocalDateTime endDate, String username, PrintWriter out) {
+    private void processExport(String request, PrintWriter out) {
+        Matcher exportDateTagMatcher = RegexPatternsCommands.EXPORT_DATE_TAG.matcher(request);
+        Matcher exportTagMatcher = RegexPatternsCommands.EXPORT_TAG.matcher(request);
+        Matcher exportDateMatcher = RegexPatternsCommands.EXPORT_DATE.matcher(request);
+        if (exportDateTagMatcher.matches()) {
+            try {
+                LocalDateTime startDate = LocalDateTime.parse(exportDateTagMatcher.group("startDate"));
+                LocalDateTime endDate = LocalDateTime.parse(exportDateTagMatcher.group("endDate"));
+                TagType tag = TagType.valueOf(exportDateTagMatcher.group("tag"));
+                String username = exportDateTagMatcher.group("username");
+
+                processExportByDateRangeAndTagCommand(startDate, endDate, tag, username, out);
+            } catch (DateTimeParseException ex) {
+                out.println("ERRO: Data inválida para Export. Deve ser DD-MM-YYThh:mm:ss");
+            } catch (IllegalArgumentException ie) {
+                out.println("ERRO: Tag inválida");
+            }
+        } else if (exportDateMatcher.matches()) {
+            try {
+                LocalDateTime startDate = LocalDateTime.parse(exportDateMatcher.group("startDate"));
+                LocalDateTime endDate = LocalDateTime.parse(exportDateMatcher.group("endDate"));
+                String username = exportDateMatcher.group("username");
+
+                processExportByDateRangeCommand(startDate, endDate, username, out);
+            } catch (DateTimeParseException ex) {
+                out.println("ERRO: Data inválida para Export. Deve ser DD-MM-YYThh:mm:ss");
+            }
+        } else if (exportTagMatcher.matches()) {
+            try {
+                TagType tag = TagType.valueOf(exportTagMatcher.group("tag"));
+                String username = exportTagMatcher.group("username");
+
+                processExportByTagCommand(tag, username, out);
+            } catch (IllegalArgumentException ie) {
+                out.println("ERRO: Tag inválida");
+            }
+        } else {
+            out.println("ERRO: Formato inválido para Export");
+        }
+    }
+
+    private void processExportByDateRangeCommand(LocalDateTime startDate, LocalDateTime endDate, String username, PrintWriter out) {
         try {
             // Generate the endpoint URL
             String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate;
+
+            // Log the generated URL
+            System.out.println("Generated URL for download: " + url);
+
+            // Notify the client to download the file
+            out.println("SUCESSO: O pdf foi gerado com sucesso. Por favor, faça o download aqui: " + url);
+
+            // Save log for success
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
+        } catch (Exception e) {
+            // Handle exceptions
+            out.println("ERRO: Falha ao gerar o relatório PDF.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Falha ao gerar o relatório PDF para " + username));
+        }
+    }
+
+    private void processExportByDateRangeAndTagCommand(LocalDateTime startDate, LocalDateTime endDate, TagType tagType, String username, PrintWriter out) {
+        try {
+            // Generate the endpoint URL
+            String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate + "&tag=" + tagType.name();
+
+            // Log the generated URL
+            System.out.println("Generated URL for download: " + url);
+
+            // Notify the client to download the file
+            out.println("SUCESSO: O pdf foi gerado com sucesso. Por favor, faça o download aqui: " + url);
+
+            // Save log for success
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
+        } catch (Exception e) {
+            // Handle exceptions
+            out.println("ERRO: Falha ao gerar o relatório PDF.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Falha ao gerar o relatório PDF para " + username));
+        }
+    }
+
+    private void processExportByTagCommand(TagType tagType, String username, PrintWriter out) {
+        try {
+            // Generate the endpoint URL
+            String url = "http://localhost:8080/download-pdf-report?tag=" + tagType.name();
 
             // Log the generated URL
             System.out.println("Generated URL for download: " + url);
@@ -124,9 +190,9 @@ public class ExecuteUserCommands {
         }
 
         /*TODO: Verificar permissões*/
-        if(groupService.isUserInGroup(name, user.getId())) {
+        if (groupService.isUserInGroup(name, user.getId())) {
             groupService.addUserToGroup(name, user.getId());
-        }else{
+        } else {
             System.out.println("utilizador já pertence ao grupo");
         }
         // Buscar o grupo com os parâmetros fornecidos
@@ -234,5 +300,4 @@ public class ExecuteUserCommands {
         pendingApprovals.put(username, message);  // Mapa fictício para armazenar as notificações pendentes
         // Se você estiver usando um banco de dados, faria a inserção aqui
     }
-
 }

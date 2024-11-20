@@ -1,5 +1,6 @@
 package org.estg.ipp.pt.Controller;
 
+import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Services.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -24,20 +25,34 @@ public class LogController {
 
     @GetMapping("/download-pdf-report")
     public ResponseEntity<ByteArrayResource> downloadPdfReport(
-            @RequestParam LocalDateTime startDate,
-            @RequestParam LocalDateTime endDate) throws IOException {
+            @RequestParam(required = false) TagType tag,
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate) throws IOException {
 
         // Generate the PDF in memory
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        logService.generatePdfReport(startDate, endDate, byteArrayOutputStream);
+
+        if (tag != null && startDate != null && endDate != null) {
+            // Generate report for date range and tag
+            logService.generatePdfReportByDateRangeAndTag(startDate, endDate, tag, byteArrayOutputStream);
+        } else if (tag != null) {
+            // Generate a report for tag
+            logService.generatePdfReportByTag(tag, byteArrayOutputStream);
+        } else if (startDate != null && endDate != null) {
+            // Generate a report for date range
+            logService.generatePdfReportByDateRange(startDate, endDate, byteArrayOutputStream);
+        } else {
+            // Handle the case where no parameters are provided
+            throw new IllegalArgumentException("At least one parameter (tag, startDate, endDate) must be provided");
+        }
+
 
         // Create a ByteArrayResource from the byte array
         ByteArrayResource resource = new ByteArrayResource(byteArrayOutputStream.toByteArray());
 
         // Set up the response headers
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=log_report" +
-                startDate.toString() + "-" + endDate.toString() + ".pdf");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=log_report.pdf");
 
         // Return the response entity with the PDF content
         return ResponseEntity.ok()

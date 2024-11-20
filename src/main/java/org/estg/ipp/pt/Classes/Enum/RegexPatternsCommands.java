@@ -6,7 +6,9 @@ import java.util.regex.Pattern;
 public enum RegexPatternsCommands {
     APPROVE("^/approve\\s(?<requester>.+):(?<username>.+)$"),                                 // Approve-specific regex
     REJECT("^/reject\\s(?<requester>.+):(?<username>.+)$"),
-    EXPORT("^/export\\s(?<startDate>.+)\\s(?<endDate>.+):(?<username>.+)$"),                                 // Approve-specific regex
+    EXPORT_TAG("^/export\\s(?<tag>.+):(?<username>.+)$"),                                 // Approve-specific regex
+    EXPORT_DATE("^/export\\s(?<startDate>.+)\\s(?<endDate>.+):(?<username>.+)$"),                                 // Approve-specific regex
+    EXPORT_DATE_TAG("^/export\\s(?<startDate>.+)\\s(?<endDate>.+)\\s(?<tag>.+):(?<username>.+)$"),                                 // Approve-specific regex
     REQUEST("^(?<command>/\\w+|\\w+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$"),
     JOIN("^/join\\s(?<name>.+):(?<requester>.+)$");
 
