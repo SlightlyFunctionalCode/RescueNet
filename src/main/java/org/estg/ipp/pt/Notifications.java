@@ -1,6 +1,8 @@
 package org.estg.ipp.pt;
 
+import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
+import org.estg.ipp.pt.Services.GroupService;
 import org.estg.ipp.pt.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -10,26 +12,25 @@ import java.net.*;
 import java.util.*;
 
 import static org.estg.ipp.pt.Server.*;
-import static org.estg.ipp.pt.Services.ExecuteInternalCommands.getGroupAddressAndPort;
 import static org.estg.ipp.pt.Services.ExecuteInternalCommands.getUserSocket;
 import static org.estg.ipp.pt.Services.ExecuteUserCommands.saveNotificationForLater;
 
 
 public class Notifications {
 
-    public static void sendNotificationToGroups(String message, List<AbstractMap.SimpleEntry<String, Integer>> multicastGroups) {
+    public static void sendNotificationToGroups(String message, List<Group> multicastGroups) {
         try {
             DatagramSocket socket = new DatagramSocket();
 
             // Iterar sobre todos os grupos de multicast
-            for (AbstractMap.SimpleEntry<String, Integer> group : multicastGroups) {
-                InetAddress groupAddress = InetAddress.getByName(group.getKey());
+            for (Group group : multicastGroups) {
+                InetAddress groupAddress = InetAddress.getByName(group.getAddress());
                 byte[] msg = message.getBytes();
 
-                DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, group.getValue());
+                DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, Integer.parseInt(group.getPort()));
                 socket.send(packet);
 
-                System.out.println("Enviando notificação para " + group.getKey() + ":" + group.getValue() + " - " + message);
+                System.out.println("Enviando notificação para " + group.getAddress() + ":" + group.getPort() + " - " + message);
             }
 
             socket.close();
@@ -38,19 +39,19 @@ public class Notifications {
         }
     }
 
-    protected static void sendNotificationToGroupHIGH_LEVEL(String message, AbstractMap.SimpleEntry<String, Integer> group) {
+    protected static void sendNotificationToGroupHIGH_LEVEL(String message, Group group) {
         DatagramSocket socket;
         try {
             socket = new DatagramSocket();
 
             // Iterar sobre todos os grupos de multicast
-            InetAddress groupAddress = InetAddress.getByName(group.getKey());
+            InetAddress groupAddress = InetAddress.getByName(group.getAddress());
             byte[] msg = message.getBytes();
 
-            DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, group.getValue());
+            DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, Integer.parseInt(group.getPort()));
             socket.send(packet);
 
-            System.out.println("Enviando notificação para " + group.getKey() + ":" + group.getValue() + " - " + message);
+            System.out.println("Enviando notificação para " + group.getAddress() + ":" + group.getPort() + " - " + message);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -79,7 +80,7 @@ public class Notifications {
     }
 
     public static void notifyUser(String username, String message, Set<String> usersWithPermissionsOnline,
-                                  List<AbstractMap.SimpleEntry<String, Integer>> groups) {
+                                  List<Group> groups) {
         // Log para debug
         System.out.println("Tentando notificar " + username + ": " + message);
 
@@ -120,7 +121,7 @@ public class Notifications {
         }
     }
 
-    public static void sendNotificationToUserInGroup(String username, String message, Set<String> usersWithPermissionsOnline, UserService userService) {
+    public static void sendNotificationToUserInGroup(String username, String message, Set<String> usersWithPermissionsOnline, UserService userService, GroupService groupService) {
         // Verifica se o usuário está online
         if (!usersWithPermissionsOnline.contains(username)) {
             System.out.println("Usuário " + username + " não está online ou não tem permissões.");
@@ -132,13 +133,13 @@ public class Notifications {
             String fullMessage = "USER: " + username + " " + message; // Prefixa com o nome do destinatário
 
             User user = userService.getUserByName(username);
-            String groupAddress = getGroupAddressAndPort(user);
-            String[] group_parts = groupAddress.split(":", 2);
-            String groupAddress1 = group_parts[0];
-            String port = group_parts[1];
+            Group group_user = new Group();
+            groupService.getUserGroupByName(user.getId(), user.getGroups().get(0).getName());
+            String groupAddress = group_user.getAddress();
+            String port = group_user.getPort();
 
             // Criando o socket multicast para enviar a mensagem para o grupo
-            InetAddress group = InetAddress.getByName(groupAddress1);
+            InetAddress group = InetAddress.getByName(groupAddress);
 
             MulticastSocket socket = new MulticastSocket();
             socket.joinGroup(group);

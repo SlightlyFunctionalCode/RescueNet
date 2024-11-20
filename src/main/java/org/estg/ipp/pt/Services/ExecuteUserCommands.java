@@ -3,6 +3,7 @@ package org.estg.ipp.pt.Services;
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
+import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,12 @@ public class ExecuteUserCommands {
 
     @Autowired
     private LogService logService;
+    @Autowired
+    public GroupService groupService;
 
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
                                   Map<String, String> pendingApprovals,
-                                  Set<String> usersWithPermissionsOnline, List<AbstractMap.SimpleEntry<String, Integer>> multicastGroups) {
+                                  Set<String> usersWithPermissionsOnline, List<Group> multicastGroups) {
         switch (command) {
             case "/evac", "/resdist", "/emerg" ->
                     processOperationCommand(payload, command, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
@@ -91,7 +94,7 @@ public class ExecuteUserCommands {
 
     private void processOperationCommand(String username, String operationName, PrintWriter out,
                                          Map<String, String> pendingApprovals,
-                                         Set<String> usersWithPermissionsOnline, List<AbstractMap.SimpleEntry<String, Integer>> multicastGroups) {
+                                         Set<String> usersWithPermissionsOnline, List<Group> multicastGroups) {
         User user = userService.getUserByName(username);
         if (user == null) {
             out.println("ERRO: Utilizador não encontrado.");
@@ -123,7 +126,7 @@ public class ExecuteUserCommands {
                 out.println("PENDENTE: Solicitação enviada para aprovação.");
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
 
-                sendNotificationToUserInGroup(username, "PENDENTE: Solicitação enviada para aprovação.", usersWithPermissionsOnline, userService);
+                sendNotificationToUserInGroup(username, "PENDENTE: Solicitação enviada para aprovação.", usersWithPermissionsOnline, userService, groupService);
             } else {
                 for (String approver : usersWithPermissionsOnline) {
                     notifyUser(approver, "Solicitação para aprovação do comando'" + operationName + "'por" + username, usersWithPermissionsOnline, multicastGroups);
@@ -137,7 +140,7 @@ public class ExecuteUserCommands {
     private static void handleApprovalCommand(String action, String username, String requester, PrintWriter out,
                                               Map<String, String> pendingApprovals,
                                               Set<String> usersWithPermissionsOnline,
-                                              List<AbstractMap.SimpleEntry<String, Integer>> multicastGroups) {
+                                              List<Group> multicastGroups) {
         if (!pendingApprovals.containsKey(requester)) {
             notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, multicastGroups);
             out.println("ERRO: Comando desconhecido.");
@@ -171,4 +174,5 @@ public class ExecuteUserCommands {
         pendingApprovals.put(username, message);  // Mapa fictício para armazenar as notificações pendentes
         // Se você estiver usando um banco de dados, faria a inserção aqui
     }
+
 }

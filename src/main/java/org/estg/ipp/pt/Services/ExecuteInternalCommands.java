@@ -2,6 +2,7 @@ package org.estg.ipp.pt.Services;
 
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
+import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,14 +22,17 @@ public class ExecuteInternalCommands {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    public GroupService groupService;
+
     public boolean isInternalCommand(String command) {
         return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT");
     }
 
-    public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket) {
+    public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList) {
         switch (command) {
             case "REGISTER" -> handleRegister(payload, out);
-            case "LOGIN" -> handleLogin(payload, out, clientSocket);
+            case "LOGIN" -> handleLogin(payload, out, clientSocket, groupList);
             case "LOGOUT" -> handleLogout(payload, out);
             default -> out.println("ERRO: Comando interno inválido");
         }
@@ -48,12 +52,19 @@ public class ExecuteInternalCommands {
             user.setPermissions(Permissions.LOW_LEVEL);
 
             try {
+                // Registra o usuário no banco de dados
                 int result = userService.register(user);
+
                 if (result == 0) {
                     out.println("FAILED: Usuário com nome ou email já existente");
-                } else {
-                    out.println("SUCESSO: Usuário registrado com sucesso");
+                    return; // Retorna sem associar ao grupo se o registro falhar
                 }
+
+                // Após salvar o usuário, associa-o a um grupo padrão
+                groupService.addUserToGroup(user.getPermissions().toString(), user.getId());
+
+                out.println("SUCESSO: Usuário registrado e associado ao grupo padrão com sucesso");
+
             } catch (Exception e) {
                 out.println("ERRO: Falha ao registrar usuário - " + e.getMessage());
             }
@@ -62,14 +73,14 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private void handleLogin(String payload, PrintWriter out, Socket clientSocket) {
+    private void handleLogin(String payload, PrintWriter out, Socket clientSocket, List<Group> groupList) {
         Matcher loginMatcher = RegexPatterns.LOGIN.matcher(payload);
         System.out.println("loginMatcher: " + loginMatcher);
         if (loginMatcher.matches()) {
             String usernameOrEmail = loginMatcher.group("username");
             String password = loginMatcher.group("password");
             System.out.println("usernameOrEmail: " + usernameOrEmail + ", password: " + password);
-            String response = loginUser(usernameOrEmail, password, clientSocket);
+            String response = loginUser(usernameOrEmail, password, clientSocket, groupList);
             System.out.println(response);
 
             out.println(response);
@@ -81,7 +92,7 @@ public class ExecuteInternalCommands {
                 for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
                     String requestingUser = entry.getKey();
                     String operationName = entry.getValue();
-                    notifyUser(usernameOrEmail, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, multicastGroups);
+                    notifyUser(usernameOrEmail, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, groupList);
                 }
             }
             } else {
@@ -89,7 +100,7 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private String loginUser(String usernameOrEmail, String password, Socket clientSocket) {
+    private String loginUser(String usernameOrEmail, String password, Socket clientSocket, List<Group> groupList) {
 
         User user = userService.authenticate(usernameOrEmail, password);
 
@@ -106,40 +117,16 @@ public class ExecuteInternalCommands {
             for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
                 String requestingUser = entry.getKey();
                 String operationName = entry.getValue();
-                notifyUser(usernameOrEmail, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, multicastGroups);
+                notifyUser(usernameOrEmail, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, groupList);
             }
         }
-
-        // Atribuir grupo com base nas permissões
-        String group = getGroupAddressAndPort(user);
-        String[] groupParts = group.split(":", 2);
-        String groupAddress = groupParts[0];
-        String port = groupParts[1];
-
-        return "SUCESSO: Login realizado. Grupo: " + groupAddress + ":" + port;
-    }
-
-    public static String getGroupAddressAndPort(User user) {
-        String groupAddress;
-        int port;
-        switch (user.getPermissions()) {
-            case LOW_LEVEL -> {
-                groupAddress = "230.0.0.1";
-                port = 4446;
-            }
-            case MEDIUM_LEVEL -> {
-                groupAddress = "230.0.0.2";
-                port = 4447;
-            }
-            case HIGH_LEVEL -> {
-                groupAddress = "230.0.0.3";
-                port = 4448;
-            }
-            default -> {
-                return "ERRO: Permissão desconhecida";
-            }
+        if (user.getGroups().isEmpty()) {
+            throw new IllegalArgumentException("O usuário não está associado a nenhum grupo");
         }
-        return groupAddress + ":" + port;
+
+        Group group = groupService.getUserGroupByName(user.getId(), user.getGroups().get(0).getName());
+
+        return "SUCESSO: Login realizado. Grupo: " + group.getAddress() + ":" + group.getPort();
     }
 
     public static Socket getUserSocket(String username) {

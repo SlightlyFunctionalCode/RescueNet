@@ -39,13 +39,9 @@ public class Server {
     @Autowired
     private ExecuteUserCommands userCommands;
 
+
     public static final Map<String, String> pendingApprovals = new HashMap<>();
     public static final Set<String> usersWithPermissionsOnline = new HashSet<>();
-    public static final List<AbstractMap.SimpleEntry<String, Integer>> multicastGroups = List.of(
-            new AbstractMap.SimpleEntry<>("230.0.0.1", 4446), // LOW_LEVEL
-            new AbstractMap.SimpleEntry<>("230.0.0.2", 4447), // MEDIUM_LEVEL
-            new AbstractMap.SimpleEntry<>("230.0.0.3", 4448)  // HIGH_LEVEL
-    );
     public static final Map<String, Socket> userSockets = new HashMap<>();
 
     @Autowired
@@ -56,10 +52,11 @@ public class Server {
     }
 
     @Bean
-    public CommandLineRunner startServer() {
+    public CommandLineRunner startServer(ExecuteInternalCommands executeInternalCommands) {
         return args -> {
             int serverPort = 5000;
 
+            executeInternalCommands.groupService.initializeDefaultGroups();
 
             try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
                 System.out.println("Servidor iniciado na porta " + serverPort);
@@ -100,12 +97,11 @@ public class Server {
                     System.out.println(payload);
                     // Delegar o comando à classe correta
                     if (internalCommands.isInternalCommand(command)) {
-                        internalCommands.handleInternalCommand(command, payload, out, clientSocket);
+                        internalCommands.handleInternalCommand(command, payload, out, clientSocket, userCommands.groupService.getAllGroups());
                     } else {
                         userCommands.handleUserCommand(
                                 command, request, requester, payload, out,
-                                pendingApprovals, usersWithPermissionsOnline, multicastGroups
-                        );
+                                pendingApprovals, usersWithPermissionsOnline, userCommands.groupService.getAllGroups());
                     }
                 } else {
                     out.println("ERRO: Formato de solicitação inválido");
