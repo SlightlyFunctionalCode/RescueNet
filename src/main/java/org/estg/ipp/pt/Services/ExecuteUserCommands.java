@@ -2,11 +2,16 @@ package org.estg.ipp.pt.Services;
 
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
+import org.estg.ipp.pt.Classes.Enum.TagType;
+import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
@@ -17,17 +22,22 @@ import static java.lang.System.out;
 import static org.estg.ipp.pt.Notifications.*;
 import static org.estg.ipp.pt.Notifications.notifyUser;
 import static org.estg.ipp.pt.Server.pendingApprovals;
+import static org.estg.ipp.pt.Server.usersWithPermissionsOnline;
 
 @Component
 public class ExecuteUserCommands {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private LogService logService;
+
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
                                   Map<String, String> pendingApprovals,
                                   Set<String> usersWithPermissionsOnline, List<AbstractMap.SimpleEntry<String, Integer>> multicastGroups) {
         switch (command) {
-            case "/evac", "/resdist", "/emerg" -> processOperationCommand(payload, command, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
+            case "/evac", "/resdist", "/emerg" ->
+                    processOperationCommand(payload, command, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
             case "/approve" -> {
                 Matcher approveMatcher = RegexPatternsCommands.APPROVE.matcher(request);
                 if (approveMatcher.matches()) {
@@ -46,9 +56,38 @@ public class ExecuteUserCommands {
                     out.println("ERRO: Formato inválido para REJECT");
                 }
             }
+            case "/export" -> {
+                Matcher exportMatcher = RegexPatternsCommands.EXPORT.matcher(request);
+                if (exportMatcher.matches()) {
+                    try {
+                        LocalDateTime startDate = LocalDateTime.parse(exportMatcher.group("startDate"));
+                        LocalDateTime endDate = LocalDateTime.parse(exportMatcher.group("endDate"));
+                        String filepath = exportMatcher.group("filepath");
+                        String username = exportMatcher.group("username");
+
+                        processExportCommand(startDate, endDate, filepath, username, out);
+                    } catch (DateTimeParseException ex) {
+                        out.println("ERRO: Data inválida para Export. Deve ser DD-MM-YYThh:mm:ss");
+                    }
+                } else {
+                    out.println("ERRO: Formato inválido para Export");
+                }
+            }
             default -> out.println("ERRO: Comando de utilizador inválido");
         }
     }
+
+    private void processExportCommand(LocalDateTime startDate, LocalDateTime endDate, String filepath, String username, PrintWriter out) {
+        try {
+            logService.generatePdfReport(startDate, endDate, filepath);
+            out.println("SUCESSO: O pdf foi gerado com sucesso");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
+        } catch (IOException io) {
+            out.println("ERRO: IO exception when generating pdf report.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "O pdf gerado por " + username + " sofreu um IO exception"));
+        }
+    }
+
 
     private void processOperationCommand(String username, String operationName, PrintWriter out,
                                          Map<String, String> pendingApprovals,
@@ -56,19 +95,20 @@ public class ExecuteUserCommands {
         User user = userService.getUserByName(username);
         if (user == null) {
             out.println("ERRO: Utilizador não encontrado.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Utilizador não encontrado."));
             return;
         }
 
         Operation operation = switch (operationName) {
             case "/evac" -> new Operation("Operação de evacuação em massa", Permissions.HIGH_LEVEL);
-            case "/resdist" ->
-                    new Operation("Distribuição de Recursos de Emergência", Permissions.LOW_LEVEL);
+            case "/resdist" -> new Operation("Distribuição de Recursos de Emergência", Permissions.LOW_LEVEL);
             case "/emerg" -> new Operation("Ativação de comunicações de Emergência", Permissions.MEDIUM_LEVEL);
             default -> null;
         };
 
         if (operation == null) {
             out.println("ERRO: Operação desconhecida.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Operação desconhecida."));
             return;
         }
 
@@ -76,16 +116,20 @@ public class ExecuteUserCommands {
             // Permissão suficiente - executar a operação
             sendNotificationToGroups("Comando executado: " + operation.getName() + " (por " + username + ")", multicastGroups);
             out.println("SUCESSO: Operação realizada.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Comando executado: \" + operation.getName() + \" (por \" + username + \")\""));
         } else {
             if (usersWithPermissionsOnline.isEmpty()) {
                 pendingApprovals.put(username, operationName);  // Salva a solicitação
                 out.println("PENDENTE: Solicitação enviada para aprovação.");
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
+
                 sendNotificationToUserInGroup(username, "PENDENTE: Solicitação enviada para aprovação.", usersWithPermissionsOnline, userService);
             } else {
                 for (String approver : usersWithPermissionsOnline) {
                     notifyUser(approver, "Solicitação para aprovação do comando'" + operationName + "'por" + username, usersWithPermissionsOnline, multicastGroups);
                 }
                 out.println("PENDENTE: Solicitação enviada para aprovação.");
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
             }
         }
     }

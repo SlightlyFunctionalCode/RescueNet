@@ -3,15 +3,18 @@ package org.estg.ipp.pt.Services;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Repositories.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -87,5 +90,39 @@ public class LogService {
         // Save the document to the local file system
         document.save(new File(filePath));
         document.close();
+    }
+
+
+    private void handleGeneratePdfReport(Socket clientSocket, LocalDateTime startDate, LocalDateTime endDate) throws IOException {
+        List<Log> logs = logRepository.findByDateRange(startDate, endDate);
+
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage();
+        document.addPage(page);
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+        contentStream.newLineAtOffset(50, 750);
+        contentStream.showText("Log Report");
+        contentStream.newLineAtOffset(0, -20);
+        contentStream.showText("Date                          | Tag         | Message");
+        contentStream.newLineAtOffset(0, -20);
+
+        for (Log log : logs) {
+            String logEntry = String.format("%-30s | %-10s | %s", log.getDateTime(), log.getTag(), log.getMessage());
+            contentStream.showText(logEntry);
+            contentStream.newLineAtOffset(0, -20);
+        }
+
+        contentStream.endText();
+        contentStream.close();
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        document.save(byteArrayOutputStream);
+        document.close();
+
+        clientSocket.getOutputStream().write(byteArrayOutputStream.toByteArray());
+        clientSocket.getOutputStream().flush();
     }
 }

@@ -3,6 +3,8 @@ package org.estg.ipp.pt;
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
+import org.estg.ipp.pt.Classes.Enum.TagType;
+import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Services.Operation;
 import org.estg.ipp.pt.Services.UserService;
@@ -19,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.*;
@@ -45,6 +48,9 @@ public class Server {
     );
     public static final Map<String, Socket> userSockets = new HashMap<>();
 
+    @Autowired
+    private LogService logService;
+
     public static void main(String[] args) {
         SpringApplication.run(Server.class, args); // Start the Spring Boot application
     }
@@ -57,16 +63,19 @@ public class Server {
 
             try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
                 System.out.println("Servidor iniciado na porta " + serverPort);
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.INFO, "Servidor iniciado na porta " + serverPort));
 
                 while (true) {
                     Socket clientSocket = serverSocket.accept();
                     System.out.println("Cliente conectado: " + clientSocket.getInetAddress());
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ACCESS, "Cliente conectado: " + clientSocket.getInetAddress()));
 
                     // Usar threads para lidar com clientes
                     new Thread(() -> handleClient(clientSocket)).start();
                 }
             } catch (IOException e) {
                 System.err.println("Erro ao iniciar o servidor: " + e.getMessage());
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.CRITICAL, "Erro ao iniciar o servidor: " + e.getMessage()));
             }
         };
     }
@@ -79,6 +88,7 @@ public class Server {
             String request;
             while ((request = in.readLine()) != null) {
                 System.out.println("Solicitação recebida: " + request);
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.USER_ACTION, "Solicitação recebida: " + request));
 
                 Matcher requestMatcher = RegexPatternsCommands.REQUEST.matcher(request);
                 System.out.println(requestMatcher);
@@ -99,10 +109,12 @@ public class Server {
                     }
                 } else {
                     out.println("ERRO: Formato de solicitação inválido");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato de solicitação inválido"));
                 }
             }
         } catch (IOException e) {
             System.err.println("Erro ao comunicar com o cliente: " + e.getMessage());
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.FAILURE, "Erro ao comunicar com o cliente: " + e.getMessage()));
         }
     }
 }

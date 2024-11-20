@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "logs")
 public class Log {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,9 +17,18 @@ public class Log {
     private TagType tag;
     private String message;
 
-    // Getters e setters
-    // Construtor para inicialização
+    // No-argument constructor (required by JPA)
+    public Log() {
+    }
 
+    // Parameterized constructor for easy initialization
+    public Log(LocalDateTime dateTime, TagType tag, String message) {
+        this.dateTime = dateTime;
+        this.tag = tag;
+        this.message = message;
+    }
+
+    // Getters and setters
     public Long getId() {
         return id;
     }
