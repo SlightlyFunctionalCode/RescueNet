@@ -11,7 +11,9 @@ public enum RegexPatternsCommands {
     EXPORT_DATE("^/export\\s(?<startDate>.+)\\s(?<endDate>.+):(?<username>.+)$"),                                 // Approve-specific regex
     EXPORT_DATE_TAG("^/export\\s(?<startDate>.+)\\s(?<endDate>.+)\\s(?<tag>.+):(?<username>.+)$"),                                 // Approve-specific regex
     REQUEST("^(?<command>/\\w+|\\w+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$"),
-    JOIN("^/join\\s(?<name>.+):(?<requester>.+)$");
+    JOIN("^/join\\s(?<name>.+):(?<requester>.+)$"),
+    CHANGEPERMISSIONS("^/change_permission\\s(?<name>.+)\\s(?<permission>.+):(?<requester>.+)$"),
+    CREATEGROUP("^/create_group\\s(?<name>.+)\\s(?<address>.+)\\s(?<port>.+):(?<requester>.+)$");
 
     private final Pattern pattern;
 
