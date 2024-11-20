@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLOutput;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -89,5 +90,27 @@ public class GroupService {
 
     public List<Group> getAllGroups() {
         return groupRepository.findAll(); // Retorna todos os grupos no banco de dados
+    }
+
+    public List<User> getUsersByGroupName(String groupName) {
+        // Verifica se o grupo existe
+        Group group = groupRepository.findByName(groupName)
+                .orElseThrow(() -> new IllegalArgumentException("Grupo não encontrado"));
+
+        // Retorna a lista de usuários associados ao grupo
+        return new ArrayList<>(group.getUsers());
+    }
+
+    public boolean isUserInGroup(String groupName, Long userId) {
+        // Buscar o grupo pelo nome
+        Group group = groupRepository.findByName(groupName)
+                .orElseThrow(() -> new IllegalArgumentException("Grupo não encontrado"));
+
+        // Buscar o usuário pelo ID
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        // Verificar se o usuário está associado ao grupo
+        return group.getUsers().contains(user);
     }
 }

@@ -76,6 +76,16 @@ public class ExecuteUserCommands {
                     out.println("ERRO: Formato inválido para Export");
                 }
             }
+            case "/join" ->{
+                Matcher joinMatcher = RegexPatternsCommands.JOIN.matcher(request);
+                if (joinMatcher.matches()) {
+                    String name = joinMatcher.group("name");
+                    System.out.println(name);
+                    System.out.println(payload);
+                    processJoinCommand(payload, name, out);
+                }
+
+            }
             default -> out.println("ERRO: Comando de utilizador inválido");
         }
     }
@@ -91,6 +101,42 @@ public class ExecuteUserCommands {
         }
     }
 
+    private void processJoinCommand(String username, String name, PrintWriter out) {
+        // Buscar o usuário com o nome fornecido
+        User user = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
+        if (user == null) {
+            out.println("ERRO: Usuário não encontrado");
+            return;
+        }
+        
+        /*TODO: Verificar permissões*/
+        if(groupService.isUserInGroup(name, user.getId())) {
+            groupService.addUserToGroup(name, user.getId());
+        }else{
+            System.out.println("utilizador já pertence ao grupo");
+        }
+        // Buscar o grupo com os parâmetros fornecidos
+        Group group = groupService.getUserGroupByName(user.getId(), name); // Método para buscar o grupo
+        if (group == null) {
+            out.println("ERRO: Grupo não encontrado");
+            return;
+        }
+
+        // Verificar se o usuário já faz parte do grupo
+        if (user.getGroups().contains(group)) {
+            out.println("ERRO: Usuário já está no grupo");
+            return;
+        }
+
+        out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
+
+        // Agora, permitir que o usuário entre no chat
+        try {
+            Chat.startChat(group.getAddress(), Integer.parseInt(group.getPort()), username); // Chama o método para iniciar o chat multicast
+        } catch (IOException e) {
+            out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
+        }
+    }
 
     private void processOperationCommand(String username, String operationName, PrintWriter out,
                                          Map<String, String> pendingApprovals,

@@ -7,8 +7,8 @@ public enum RegexPatternsCommands {
     APPROVE("^/approve\\s(?<requester>.+):(?<username>.+)$"),                                 // Approve-specific regex
     REJECT("^/reject\\s(?<requester>.+):(?<username>.+)$"),
     EXPORT("^/export\\s(?<startDate>.+)\\s(?<endDate>.+)\\s(?<filepath>.+):(?<username>.+)$"),                                 // Approve-specific regex
-    REQUEST("^(?<command>.+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$");
-
+    REQUEST("^(?<command>/\\w+|\\w+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$"),
+    JOIN("^/join\\s(?<name>.+):(?<requester>.+)$");
     private final Pattern pattern;
 
     RegexPatternsCommands(String regex) {
