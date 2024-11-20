@@ -1,9 +1,17 @@
 package org.estg.ipp.pt.Services;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import com.itextpdf.kernel.colors.Color;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.SolidBorder;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.property.UnitValue;
+import com.itextpdf.layout.property.VerticalAlignment;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Repositories.LogRepository;
@@ -11,12 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.Socket;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class LogService {
@@ -44,85 +51,91 @@ public class LogService {
         return logRepository.findByTagAndDateRange(tag, startDate, endDate);
     }
 
-    /**
-     * Generates a PDF report of logs and saves it to the local file system.
-     *
-     * @param startDate The start date of the logs to be included.
-     * @param endDate   The end date of the logs to be included.
-     * @param filePath  The path where the PDF file will be saved.
-     * @throws IOException If there is an IO error while generating or saving the PDF.
-     */
-    public void generatePdfReport(LocalDateTime startDate, LocalDateTime endDate, String filePath) throws IOException {
+    public void generatePdfReport(LocalDateTime startDate, LocalDateTime endDate, ByteArrayOutputStream byteArrayOutputStream) throws IOException {
         // Fetch logs from repository
         List<Log> logs = logRepository.findByDateRange(startDate, endDate);
 
         // Create a new PDF document
-        PDDocument document = new PDDocument();
-
-        // Create a page in the document
-        PDPage page = new PDPage();
-        document.addPage(page);
-
-        // Prepare content stream to write content on the page
-        PDPageContentStream contentStream = new PDPageContentStream(document, page);
-        contentStream.beginText();
-        contentStream.setFont(org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA_BOLD, 12);
-        contentStream.newLineAtOffset(50, 750);
+        PdfWriter writer = new PdfWriter(byteArrayOutputStream);
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        Document document = new Document(pdfDoc);
 
         // Add title
-        contentStream.showText("Log Report");
-        contentStream.newLineAtOffset(0, -20);
+        Paragraph title = new Paragraph("Log Report")
+                .setFontSize(16)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
+        document.add(title);
+
+        // Create table
+        float[] columnWidths = {2, 1, 3}; // Adjust column widths as needed
+        Table table = new Table(UnitValue.createPercentArray(columnWidths))
+                .setWidth(UnitValue.createPercentValue(100));
 
         // Add headers for the log table
-        contentStream.showText("Date                          | Tag         | Message");
-        contentStream.newLineAtOffset(0, -20);
+        addTableHeader(table, "Date");
+        addTableHeader(table, "Tag");
+        addTableHeader(table, "Message");
 
-        // Add logs to the content stream
+        // Add logs to the table
         for (Log log : logs) {
-            String logEntry = String.format("%-30s | %-10s | %s", log.getDateTime(), log.getTag(), log.getMessage());
-            contentStream.showText(logEntry);
-            contentStream.newLineAtOffset(0, -20);
+            addTableRow(table, log.getDateTime(), log.getTag(), log.getMessage());
         }
 
-        contentStream.endText();
-        contentStream.close();
+        // Add the table to the document
+        document.add(table);
 
-        // Save the document to the local file system
-        document.save(new File(filePath));
+        // Close the document
         document.close();
     }
 
+    private void addTableHeader(Table table, String text) {
+        Cell cell = new Cell()
+                .add(new Paragraph(text)
+                        .setFontSize(12)
+                        .setBold())
+                .setTextAlignment(TextAlignment.CENTER)
+                .setVerticalAlignment(VerticalAlignment.MIDDLE)
+                .setBackgroundColor(ColorConstants.LIGHT_GRAY)
+                .setBorder(new SolidBorder(ColorConstants.BLACK, 0.5f));
+        table.addCell(cell);
+    }
 
-    private void handleGeneratePdfReport(Socket clientSocket, LocalDateTime startDate, LocalDateTime endDate) throws IOException {
-        List<Log> logs = logRepository.findByDateRange(startDate, endDate);
+    private void addTableRow(Table table, String date, TagType tag, String message) {
+        Color tagColor = getTagColor(tag);
 
-        PDDocument document = new PDDocument();
-        PDPage page = new PDPage();
-        document.addPage(page);
-        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+        table.addCell(new Cell()
+                .add(new Paragraph(tag.toString()))
+                .setTextAlignment(TextAlignment.LEFT)
+                .setFontColor(tagColor)
+                .setBold()
+                .setBorder(new SolidBorder(ColorConstants.BLACK, 0.5f)));
 
-        contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-        contentStream.newLineAtOffset(50, 750);
-        contentStream.showText("Log Report");
-        contentStream.newLineAtOffset(0, -20);
-        contentStream.showText("Date                          | Tag         | Message");
-        contentStream.newLineAtOffset(0, -20);
+        table.addCell(new Cell()
+                .add(new Paragraph(date))
+                .setTextAlignment(TextAlignment.LEFT)
+                .setBorder(new SolidBorder(ColorConstants.BLACK, 0.5f)));
 
-        for (Log log : logs) {
-            String logEntry = String.format("%-30s | %-10s | %s", log.getDateTime(), log.getTag(), log.getMessage());
-            contentStream.showText(logEntry);
-            contentStream.newLineAtOffset(0, -20);
-        }
+        table.addCell(new Cell()
+                .add(new Paragraph(message))
+                .setTextAlignment(TextAlignment.LEFT)
+                .setBorder(new SolidBorder(ColorConstants.BLACK, 0.5f)));
+    }
 
-        contentStream.endText();
-        contentStream.close();
+    private Color getTagColor(TagType tag) {
+        Map<TagType, Color> tagColorMap = new HashMap<>();
+        tagColorMap.put(TagType.INFO, ColorConstants.GRAY);
+        tagColorMap.put(TagType.ERROR, ColorConstants.RED);
+        tagColorMap.put(TagType.ALERT, ColorConstants.ORANGE);
+        tagColorMap.put(TagType.CRITICAL, ColorConstants.DARK_GRAY);
+        tagColorMap.put(TagType.SUCCESS, ColorConstants.GREEN);
+        tagColorMap.put(TagType.FAILURE, ColorConstants.PINK);
+        tagColorMap.put(TagType.ACCESS, ColorConstants.BLUE);
+        tagColorMap.put(TagType.USER_ACTION, ColorConstants.CYAN);
+        tagColorMap.put(TagType.DATABASE, ColorConstants.YELLOW);
+        tagColorMap.put(TagType.NETWORK, ColorConstants.MAGENTA);
+        tagColorMap.put(TagType.SECURITY, ColorConstants.BLACK);
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        document.save(byteArrayOutputStream);
-        document.close();
-
-        clientSocket.getOutputStream().write(byteArrayOutputStream.toByteArray());
-        clientSocket.getOutputStream().flush();
+        return tagColorMap.getOrDefault(tag, ColorConstants.LIGHT_GRAY);
     }
 }

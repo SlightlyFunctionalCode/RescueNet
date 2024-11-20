@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     // PDF Generator
-    implementation 'org.apache.pdfbox:pdfbox:2.0.27'  // Apache PDFBox for PDF generation
+    implementation 'com.itextpdf:itext7-core:7.1.19'
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     testImplementation platform('org.junit:junit-bom:5.10.0')
@@ -26,7 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // PostgreSQL Connector
+    // Postgresql Connector
     implementation 'org.postgresql:postgresql:42.7.2' // Use the latest stable version
     // Spring Boot Starter Security
     implementation 'org.springframework.boot:spring-boot-starter-security'

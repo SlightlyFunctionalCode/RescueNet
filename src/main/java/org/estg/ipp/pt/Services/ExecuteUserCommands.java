@@ -9,8 +9,14 @@ import org.estg.ipp.pt.Classes.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.AbstractMap;
@@ -65,10 +71,9 @@ public class ExecuteUserCommands {
                     try {
                         LocalDateTime startDate = LocalDateTime.parse(exportMatcher.group("startDate"));
                         LocalDateTime endDate = LocalDateTime.parse(exportMatcher.group("endDate"));
-                        String filepath = exportMatcher.group("filepath");
                         String username = exportMatcher.group("username");
 
-                        processExportCommand(startDate, endDate, filepath, username, out);
+                        processExportCommand(startDate, endDate, username, out);
                     } catch (DateTimeParseException ex) {
                         out.println("ERRO: Data inválida para Export. Deve ser DD-MM-YYThh:mm:ss");
                     }
@@ -90,14 +95,23 @@ public class ExecuteUserCommands {
         }
     }
 
-    private void processExportCommand(LocalDateTime startDate, LocalDateTime endDate, String filepath, String username, PrintWriter out) {
+    private void processExportCommand(LocalDateTime startDate, LocalDateTime endDate, String username, PrintWriter out) {
         try {
-            logService.generatePdfReport(startDate, endDate, filepath);
-            out.println("SUCESSO: O pdf foi gerado com sucesso");
+            // Generate the endpoint URL
+            String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate;
+
+            // Log the generated URL
+            System.out.println("Generated URL for download: " + url);
+
+            // Notify the client to download the file
+            out.println("SUCESSO: O pdf foi gerado com sucesso. Por favor, faça o download aqui: " + url);
+
+            // Save log for success
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
-        } catch (IOException io) {
-            out.println("ERRO: IO exception when generating pdf report.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "O pdf gerado por " + username + " sofreu um IO exception"));
+        } catch (Exception e) {
+            // Handle exceptions
+            out.println("ERRO: Falha ao gerar o relatório PDF.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Falha ao gerar o relatório PDF para " + username));
         }
     }
 

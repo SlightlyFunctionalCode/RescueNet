@@ -91,21 +91,5 @@ public class Client {
             }
         }
     }
-
-    //Receber o pdf
-    /*
-    *
-    try (Socket socket = new Socket("serverAddress", serverPort);
-     InputStream in = socket.getInputStream();
-     FileOutputStream fileOut = new FileOutputStream("DownloadedReport.pdf")) {
-
-    byte[] buffer = new byte[1024];
-    int bytesRead;
-    while ((bytesRead = in.read(buffer)) != -1) {
-        fileOut.write(buffer, 0, bytesRead);
-    }
-    System.out.println("PDF Report saved as 'DownloadedReport.pdf'");
-}
-     */
 }
 

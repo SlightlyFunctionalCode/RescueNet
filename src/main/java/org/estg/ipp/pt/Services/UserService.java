@@ -4,6 +4,8 @@ import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -88,7 +90,7 @@ public class UserService {
     }
 
     public User getUserByName(String username) {
-           Optional<User> user = userRepository.findByName(username);
+        Optional<User> user = userRepository.findByName(username);
         return user.orElse(null);
     }
 }
