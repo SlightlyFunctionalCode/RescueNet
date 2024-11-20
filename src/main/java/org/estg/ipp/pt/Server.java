@@ -57,6 +57,7 @@ public class Server {
             int serverPort = 5000;
 
             executeInternalCommands.groupService.initializeDefaultGroups();
+            executeInternalCommands.userService.initializeUser();
 
             try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
                 System.out.println("Servidor iniciado na porta " + serverPort);

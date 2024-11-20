@@ -1,5 +1,6 @@
 package org.estg.ipp.pt.Services;
 
+import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,18 @@ public class UserService {
     private UserRepository userRepository;  // Ensure this is injected correctly by Spring
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
+
+    public void initializeUser() {
+        if (!userRepository.existsByName("admin")) {
+            User user = new User();
+            user.setName("admin");
+            user.setPassword(passwordEncoder.encode("admin"));
+            user.setEmail("admin@admin.admin");
+            user.setPermissions(Permissions.HIGH_LEVEL);
+
+            userRepository.save(user);
+        }
+    }
     /**
      * Registers a new user.
      *

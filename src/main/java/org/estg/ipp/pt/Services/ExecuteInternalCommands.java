@@ -20,7 +20,7 @@ import static org.estg.ipp.pt.Server.*;
 public class ExecuteInternalCommands {
 
     @Autowired
-    private UserService userService;
+    public UserService userService;
 
     @Autowired
     public GroupService groupService;
@@ -60,9 +60,6 @@ public class ExecuteInternalCommands {
                     return; // Retorna sem associar ao grupo se o registro falhar
                 }
 
-                // Após salvar o usuário, associa-o a um grupo padrão
-                groupService.addUserToGroup(user.getPermissions().toString(), user.getId());
-
                 out.println("SUCESSO: Usuário registrado e associado ao grupo padrão com sucesso");
 
             } catch (Exception e) {
@@ -80,21 +77,16 @@ public class ExecuteInternalCommands {
             String usernameOrEmail = loginMatcher.group("username");
             String password = loginMatcher.group("password");
             System.out.println("usernameOrEmail: " + usernameOrEmail + ", password: " + password);
+
+            User user = userService.getUserByName(usernameOrEmail);
+            // Após salvar o usuário, associa-o a um grupo padrão
+            groupService.addUserToGroup(user.getPermissions().toString(), user.getId());
+
             String response = loginUser(usernameOrEmail, password, clientSocket, groupList);
             System.out.println(response);
 
             out.println(response);
 
-            User user = userService.getUserByName(usernameOrEmail);
-            if (user != null && (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL)) {
-                usersWithPermissionsOnline.add(usernameOrEmail);
-                // Enviar notificações de pedidos pendentes
-                for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
-                    String requestingUser = entry.getKey();
-                    String operationName = entry.getValue();
-                    notifyUser(usernameOrEmail, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, groupList);
-                }
-            }
             } else {
             out.println("ERRO: Formato inválido para LOGIN");
         }

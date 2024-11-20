@@ -108,7 +108,7 @@ public class ExecuteUserCommands {
             out.println("ERRO: Usuário não encontrado");
             return;
         }
-        
+
         /*TODO: Verificar permissões*/
         if(groupService.isUserInGroup(name, user.getId())) {
             groupService.addUserToGroup(name, user.getId());
