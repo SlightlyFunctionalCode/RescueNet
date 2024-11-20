@@ -80,11 +80,23 @@ public class ExecuteUserCommands {
         }
     }
 
-    private void processExport(String request, PrintWriter out) {
+    public void processExport(String request, PrintWriter out) {
         Matcher exportDateTagMatcher = RegexPatternsCommands.EXPORT_DATE_TAG.matcher(request);
         Matcher exportTagMatcher = RegexPatternsCommands.EXPORT_TAG.matcher(request);
         Matcher exportDateMatcher = RegexPatternsCommands.EXPORT_DATE.matcher(request);
-        if (exportDateTagMatcher.matches()) {
+        Matcher exportHelpMatcher = RegexPatternsCommands.EXPORT_HELP.matcher(request);
+
+        if (exportHelpMatcher.matches()) {
+            String help = """
+                    INFO: Os parâmetros que podem ser executados por /export são:
+                    
+                    <startDate> data e hora inicial (formato DD-MM-yyyyThh:mm:ss)
+                    
+                    <endDate> data e hora final (formato DD-MM-yyyyThh:mm:ss)
+                    
+                    <tag> tag do tipo TagType\r""";
+            out.println(help);
+        } else if (exportDateTagMatcher.matches()) {
             try {
                 LocalDateTime startDate = LocalDateTime.parse(exportDateTagMatcher.group("startDate"));
                 LocalDateTime endDate = LocalDateTime.parse(exportDateTagMatcher.group("endDate"));
@@ -93,7 +105,7 @@ public class ExecuteUserCommands {
 
                 processExportByDateRangeAndTagCommand(startDate, endDate, tag, username, out);
             } catch (DateTimeParseException ex) {
-                out.println("ERRO: Data inválida para Export. Deve ser DD-MM-YYThh:mm:ss");
+                out.println("ERRO: Data inválida para Export. Deve ser YYYY-MM-DDThh:mm:ss");
             } catch (IllegalArgumentException ie) {
                 out.println("ERRO: Tag inválida");
             }
@@ -105,7 +117,7 @@ public class ExecuteUserCommands {
 
                 processExportByDateRangeCommand(startDate, endDate, username, out);
             } catch (DateTimeParseException ex) {
-                out.println("ERRO: Data inválida para Export. Deve ser DD-MM-YYThh:mm:ss");
+                out.println("ERRO: Data inválida para Export. Deve ser YYYY-MM-DDThh:mm:ss");
             }
         } else if (exportTagMatcher.matches()) {
             try {

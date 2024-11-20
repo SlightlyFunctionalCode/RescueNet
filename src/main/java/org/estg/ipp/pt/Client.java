@@ -2,6 +2,7 @@ package org.estg.ipp.pt;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Services.Chat;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-
+@SpringBootApplication
 public class Client {
 
     public static void main(String[] args) throws IOException {

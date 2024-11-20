@@ -1,5 +1,6 @@
 package org.estg.ipp.pt.Controller;
 
+import com.itextpdf.text.DocumentException;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Services.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ public class LogController {
     public ResponseEntity<ByteArrayResource> downloadPdfReport(
             @RequestParam(required = false) TagType tag,
             @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate) throws IOException {
+            @RequestParam(required = false) LocalDateTime endDate) throws IOException, DocumentException {
 
         // Generate the PDF in memory
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
