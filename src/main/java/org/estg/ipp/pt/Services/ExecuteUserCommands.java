@@ -236,8 +236,8 @@ public class ExecuteUserCommands {
         }
 
         /*TODO: Verificar permissões*/
-        if (groupService.isUserInGroup(name, user.getId())) {
-            groupService.addUserToGroup(name, user.getId());
+        if (!groupService.isUserInGroup(name, user.getId())) {
+            groupService.addUserToGroup(name, user);
         } else {
             System.out.println("utilizador já pertence ao grupo");
         }
@@ -245,12 +245,6 @@ public class ExecuteUserCommands {
         Group group = groupService.getUserGroupByName(user.getId(), name); // Método para buscar o grupo
         if (group == null) {
             out.println("ERRO: Grupo não encontrado");
-            return;
-        }
-
-        // Verificar se o usuário já faz parte do grupo
-        if (user.getGroups().contains(group)) {
-            out.println("ERRO: Usuário já está no grupo");
             return;
         }
 
@@ -291,7 +285,7 @@ public class ExecuteUserCommands {
             if (newGroup == null) {
                 out.println("ERRO: Grupo não pode ser criado");
             } else {
-                groupService.addUserToGroup(newGroup.getName(), userWithPermissions.getId());
+                groupService.addUserToGroup(newGroup.getName(), userWithPermissions);
                 out.println("SUCESSO: Grupo " + name + " criado com sucesso");
             }
         } catch (Exception e) {

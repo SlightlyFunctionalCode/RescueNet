@@ -16,14 +16,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Chat {
-    public static void startChat(String groupAddress, int port, String name) throws IOException {
+    private static volatile boolean running = true; // Sinalizador de execução
+
+    public static boolean startChat(String groupAddress, int port, String name) throws IOException {
         InetAddress group = InetAddress.getByName(groupAddress);
         MulticastSocket socket = new MulticastSocket(port);
         socket.joinGroup(group);
 
+        running = true; // Reset do sinalizador ao iniciar o chat
+
         Thread receiveThread = new Thread(() -> {
             byte[] buffer = new byte[1024];
-            while (true) {
+            while (running) { // Verifica o sinalizador antes de receber mensagens
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 try {
                     socket.receive(packet);
@@ -39,6 +43,9 @@ public class Chat {
                         System.out.println(received);
                     }
                 } catch (IOException e) {
+                    if (!running) {
+                        break;
+                    }
                     throw new RuntimeException(e);
                 }
             }
@@ -47,17 +54,24 @@ public class Chat {
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("JOIN ON CHAT " + groupAddress + ": ");
+        boolean shouldExit = false;
 
-        while (true) {
-            String msg = scanner.nextLine();
-            if (msg.equalsIgnoreCase("exit")) {
-                System.out.println("Saindo do chat...");
-                socket.leaveGroup(group);
-                socket.close();
-                break;
-            }
-
-            if (msg.startsWith("/")) {
+        while (!shouldExit) {
+            String msg = scanner.nextLine(); // Voltar ao menu principal
+            if (msg.equalsIgnoreCase("/logout")) {
+                try (Socket serverSocket = new Socket("localhost", 5000);
+                     PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true)) {
+                    out.println("LOGOUT:" + name);
+                    System.out.println("Logout realizado. Voltando ao menu principal...");
+                    running = false; // Sinaliza para a thread parar
+                    receiveThread.interrupt(); // Interrompe a thread (caso esteja bloqueada)
+                    socket.leaveGroup(group);
+                    socket.close();
+                    return true; // Voltar ao menu principal
+                } catch (IOException e) {
+                    System.err.println("Erro ao realizar logout: " + e.getMessage());
+                }
+            } else if (msg.startsWith("/")) {
                 try (Socket serverSocket = new Socket("localhost", 5000);
                      PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()))) {
@@ -65,7 +79,6 @@ public class Chat {
 
                     String serverResponse = in.readLine();
 
-                    // Use regex enums to process server responses
                     if (RegexPatterns.SERVER_PENDING.matches(serverResponse)) {
                         System.out.println("Aguardando aprovação...");
                     } else if (RegexPatterns.SERVER_SUCCESS.matches(serverResponse)) {
@@ -77,8 +90,6 @@ public class Chat {
                         System.out.println("Aprovado e executado.");
                     } else if (RegexPatterns.SERVER_REJECT.matches(serverResponse)) {
                         System.out.println("Rejeitado.");
-                    } else if (RegexPatterns.SERVER_REJECT.matches(serverResponse)) {
-                        System.out.println("Rejeitado.");
                     } else if (serverResponse.startsWith("--HELP--")) {
                         String line;
                         while ((line = in.readLine()) != null) {
@@ -88,7 +99,7 @@ public class Chat {
                     } else {
                         System.out.println(serverResponse);
                     }
-                }catch (NullPointerException | IOException e) {
+                } catch (NullPointerException | IOException e) {
                     System.err.println("Erro ao comunicar com o servidor: " + e.getMessage());
                 }
             } else {
@@ -104,7 +115,6 @@ public class Chat {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
                     socket.send(packet);
                 } else {
-                    // Otherwise, send it to the group
                     String fullMsg = name + ": " + msg;
                     byte[] buffer = fullMsg.getBytes();
 
@@ -113,6 +123,8 @@ public class Chat {
                 }
             }
         }
+        return false;
     }
-
 }
+
+

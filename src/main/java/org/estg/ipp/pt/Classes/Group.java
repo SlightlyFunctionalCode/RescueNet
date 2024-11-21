@@ -16,13 +16,17 @@ public class Group {
     private String address;
     private String port;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "group_user",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_id")
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> users = new ArrayList<>();
+
+    public Long getId() {
+        return id;
+    }
 
     public String getName() {
         return name;

@@ -19,12 +19,7 @@ public class User {
     private Permissions permission;
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_groups",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_id")
-    )
+    @ManyToMany(mappedBy = "users")
     private List<Group> groups = new ArrayList<>();
 
     // Getters e setters

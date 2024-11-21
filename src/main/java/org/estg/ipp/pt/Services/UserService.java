@@ -3,11 +3,13 @@ package org.estg.ipp.pt.Services;
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Repositories.UserRepository;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -64,6 +66,7 @@ public class UserService {
      * @param password        The password to validate.
      * @return The authenticated user, or null if authentication fails.
      */
+    @Transactional
     public User authenticate(String usernameOrEmail, String password) {
         // Find user by name
         Optional<User> userOptional = userRepository.findByName(usernameOrEmail);
@@ -79,6 +82,7 @@ public class UserService {
             // Check if the provided password matches the stored password
             if (passwordEncoder.matches(password, user.getPassword())) {
                 System.out.println("Authentication successful");
+                Hibernate.initialize(user.getGroups());
                 return user;
             } else {
                 System.out.println("Invalid password");

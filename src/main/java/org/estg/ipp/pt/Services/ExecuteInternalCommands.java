@@ -56,17 +56,17 @@ public class ExecuteInternalCommands {
                 int result = userService.register(user);
 
                 if (result == 0) {
-                    out.println("FAILED: Usuário com nome ou email já existente");
+                    out.println("FAILED: Utilizador com nome ou email já existente");
                     return; // Retorna sem associar ao grupo se o registro falhar
                 }
 
-                out.println("SUCESSO: Usuário registrado e associado ao grupo padrão com sucesso");
+                out.println("SUCESSO: Utilizador registrado com sucesso");
 
             } catch (Exception e) {
-                out.println("ERRO: Falha ao registrar usuário - " + e.getMessage());
+                out.println("ERRO: Falha ao registrar utilizador - " + e.getMessage());
             }
         } else {
-            out.println("ERRO: Formato inválido para REGISTER");
+            out.println("ERRO: Formato inválido para REGISTER ");
         }
     }
 
@@ -79,15 +79,18 @@ public class ExecuteInternalCommands {
             System.out.println("usernameOrEmail: " + usernameOrEmail + ", password: " + password);
 
             User user = userService.getUserByName(usernameOrEmail);
+
             // Após salvar o usuário, associa-o a um grupo padrão
             if(user == null){
                 out.println("User inválido");
             }else {
-                groupService.addUserToGroup(user.getPermissions().toString(), user.getId());
+                System.out.println("Adicionando user ao grupo default");
+                groupService.addUserToGroup(user.getPermissions().toString(), user);
             }
 
             String response = loginUser(usernameOrEmail, password, clientSocket, groupList);
             System.out.println(response);
+
 
             out.println(response);
 

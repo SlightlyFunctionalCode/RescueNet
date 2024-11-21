@@ -4,6 +4,7 @@ import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Repositories.GroupRepository;
 import org.estg.ipp.pt.Repositories.UserRepository;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,32 +57,41 @@ public class GroupService {
         }
     }
 
-    public void addUserToGroup(String groupName, Long userId) {
-        // Carregar o grupo e o usuário, garantindo que ambos existem na base de dados
+    @Transactional
+    public void addUserToGroup(String groupName, User user) {
+
+        // Carregar o grupo e verificar se ele existe
         Group group = groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo não encontrado"));
 
-        User user = userRepository.findById(userId)
+        user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
-        System.out.println("Grupo encontrado: " + group.getName());
-        // Certifique-se de que o usuário e o grupo não estão já associados
-        if (!group.getUsers().contains(user)) {
+        // Verificar se o usuário já está no grupo usando uma consulta ao banco
+        if (groupRepository.existsByIdAndUsersId(group.getId(), user.getId())) {
+            System.out.println("O usuário já está no grupo.");
+            return;
+        }
+
+            // Adicionar o usuário ao grupo
             group.getUsers().add(user);
             user.getGroups().add(group);
 
-            // Salvar as alterações manualmente
-            groupRepository.save(group); // Salva o grupo com o novo usuário
-            userRepository.save(user);   // Salva o usuário com o novo grupo
-        } else {
-            System.out.println("O usuário já está no grupo.");
-        }
+            // Salvar apenas o grupo (o relacionamento bidirecional será tratado automaticamente)
+            groupRepository.save(group);
+            System.out.println("Usuário adicionado ao grupo com sucesso!");
     }
 
+    @Transactional
     public Group getUserGroupByName(Long userId, String groupName) {
+        // Buscar o usuário do banco de dados
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
+        // Inicializar a coleção de grupos (se necessário)
+        Hibernate.initialize(user.getGroups());
+
+        // Procurar o grupo na coleção do usuário
         return user.getGroups().stream()
                 .filter(group -> group.getName().equalsIgnoreCase(groupName))
                 .findFirst()
@@ -101,7 +111,9 @@ public class GroupService {
         return new ArrayList<>(group.getUsers());
     }
 
+    @Transactional
     public boolean isUserInGroup(String groupName, Long userId) {
+        System.out.println(groupName);
         // Buscar o grupo pelo nome
         Group group = groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo não encontrado"));
@@ -140,6 +152,8 @@ public class GroupService {
         // Retorna o grupo criado
         return savedGroup;
     }
+
+
 
 
 }

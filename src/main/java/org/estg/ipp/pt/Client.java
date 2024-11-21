@@ -24,12 +24,12 @@ public class Client {
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
 
             Scanner scanner = new Scanner(System.in);
-            while (true) {
+            boolean keepRunning = true;
+            while (keepRunning) {
                 System.out.println("\nMENU");
                 System.out.println("1. Registar");
                 System.out.println("2. Login");
-                System.out.println("3. Logout");
-                System.out.println("4. Sair");
+                System.out.println("3. Sair");
                 System.out.print("Escolha uma opção: ");
                 int choice = scanner.nextInt();
                 scanner.nextLine(); // Consumir quebra de linha
@@ -69,7 +69,12 @@ public class Client {
                             if (matcher.find()) {
                                 String groupAddress = matcher.group(1);
                                 int port = Integer.parseInt(matcher.group(2));
-                                Chat.startChat(groupAddress, port, usernameOrEmail);
+
+                                boolean returnToMenu = Chat.startChat(groupAddress, port, usernameOrEmail);
+
+                                if (!returnToMenu) {
+                                    keepRunning = false; // Sai completamente do programa
+                                }
                             }
                         } else if (RegexPatterns.LOGIN_FAILED.matches(response)) {
                             System.out.println("Falha ao iniciar sessão. Verifique suas credenciais.");
@@ -78,12 +83,6 @@ public class Client {
                         }
                     }
                     case 3 -> {
-                        System.out.print("Digite o nome de utilizador: ");
-                        String username = scanner.nextLine();
-                        out.println("LOGOUT:" + username);
-                        System.out.println(in.readLine());
-                    }
-                    case 4 -> {
                         System.out.println("Encerrando cliente...");
                         return;
                     }

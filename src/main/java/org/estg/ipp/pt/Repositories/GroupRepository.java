@@ -14,4 +14,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     // Verificar se um grupo existe pelo nome
     boolean existsByName(String name);
+
+    boolean existsByIdAndUsersId(Long id, Long usersId);
+
 }
