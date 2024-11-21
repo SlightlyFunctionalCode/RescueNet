@@ -129,8 +129,6 @@ public class ExecuteUserCommands {
 
                     processExportByDateRangeAndTagCommand(startDate, endDate, tag, username, out);
                 } catch (DateTimeParseException | IllegalArgumentException ex) {
-                    out.println("Log5");
-
                     out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
                 }
             } else if (tagString != null) {
@@ -139,8 +137,6 @@ public class ExecuteUserCommands {
 
                     processExportByTagCommand(tag, username, out);
                 } catch (IllegalArgumentException ex) {
-                    out.println("Log4");
-
                     out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
                 }
             } else if (startDateString != null && endDateString != null) {
@@ -150,19 +146,14 @@ public class ExecuteUserCommands {
 
                     processExportByDateRangeCommand(startDate, endDate, username, out);
                 } catch (DateTimeParseException ex) {
-                    out.println("Log3");
-
                     out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
 
                 }
             } else {
-                out.println("Log2");
-
                 out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
 
             }
         } else {
-            out.println("Log1");
             out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
         }
     }
