@@ -99,58 +99,71 @@ public class ExecuteUserCommands {
     }
 
     public void processExport(String request, PrintWriter out) {
-        Matcher exportDateTagMatcher = RegexPatternsCommands.EXPORT_DATE_TAG.matcher(request);
-        Matcher exportTagMatcher = RegexPatternsCommands.EXPORT_TAG.matcher(request);
-        Matcher exportDateMatcher = RegexPatternsCommands.EXPORT_DATE.matcher(request);
-        Matcher exportHelpMatcher = RegexPatternsCommands.EXPORT_HELP.matcher(request);
+        Matcher exportMatcher = RegexPatternsCommands.EXPORT.matcher(request);
 
-        if (exportHelpMatcher.matches()) {
-            String help = """
-                    --HELP--
-                    Os parâmetros que podem ser executados por /export são:
-                    
-                    <startDate> data e hora inicial (formato DD-MM-yyyyThh:mm:ss)
-                    
-                    <endDate> data e hora final (formato DD-MM-yyyyThh:mm:ss)
-                    
-                    <tag> tag do tipo TagType
-                    --END HELP--
-                    """;
-            out.println(help);
-        } else if (exportDateTagMatcher.matches()) {
-            try {
-                LocalDateTime startDate = LocalDateTime.parse(exportDateTagMatcher.group("startDate"));
-                LocalDateTime endDate = LocalDateTime.parse(exportDateTagMatcher.group("endDate"));
-                TagType tag = TagType.valueOf(exportDateTagMatcher.group("tag"));
-                String username = exportDateTagMatcher.group("username");
+        if (exportMatcher.matches()) { // Check if the matcher found a match
+            String help = exportMatcher.group("help");
+            String startDateString = exportMatcher.group("startDate");
+            String endDateString = exportMatcher.group("endDate");
+            String tagString = exportMatcher.group("tag");
+            String username = exportMatcher.group("username");
 
-                processExportByDateRangeAndTagCommand(startDate, endDate, tag, username, out);
-            } catch (DateTimeParseException ex) {
-                out.println("ERRO: Data inválida para Export. Deve ser YYYY-MM-DDThh:mm:ss");
-            } catch (IllegalArgumentException ie) {
-                out.println("ERRO: Tag inválida");
-            }
-        } else if (exportDateMatcher.matches()) {
-            try {
-                LocalDateTime startDate = LocalDateTime.parse(exportDateMatcher.group("startDate"));
-                LocalDateTime endDate = LocalDateTime.parse(exportDateMatcher.group("endDate"));
-                String username = exportDateMatcher.group("username");
+            if (help != null) {
+                String helpString = """
+                        --HELP--
+                        Os parâmetros que podem ser executados por /export são:
+                        
+                        <startDate> data e hora inicial (formato YYYY-MM-DDThh:mm:ss)
+                        
+                        <endDate> data e hora final (formato YYYY-MM-DDThh:mm:ss)
+                        
+                        <tag> tag do tipo TagType
+                        --END HELP--
+                        """;
+                out.println(helpString);
+            } else if (startDateString != null && endDateString != null && tagString != null) {
+                try {
+                    LocalDateTime startDate = LocalDateTime.parse(startDateString);
+                    LocalDateTime endDate = LocalDateTime.parse(endDateString);
+                    TagType tag = TagType.valueOf(tagString);
 
-                processExportByDateRangeCommand(startDate, endDate, username, out);
-            } catch (DateTimeParseException ex) {
-                out.println("ERRO: Data inválida para Export. Deve ser YYYY-MM-DDThh:mm:ss");
-            }
-        } else if (exportTagMatcher.matches()) {
-            try {
-                TagType tag = TagType.valueOf(exportTagMatcher.group("tag"));
-                String username = exportTagMatcher.group("username");
+                    processExportByDateRangeAndTagCommand(startDate, endDate, tag, username, out);
+                } catch (DateTimeParseException | IllegalArgumentException ex) {
+                    out.println("Log5");
 
-                processExportByTagCommand(tag, username, out);
-            } catch (IllegalArgumentException ie) {
-                out.println("ERRO: Tag inválida");
+                    out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
+                }
+            } else if (tagString != null) {
+                try {
+                    TagType tag = TagType.valueOf(tagString);
+
+                    processExportByTagCommand(tag, username, out);
+                } catch (IllegalArgumentException ex) {
+                    out.println("Log4");
+
+                    out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
+                }
+            } else if (startDateString != null && endDateString != null) {
+                try {
+                    LocalDateTime startDate = LocalDateTime.parse(startDateString);
+                    LocalDateTime endDate = LocalDateTime.parse(endDateString);
+
+                    processExportByDateRangeCommand(startDate, endDate, username, out);
+                } catch (DateTimeParseException ex) {
+                    out.println("Log3");
+
+                    out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
+
+                }
+            } else {
+                out.println("Log2");
+
+                out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
+
             }
         } else {
-            out.println("ERRO: Formato inválido para Export");
+            out.println("Log1");
+            out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
         }
     }
 

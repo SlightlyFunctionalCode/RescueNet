@@ -6,10 +6,7 @@ import java.util.regex.Pattern;
 public enum RegexPatternsCommands {
     APPROVE("^/approve\\s(?<requester>.+):(?<username>.+)$"),                                 // Approve-specific regex
     REJECT("^/reject\\s(?<requester>.+):(?<username>.+)$"),
-    EXPORT_HELP("^/export\\s(?<help>-h):(?<username>.+)$"),                                 // Approve-specific regex
-    EXPORT_TAG("^/export\\s(?<tag>.+):(?<username>.+)$"),                                 // Approve-specific regex
-    EXPORT_DATE("^/export\\s(?<startDate>.+)\\s(?<endDate>.+):(?<username>.+)$"),                                 // Approve-specific regex
-    EXPORT_DATE_TAG("^/export\\s(?<startDate>.+)\\s(?<endDate>.+)\\s(?<tag>.+):(?<username>.+)$"),                                 // Approve-specific regex
+    EXPORT("^/export(?:\\s(?<help>-h))?(?:\\s(?<startDate>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}))?(?:\\s(?<endDate>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}))?(?:\\s(?<tag>[^\\s:]+))?:(?<username>.+)$"),
     REQUEST("^(?<command>/\\w+|\\w+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$"),
     JOIN("^/join\\s(?<name>.+):(?<requester>.+)$"),
     CHANGEPERMISSIONS("^/change_permission\\s(?<name>.+)\\s(?<permission>.+):(?<requester>.+)$"),
