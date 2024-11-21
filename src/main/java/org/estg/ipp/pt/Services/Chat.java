@@ -85,10 +85,10 @@ public class Chat {
                             if (line.equals("--END HELP--")) break;
                             System.out.println(line);
                         }
-                    }else {
+                    } else {
                         System.out.println(serverResponse);
                     }
-                } catch (IOException e) {
+                }catch (NullPointerException | IOException e) {
                     System.err.println("Erro ao comunicar com o servidor: " + e.getMessage());
                 }
             } else {

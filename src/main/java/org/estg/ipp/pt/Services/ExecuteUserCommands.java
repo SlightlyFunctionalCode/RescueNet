@@ -9,22 +9,19 @@ import org.estg.ipp.pt.Classes.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
 import static java.lang.System.out;
+import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.*;
 import static org.estg.ipp.pt.Notifications.*;
-import static org.estg.ipp.pt.Notifications.notifyUser;
 import static org.estg.ipp.pt.Server.pendingApprovals;
-import static org.estg.ipp.pt.Server.usersWithPermissionsOnline;
 
 @Component
 public class ExecuteUserCommands {
@@ -44,19 +41,39 @@ public class ExecuteUserCommands {
             case "/approve" -> {
                 Matcher approveMatcher = RegexPatternsCommands.APPROVE.matcher(request);
                 if (approveMatcher.matches()) {
+                    String help = approveMatcher.group("help");
                     String username = approveMatcher.group("username");
-                    handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
+
+                    if (help != null) {
+                        out.println(APPROVE_HELP);
+                    } else if (requester != null) {
+                        handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
+                    } else {
+                        out.println("ERRO: Formato inválido para APPROVE. Use -h para descobrir os parâmetros");
+                        logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para APPROVE"));
+                    }
                 } else {
-                    out.println("ERRO: Formato inválido para APPROVE");
+                    out.println("ERRO: Formato inválido para APPROVE. Use -h para descobrir os parâmetros");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para APPROVE"));
                 }
             }
             case "/reject" -> {
                 Matcher rejectMatcher = RegexPatternsCommands.REJECT.matcher(request);
                 if (rejectMatcher.matches()) {
+                    String help = rejectMatcher.group("help");
                     String username = rejectMatcher.group("username");
-                    handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
+
+                    if (help != null) {
+                        out.println(REJECT_HELP);
+                    } else if (requester != null) {
+                        handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
+                    } else {
+                        out.println("ERRO: Formato inválido para REJECT. Use -h para descobrir os parâmetros");
+                        logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para REJECT"));
+                    }
                 } else {
-                    out.println("ERRO: Formato inválido para REJECT");
+                    out.println("ERRO: Formato inválido para REJECT. Use -h para descobrir os parâmetros");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para REJECT"));
                 }
             }
             case "/export" -> {
@@ -65,36 +82,74 @@ public class ExecuteUserCommands {
             case "/join" -> {
                 Matcher joinMatcher = RegexPatternsCommands.JOIN.matcher(request);
                 if (joinMatcher.matches()) {
+                    String help = joinMatcher.group("help");
                     String name = joinMatcher.group("name");
-                    System.out.println(name);
-                    System.out.println(payload);
-                    processJoinCommand(payload, name, out);
+
+                    if (help != null) {
+                        out.println(JOIN_HELP);
+                    } else if (name != null) {
+                        processJoinCommand(payload, name, out);
+                    } else {
+                        out.println("ERRO: Formato inválido para /join. Use -h para descobrir os parâmetros");
+                        logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /join"));
+                    }
+                } else {
+                    out.println("ERRO: Formato inválido para /join. Use -h para descobrir os parâmetros");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /join"));
                 }
             }
             case "/change_permission" -> {
-                Matcher joinMatcher = RegexPatternsCommands.CHANGEPERMISSIONS.matcher(request);
-                if (joinMatcher.matches()) {
-                    String name = joinMatcher.group("name");
-                    String perm = joinMatcher.group("permission");
-                    System.out.println(name);
-                    System.out.println(perm);
-                    int permission = Integer.parseInt(perm);
-                    Permissions permissions = Permissions.fromValue(permission);
-                    processChangePermissionCommand(payload, name, permissions, out);
+                Matcher changPermissionMatcher = RegexPatternsCommands.CHANGE_PERMISSIONS.matcher(request);
+                if (changPermissionMatcher.matches()) {
+                    String help = changPermissionMatcher.group("help");
+                    String name = changPermissionMatcher.group("name");
+                    String perm = changPermissionMatcher.group("permission");
+
+                    if (help != null) {
+                        out.println(CHANGE_PERMISSION_HELP);
+                    } else if (name != null && perm != null) {
+                        try {
+                            int permission = Integer.parseInt(perm);
+                            Permissions permissions = Permissions.fromValue(permission);
+                            processChangePermissionCommand(payload, name, permissions, out);
+                        } catch (NumberFormatException e) {
+                            out.println("ERRO: Formato inválido para /change_permission. Use -h para descobrir os parâmetros");
+                            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /join"));
+                        }
+                    } else {
+                        out.println("ERRO: Formato inválido para /change_permission. Use -h para descobrir os parâmetros");
+                        logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /change_permission"));
+                    }
+                } else {
+                    out.println("ERRO: Formato inválido para /change_permission. Use -h para descobrir os parâmetros");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /change_permission"));
                 }
             }
-
             case "/create_group" -> {
-                Matcher joinMatcher = RegexPatternsCommands.CREATEGROUP.matcher(request);
-                if (joinMatcher.matches()) {
-                    String name = joinMatcher.group("name");
-                    String address = joinMatcher.group("address");
-                    String port = joinMatcher.group("port");
+                Matcher createGroupMatcher = RegexPatternsCommands.CREATE_GROUP.matcher(request);
+                if (createGroupMatcher.matches()) {
+                    String help = createGroupMatcher.group("help");
+                    String name = createGroupMatcher.group("name");
+                    String address = createGroupMatcher.group("address");
+                    String port = createGroupMatcher.group("port");
 
-                    processCreateGroupCommand(payload, name, address, port, out);
+                    if (help != null) {
+                        out.println(CREATE_GROUP_HELP);
+                    } else if (name != null && address != null && port != null) {
+                        processCreateGroupCommand(payload, name, address, port, out);
+                    } else {
+                        out.println("ERRO: Formato inválido para /create_group. Use -h para descobrir os parâmetros");
+                        logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
+                    }
+                } else {
+                    out.println("ERRO: Formato inválido para /create_group. Use -h para descobrir os parâmetros");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
                 }
             }
-            default -> out.println("ERRO: Comando de utilizador inválido");
+            default -> {
+                out.println("ERRO: Comando de utilizador inválido");
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando de utilizador inválido"));
+            }
         }
     }
 
@@ -108,114 +163,68 @@ public class ExecuteUserCommands {
             String tagString = exportMatcher.group("tag");
             String username = exportMatcher.group("username");
 
-            if (help != null) {
-                String helpString = """
-                        --HELP--
-                        Os parâmetros que podem ser executados por /export são:
-                        
-                        <startDate> data e hora inicial (formato YYYY-MM-DDThh:mm:ss)
-                        
-                        <endDate> data e hora final (formato YYYY-MM-DDThh:mm:ss)
-                        
-                        <tag> tag do tipo TagType
-                        --END HELP--
-                        """;
-                out.println(helpString);
-            } else if (startDateString != null && endDateString != null && tagString != null) {
-                try {
+            try {
+                if (help != null) {
+                    out.println(EXPORT_HELP);
+                } else if (startDateString != null && endDateString != null && tagString != null) {
                     LocalDateTime startDate = LocalDateTime.parse(startDateString);
                     LocalDateTime endDate = LocalDateTime.parse(endDateString);
                     TagType tag = TagType.valueOf(tagString);
 
                     processExportByDateRangeAndTagCommand(startDate, endDate, tag, username, out);
-                } catch (DateTimeParseException | IllegalArgumentException ex) {
-                    out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
-                }
-            } else if (tagString != null) {
-                try {
+                } else if (tagString != null) {
                     TagType tag = TagType.valueOf(tagString);
 
                     processExportByTagCommand(tag, username, out);
-                } catch (IllegalArgumentException ex) {
-                    out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
-                }
-            } else if (startDateString != null && endDateString != null) {
-                try {
+                } else if (startDateString != null && endDateString != null) {
                     LocalDateTime startDate = LocalDateTime.parse(startDateString);
                     LocalDateTime endDate = LocalDateTime.parse(endDateString);
 
                     processExportByDateRangeCommand(startDate, endDate, username, out);
-                } catch (DateTimeParseException ex) {
+                } else {
                     out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
-
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /export."));
                 }
-            } else {
+            } catch (DateTimeParseException | IllegalArgumentException ex) {
                 out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
-
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /export."));
             }
         } else {
             out.println("ERRO: Formato inválido para /export. Use -h para descobrir os parâmetros");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /export."));
         }
     }
 
     private void processExportByDateRangeCommand(LocalDateTime startDate, LocalDateTime endDate, String username, PrintWriter out) {
-        try {
-            // Generate the endpoint URL
-            String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate;
+        // Generate the endpoint URL
+        String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate;
 
-            // Log the generated URL
-            System.out.println("Generated URL for download: " + url);
-
-            // Notify the client to download the file
-            out.println("SUCESSO: O pdf foi gerado com sucesso. Por favor, faça o download aqui: " + url);
-
-            // Save log for success
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
-        } catch (Exception e) {
-            // Handle exceptions
-            out.println("ERRO: Falha ao gerar o relatório PDF.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Falha ao gerar o relatório PDF para " + username));
-        }
+        processExportURL(url, username, out);
     }
 
     private void processExportByDateRangeAndTagCommand(LocalDateTime startDate, LocalDateTime endDate, TagType tagType, String username, PrintWriter out) {
-        try {
-            // Generate the endpoint URL
-            String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate + "&tag=" + tagType.name();
+        // Generate the endpoint URL
+        String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate + "&tag=" + tagType.name();
 
-            // Log the generated URL
-            System.out.println("Generated URL for download: " + url);
-
-            // Notify the client to download the file
-            out.println("SUCESSO: O pdf foi gerado com sucesso. Por favor, faça o download aqui: " + url);
-
-            // Save log for success
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
-        } catch (Exception e) {
-            // Handle exceptions
-            out.println("ERRO: Falha ao gerar o relatório PDF.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Falha ao gerar o relatório PDF para " + username));
-        }
+        processExportURL(url, username, out);
     }
 
     private void processExportByTagCommand(TagType tagType, String username, PrintWriter out) {
-        try {
-            // Generate the endpoint URL
-            String url = "http://localhost:8080/download-pdf-report?tag=" + tagType.name();
+        // Generate the endpoint URL
+        String url = "http://localhost:8080/download-pdf-report?tag=" + tagType.name();
 
-            // Log the generated URL
-            System.out.println("Generated URL for download: " + url);
+        processExportURL(url, username, out);
+    }
 
-            // Notify the client to download the file
-            out.println("SUCESSO: O pdf foi gerado com sucesso. Por favor, faça o download aqui: " + url);
+    private void processExportURL(String url, String username, PrintWriter out) {
+        // Log the generated URL
+        System.out.println("Generated URL for download: " + url);
 
-            // Save log for success
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
-        } catch (Exception e) {
-            // Handle exceptions
-            out.println("ERRO: Falha ao gerar o relatório PDF.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Falha ao gerar o relatório PDF para " + username));
-        }
+        // Notify the client to download the file
+        out.println("SUCESSO: O pdf foi gerado com sucesso. Por favor, faça o download aqui: " + url);
+
+        // Save log for success
+        logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
     }
 
     private void processJoinCommand(String username, String name, PrintWriter out) {
@@ -267,7 +276,6 @@ public class ExecuteUserCommands {
             out.println("SUCESSO: Usuário " + name + " promovido para " + permission.name());
         } else {
             out.println("ERRO: Usuário sem permissões para usar este comando");
-            return;
         }
     }
 
@@ -278,12 +286,16 @@ public class ExecuteUserCommands {
             return;
         }
 
-        Group newGroup = groupService.addCustomGroup(name, address, port);
-        if (newGroup == null) {
-            out.println("ERRO: Grupo não pode ser criado");
-        } else {
-            groupService.addUserToGroup(newGroup.getName(), userWithPermissions.getId());
-            out.println("SUCESSO: Grupo " + name + " criado com sucesso");
+        try {
+            Group newGroup = groupService.addCustomGroup(name, address, port);
+            if (newGroup == null) {
+                out.println("ERRO: Grupo não pode ser criado");
+            } else {
+                groupService.addUserToGroup(newGroup.getName(), userWithPermissions.getId());
+                out.println("SUCESSO: Grupo " + name + " criado com sucesso");
+            }
+        } catch (Exception e) {
+            out.println("ERRO: " + e.getMessage());
         }
     }
 
@@ -332,15 +344,16 @@ public class ExecuteUserCommands {
         }
     }
 
-    private static void handleApprovalCommand(String action, String username, String requester, PrintWriter out,
-                                              Map<String, String> pendingApprovals,
-                                              Set<String> usersWithPermissionsOnline,
-                                              List<Group> multicastGroups) {
+    private void handleApprovalCommand(String action, String username, String requester, PrintWriter out,
+                                       Map<String, String> pendingApprovals,
+                                       Set<String> usersWithPermissionsOnline,
+                                       List<Group> multicastGroups) {
         if (!pendingApprovals.containsKey(requester)) {
             notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, multicastGroups);
             out.println("ERRO: Comando desconhecido.");
-            return;
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
 
+            return;
         }
 
         String operationName = pendingApprovals.remove(requester);
@@ -349,13 +362,17 @@ public class ExecuteUserCommands {
             sendNotificationToGroups("Comando executado: " + operationName + " (por " + username + ")", multicastGroups);
             notifyUser(requester, "SUCESSO: Sua solicitação de operação foi aprovada.", usersWithPermissionsOnline, multicastGroups);
             out.println("APPROVE: Aprovado com sucesso");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Comando executado: " + operationName + " (por " + username + ")"));
+
         } else if (action.equals("/reject")) {
             notifyUser(requester, "ERRO: Sua solicitação de operação foi rejeitada.", usersWithPermissionsOnline, multicastGroups);
             notifyUser(username, "SUCESSO: Operação rejeitada.", usersWithPermissionsOnline, multicastGroups);
             out.println("Reject: Rejectado com sucesso");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação rejeitada."));
         } else {
             notifyUser(username, "ERRO: Comando desconhecido. Use APPROVE ou REJECT.", usersWithPermissionsOnline, multicastGroups);
             out.println("ERRO: Comando desconhecido.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
         }
     }
 

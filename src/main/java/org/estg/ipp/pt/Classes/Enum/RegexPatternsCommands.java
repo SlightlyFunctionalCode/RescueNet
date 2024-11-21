@@ -4,13 +4,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum RegexPatternsCommands {
-    APPROVE("^/approve\\s(?<requester>.+):(?<username>.+)$"),                                 // Approve-specific regex
-    REJECT("^/reject\\s(?<requester>.+):(?<username>.+)$"),
+    APPROVE("^/approve(?:\\s(?<help>-h))?(?:\\s(?<requester>.+))?:(?<username>.+)$"),                                 // Approve-specific regex
+    REJECT("^/reject(?:\\s(?<help>-h))?(?:\\s(?<requester>.+))?:(?<username>.+)$"),
     EXPORT("^/export(?:\\s(?<help>-h))?(?:\\s(?<startDate>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}))?(?:\\s(?<endDate>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}))?(?:\\s(?<tag>[^\\s:]+))?:(?<username>.+)$"),
     REQUEST("^(?<command>/\\w+|\\w+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$"),
-    JOIN("^/join\\s(?<name>.+):(?<requester>.+)$"),
-    CHANGEPERMISSIONS("^/change_permission\\s(?<name>.+)\\s(?<permission>.+):(?<requester>.+)$"),
-    CREATEGROUP("^/create_group\\s(?<name>.+)\\s(?<address>.+)\\s(?<port>.+):(?<requester>.+)$");
+    JOIN("^/join(?:\\s(?<help>-h))?(?:\\s(?<name>.+))?:(?<requester>.+)$"),
+    CHANGE_PERMISSIONS("^/change_permission(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<permission>.+))?:(?<requester>.+)$"),
+    CREATE_GROUP("^/create_group(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<address>.+)\\s(?<port>.+))?:(?<requester>.+)$");
 
     private final Pattern pattern;
 
@@ -20,9 +20,5 @@ public enum RegexPatternsCommands {
 
     public Matcher matcher(String input) {
         return pattern.matcher(input);
-    }
-
-    public boolean matches(String input) {
-        return pattern.matcher(input).matches();
     }
 }
