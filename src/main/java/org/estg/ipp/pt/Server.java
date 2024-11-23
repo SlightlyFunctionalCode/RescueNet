@@ -47,6 +47,8 @@ public class Server {
     @Autowired
     private LogService logService;
 
+    private ServerSocket serverSocket;
+
     public static void main(String[] args) {
         SpringApplication.run(Server.class, args); // Start the Spring Boot application
     }
@@ -59,7 +61,8 @@ public class Server {
             executeInternalCommands.groupService.initializeDefaultGroups();
             executeInternalCommands.userService.initializeUser();
 
-            try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+            try {
+                serverSocket = new ServerSocket(serverPort);
                 System.out.println("Servidor iniciado na porta " + serverPort);
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.INFO, "Servidor iniciado na porta " + serverPort));
 
@@ -76,6 +79,11 @@ public class Server {
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.CRITICAL, "Erro ao iniciar o servidor: " + e.getMessage()));
             }
         };
+    }
+
+    // Method to retrieve user socket by username
+    public static Socket getUserSocket(String username) {
+        return userSockets.get(username);
     }
 
     private void handleClient(Socket clientSocket) {
@@ -101,7 +109,7 @@ public class Server {
                         internalCommands.handleInternalCommand(command, payload, out, clientSocket, userCommands.groupService.getAllGroups(), usersWithPermissionsOnline, pendingApprovals);
                     } else {
                         userCommands.handleUserCommand(
-                                command, request, requester, payload, out,
+                                serverSocket.getInetAddress(), command, request, requester, payload, out,
                                 pendingApprovals, usersWithPermissionsOnline, userCommands.groupService.getAllGroups());
                     }
                 } else {

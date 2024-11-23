@@ -5,12 +5,18 @@ import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
+import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -21,6 +27,7 @@ import java.util.regex.Matcher;
 import static java.lang.System.out;
 import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.*;
 import static org.estg.ipp.pt.Notifications.*;
+import static org.estg.ipp.pt.Server.*;
 
 @Component
 public class ExecuteUserCommands {
@@ -30,11 +37,13 @@ public class ExecuteUserCommands {
     private LogService logService;
     @Autowired
     public GroupService groupService;
+    @Autowired
+    public MessageService messageService;
 
-    public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
+    public void handleUserCommand(InetAddress serverAddress, String command, String request, String requester, String payload, PrintWriter out,
                                   Map<String, String> pendingApprovals, Set<String> usersWithPermissionsOnline, List<Group> multicastGroups) {
 
-          /*TODO: Adicionar Comando para adicionar pessoas aos grupos personalizados*/
+        /*TODO: Adicionar Comando para adicionar pessoas aos grupos personalizados*/
         /*TODO: Adicionar comando para listar grupos que um user pode dar join */
         /*TODO: Adicionar comando para listar todos os comandos disponíveis */
         /*TODO: Adicionar comando para mandar menssagem para um utilizador especifico (/chat)*/
@@ -148,6 +157,22 @@ public class ExecuteUserCommands {
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
                 }
             }
+            case "/chat" -> {
+                Matcher chatMatcher = RegexPatternsCommands.CHAT.matcher(request);
+                if (chatMatcher.matches()) {
+                    String targetUsername = chatMatcher.group("targetUsername");
+                    String username = chatMatcher.group("username");
+                    if (targetUsername != null && !targetUsername.isEmpty()) {
+                        initiateChatSession(username, targetUsername, out, serverAddress, usersWithPermissionsOnline, pendingApprovals);
+                    } else {
+                        out.println("ERRO: Por favor, forneça o nome de usuário do destinatário. Use -h para ajuda.");
+                        logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
+                    }
+                } else {
+                    out.println("ERRO: Formato inválido para /chat. Use -h para ajuda.");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
+                }
+            }
             default -> {
                 out.println("ERRO: Comando de utilizador inválido");
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando de utilizador inválido"));
@@ -155,7 +180,77 @@ public class ExecuteUserCommands {
         }
     }
 
-    public void processExport(String request, PrintWriter out) {
+    private void initiateChatSession(String requester, String targetUsername, PrintWriter out, InetAddress serverAddress, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
+        User requesterUser = userService.getUserByName(requester);
+        User targetUser = userService.getUserByName(targetUsername);
+
+        if (requesterUser == null || targetUser == null) {
+            out.println("ERRO: Usuário não encontrado.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Usuário não encontrado para /chat."));
+            return;
+        }
+
+        Socket targetSocket = getUserSocket(targetUsername); // Retrieve target user's socket
+        if (targetSocket == null) {
+            out.println("ERRO: O destinatário não está online.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "O destinatário não está online."));
+            return;
+        }
+
+        // Simulate connection handshake
+        try {
+            int port = groupService.getAvailablePort(); // Method to get an available port
+
+            // Notify both users about the chat initiation
+            notifyUser(requester, "SUCESSO: Iniciando chat com " + targetUsername + " no endereço: " + serverAddress + ":" + port, usersWithPermissionsOnline, targetUser.getCurrentGroup(), pendingApprovals);
+            notifyUser(targetUsername, "SUCESSO: Iniciando chat com " + requester + " no endereço: " + serverAddress + ":" + port, usersWithPermissionsOnline, requesterUser.getCurrentGroup(), pendingApprovals);
+
+            // Start chat handler threads for both users
+            new Thread(() -> startTwoClientChatServer(port, requester, targetUsername)).start(); // Start the server for communication
+            out.println("SUCESSO: Chat iniciado. Conecte-se ao endereço: " + serverAddress + ":" + port);
+
+        } catch (IOException e) {
+            out.println("ERRO: Não foi possível iniciar o chat.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Erro ao iniciar o chat: " + e.getMessage()));
+        }
+    }
+
+    private void startTwoClientChatServer(int port, String requester, String targetUsername) {
+        try (ServerSocket chatServerSocket = new ServerSocket(port)) {
+            System.out.println("Chat server iniciado na porta " + port);
+
+            // Accept connections from the two clients
+            Socket client1 = chatServerSocket.accept(); // First user connects
+            Socket client2 = chatServerSocket.accept(); // Second user connects
+
+            // Start threads to handle communication and save messages
+            new Thread(() -> handleTwoClientCommunication(client1, client2, requester, targetUsername)).start();
+            new Thread(() -> handleTwoClientCommunication(client2, client1, targetUsername, requester)).start();
+
+        } catch (IOException e) {
+            System.err.println("Erro ao iniciar o servidor de chat: " + e.getMessage());
+        }
+    }
+
+    private void handleTwoClientCommunication(Socket fromClient, Socket toClient, String sender, String receiver) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(fromClient.getInputStream()));
+             PrintWriter out = new PrintWriter(toClient.getOutputStream(), true)) {
+
+            String message;
+            while ((message = in.readLine()) != null) {
+                // Save the message to the database
+                Message chatMessage = new Message(sender, receiver, message, LocalDateTime.now());
+                messageService.saveMessage(chatMessage);
+
+                // Forward the message to the other client
+                out.println(message);
+            }
+        } catch (IOException e) {
+            System.err.println("Erro na comunicação do cliente: " + e.getMessage());
+        }
+    }
+
+    private void processExport(String request, PrintWriter out) {
         Matcher exportMatcher = RegexPatternsCommands.EXPORT.matcher(request);
 
         if (exportMatcher.matches()) { // Check if the matcher found a match
@@ -239,7 +334,7 @@ public class ExecuteUserCommands {
 
         /*TODO: Verificar permissões*/
         //if (!groupService.isUserInGroup(name, user.getId())) {
-           // groupService.addUserToGroup(name, user);
+        // groupService.addUserToGroup(name, user);
 
         // Buscar o grupo com os parâmetros fornecidos
         Group group = groupService.getUserGroupByNameAndVerify(user.getId(), name); // Método para buscar o grupo
@@ -286,7 +381,7 @@ public class ExecuteUserCommands {
             return;
         }
 
-        if(!publicOrPrivate.equalsIgnoreCase("public") && !publicOrPrivate.equalsIgnoreCase("private")) {
+        if (!publicOrPrivate.equalsIgnoreCase("public") && !publicOrPrivate.equalsIgnoreCase("private")) {
             out.println("Verifique se o tipo de grupo está public ou private");
             return;
         }

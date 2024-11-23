@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
@@ -220,5 +222,12 @@ public class GroupService {
             }
         }
         throw new RuntimeException("Não há portas disponíveis.");
+    }
+
+    public int getAvailablePort() throws IOException {
+        try (ServerSocket tempSocket = new ServerSocket(0)) { // Bind to an available port
+            tempSocket.setReuseAddress(true);
+            return tempSocket.getLocalPort(); // Return the port number
+        }
     }
 }

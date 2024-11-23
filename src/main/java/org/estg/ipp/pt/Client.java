@@ -69,7 +69,6 @@ public class Client {
                             if (matcher.find()) {
                                 String groupAddress = matcher.group(1);
                                 int port = Integer.parseInt(matcher.group(2));
-
                                 boolean returnToMenu = GroupChat.startChat(groupAddress, port, usernameOrEmail);
 
                                 if (!returnToMenu) {
@@ -92,4 +91,5 @@ public class Client {
         }
     }
 }
+
 
