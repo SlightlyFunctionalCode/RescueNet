@@ -15,6 +15,7 @@ public class Group {
     private String name;
     private String address;
     private String port;
+    private Long createdBy;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -52,6 +53,13 @@ public class Group {
         this.port = port;
     }
 
+    public Long getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
 
     public List<User> getUsers() {
         return users;

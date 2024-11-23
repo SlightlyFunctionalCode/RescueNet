@@ -59,6 +59,7 @@ public class UserService {
         return 1;
     }
 
+    /* TODO: Melhorar o método*/
     /**
      * Authenticates a user by username or email and password.
      *

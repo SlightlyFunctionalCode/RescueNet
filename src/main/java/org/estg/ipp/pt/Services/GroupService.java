@@ -126,7 +126,7 @@ public class GroupService {
         return group.getUsers().contains(user);
     }
 
-    public Group addCustomGroup(String name, String address, String port) {
+    public Group addCustomGroup(Long id, String name, String address, String port) {
         // Verifica se já existe um grupo com o mesmo nome, endereço ou porta
         boolean groupExists = groupRepository.findAll().stream().anyMatch(group ->
                 group.getName().equalsIgnoreCase(name) ||
@@ -143,6 +143,7 @@ public class GroupService {
         newGroup.setName(name);
         newGroup.setAddress(address);
         newGroup.setPort(port);
+        newGroup.setCreatedBy(id);
 
         // Salvar o grupo no repositório
         Group savedGroup = groupRepository.save(newGroup);

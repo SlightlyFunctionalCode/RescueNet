@@ -1,6 +1,5 @@
 package org.estg.ipp.pt.Services;
 
-import jdk.swing.interop.SwingInterOpUtils;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 
 import java.io.BufferedReader;
@@ -15,7 +14,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Chat {
+public class GroupChat {
     private static volatile boolean running = true; // Sinalizador de execução
 
     public static boolean startChat(String groupAddress, int port, String name) throws IOException {

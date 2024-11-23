@@ -107,16 +107,17 @@ public class ExecuteInternalCommands {
             return "FAILED: Usuário inválido!";
         }
 
+        String username = user.getName();
         // Após login bem-sucedido, armazenar o socket e verificar permissões
-        userSockets.put(usernameOrEmail, clientSocket);
+        userSockets.put(username, clientSocket);
 
         if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {
-            usersWithPermissionsOnline.add(usernameOrEmail);
+            usersWithPermissionsOnline.add(username);
             // Enviar notificações para pedidos pendentes
             for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
                 String requestingUser = entry.getKey();
                 String operationName = entry.getValue();
-                notifyUser(usernameOrEmail, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, groupList);
+                notifyUser(username, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.", usersWithPermissionsOnline, groupList);
             }
         }
         if (user.getGroups().isEmpty()) {

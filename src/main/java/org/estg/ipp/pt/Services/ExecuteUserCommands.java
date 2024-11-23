@@ -33,8 +33,12 @@ public class ExecuteUserCommands {
     public GroupService groupService;
 
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
-                                  Map<String, String> pendingApprovals,
-                                  Set<String> usersWithPermissionsOnline, List<Group> multicastGroups) {
+                                  Map<String, String> pendingApprovals, Set<String> usersWithPermissionsOnline, List<Group> multicastGroups) {
+
+          /*TODO: Adicionar Comando para adicionar pessoas aos grupos personalizados*/
+        /*TODO: Adicionar comando para listar grupos que um user pode dar join */
+        /*TODO: Adicionar comando para listar todos os comandos disponíveis */
+        /*TODO: Adicionar comando para mandar menssagem para um utilizador especifico (/chat)*/
         switch (command) {
             case "/evac", "/resdist", "/emerg" ->
                     processOperationCommand(payload, command, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
@@ -252,7 +256,7 @@ public class ExecuteUserCommands {
 
         // Agora, permitir que o usuário entre no chat
         try {
-            Chat.startChat(group.getAddress(), Integer.parseInt(group.getPort()), username); // Chama o método para iniciar o chat multicast
+            GroupChat.startChat(group.getAddress(), Integer.parseInt(group.getPort()), username); // Chama o método para iniciar o chat multicast
         } catch (IOException e) {
             out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
         }
@@ -281,7 +285,7 @@ public class ExecuteUserCommands {
         }
 
         try {
-            Group newGroup = groupService.addCustomGroup(name, address, port);
+            Group newGroup = groupService.addCustomGroup(userWithPermissions.getId(), name, address, port);
             if (newGroup == null) {
                 out.println("ERRO: Grupo não pode ser criado");
             } else {
@@ -351,6 +355,7 @@ public class ExecuteUserCommands {
         }
 
         String operationName = pendingApprovals.remove(requester);
+
 
         if (action.equals("/approve")) {
             sendNotificationToGroups("Comando executado: " + operationName + " (por " + username + ")", multicastGroups);
