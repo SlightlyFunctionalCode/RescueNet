@@ -5,6 +5,7 @@ import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Services.GroupService;
 import org.estg.ipp.pt.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,7 +28,7 @@ public class Notifications {
                 InetAddress groupAddress = InetAddress.getByName(group.getAddress());
                 byte[] msg = message.getBytes();
 
-                DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, Integer.parseInt(group.getPort()));
+                DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, group.getPort());
                 socket.send(packet);
 
                 System.out.println("Enviando notificação para " + group.getAddress() + ":" + group.getPort() + " - " + message);
@@ -48,7 +49,7 @@ public class Notifications {
             InetAddress groupAddress = InetAddress.getByName(group.getAddress());
             byte[] msg = message.getBytes();
 
-            DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, Integer.parseInt(group.getPort()));
+            DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, group.getPort());
             socket.send(packet);
 
             System.out.println("Enviando notificação para " + group.getAddress() + ":" + group.getPort() + " - " + message);
@@ -80,7 +81,7 @@ public class Notifications {
     }
 
     public static void notifyUser(String username, String message, Set<String> usersWithPermissionsOnline,
-                                  List<Group> groups) {
+                                  Group group, Map<String, String> pendingApprovals) {
         // Log para debug
         System.out.println("Tentando notificar " + username + ": " + message);
 
@@ -91,13 +92,13 @@ public class Notifications {
 
             // Enviar a mensagem para o chat ou algum outro mecanismo de comunicação
             // Supondo que você tenha algum serviço de mensagens, como um chat
-            sendNotificationToGroupHIGH_LEVEL(message, groups.get(2));
+            sendNotificationToGroupHIGH_LEVEL(message, group);
         } else {
             // Se o usuário não está online, você pode decidir se ainda assim quer registrar a notificação
             System.out.println("Utilizador não está online, aguardando conexão...");
             // Aqui você pode salvar a notificação em algum local de espera ou log, se necessário
             // Exemplo:
-            saveNotificationForLater(username, message);
+            saveNotificationForLater(username, message, pendingApprovals);
         }
     }
 
@@ -133,10 +134,11 @@ public class Notifications {
             String fullMessage = "USER: " + username + " " + message; // Prefixa com o nome do destinatário
 
             User user = userService.getUserByName(username);
+
             Group group_user = new Group();
-            groupService.getUserGroupByName(user.getId(), user.getGroups().get(0).getName());
+            groupService.getUserGroupByNameAndVerify(user.getId(), user.getCurrentGroup().getName());
             String groupAddress = group_user.getAddress();
-            String port = group_user.getPort();
+            int port = group_user.getPort();
 
             // Criando o socket multicast para enviar a mensagem para o grupo
             InetAddress group = InetAddress.getByName(groupAddress);
@@ -145,7 +147,7 @@ public class Notifications {
             socket.joinGroup(group);
 
             byte[] buffer = fullMessage.getBytes();
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, Integer.parseInt(port));
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
 
             socket.send(packet);
             socket.leaveGroup(group);

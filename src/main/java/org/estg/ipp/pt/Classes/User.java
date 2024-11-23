@@ -19,8 +19,10 @@ public class User {
     private Permissions permission;
     private String password;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Group> groups = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "current_group_id")  // Define o nome da coluna da FK na tabela de usuários
+    private Group currentGroup;
+
 
     // Getters e setters
     // Construtor para inicialização
@@ -61,11 +63,11 @@ public class User {
         this.password = password;
     }
 
-    public List<Group> getGroups() {
-        return groups;
+    public Group getCurrentGroup() {
+        return currentGroup;
     }
 
-    public void setGroups(List<Group> groups) {
-        this.groups = groups;
+    public void setCurrentGroup(Group currentGroup) {
+        this.currentGroup = currentGroup;
     }
 }

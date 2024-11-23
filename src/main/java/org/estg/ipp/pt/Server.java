@@ -40,8 +40,8 @@ public class Server {
     private ExecuteUserCommands userCommands;
 
 
-    public static final Map<String, String> pendingApprovals = new HashMap<>();
-    public static final Set<String> usersWithPermissionsOnline = new HashSet<>();
+    public final Map<String, String> pendingApprovals = new HashMap<>();
+    public final Set<String> usersWithPermissionsOnline = new HashSet<>();
     public static final Map<String, Socket> userSockets = new HashMap<>();
 
     @Autowired
@@ -98,7 +98,7 @@ public class Server {
                     System.out.println(payload);
                     // Delegar o comando à classe correta
                     if (internalCommands.isInternalCommand(command)) {
-                        internalCommands.handleInternalCommand(command, payload, out, clientSocket, userCommands.groupService.getAllGroups());
+                        internalCommands.handleInternalCommand(command, payload, out, clientSocket, userCommands.groupService.getAllGroups(), usersWithPermissionsOnline, pendingApprovals);
                     } else {
                         userCommands.handleUserCommand(
                                 command, request, requester, payload, out,

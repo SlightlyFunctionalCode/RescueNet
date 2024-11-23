@@ -1,6 +1,7 @@
 package org.estg.ipp.pt.Services;
 
 import org.estg.ipp.pt.Classes.Enum.Permissions;
+import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Repositories.UserRepository;
 import org.hibernate.Hibernate;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Permission;
 import java.util.Optional;
 
 @Service
@@ -67,7 +69,6 @@ public class UserService {
      * @param password        The password to validate.
      * @return The authenticated user, or null if authentication fails.
      */
-    @Transactional
     public User authenticate(String usernameOrEmail, String password) {
         // Find user by name
         Optional<User> userOptional = userRepository.findByName(usernameOrEmail);
@@ -83,7 +84,6 @@ public class UserService {
             // Check if the provided password matches the stored password
             if (passwordEncoder.matches(password, user.getPassword())) {
                 System.out.println("Authentication successful");
-                Hibernate.initialize(user.getGroups());
                 return user;
             } else {
                 System.out.println("Invalid password");
@@ -97,6 +97,22 @@ public class UserService {
     public User getUserByName(String username) {
         Optional<User> user = userRepository.findByName(username);
         return user.orElse(null);
+    }
+
+    public void joinGroup(User user, Group group) {
+        // Verifica se o usuário já pertence ao grupo
+        if (user.getCurrentGroup() != null && user.getCurrentGroup().getId().equals(group.getId())) {
+            throw new IllegalArgumentException("Usuário já pertence ao grupo " + group.getName());
+        }
+
+        // Atualiza o grupo atual do usuário
+        user.setCurrentGroup(group);
+
+        // Adiciona qualquer outra lógica ou ajuste que você precise fazer quando o usuário entrar no grupo
+        // Exemplo: Atribuir permissões, inicializar configurações, etc.
+
+        // O usuário precisa ser salvo, então chama-se o método de persistência aqui
+        userRepository.save(user);  // O save do repositório será chamado no final para persistir as mudanças
     }
 
     /**
@@ -113,11 +129,18 @@ public class UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
+            Permissions previousPermission = user.getPermissions();
             // Atualizar as permissões
             user.setPermissions(newPermissions);
 
             // Salvar as alterações no banco de dados
             userRepository.save(user);
+
+            if (newPermissions.compareTo(previousPermission) < 0) {
+                // Filtrar grupos privados que exigem certo nível de permissões
+
+            }
+
 
             System.out.println("Permissões do usuário atualizadas com sucesso.");
             return true;

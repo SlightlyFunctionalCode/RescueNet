@@ -1,6 +1,7 @@
 package org.estg.ipp.pt.Classes;
 
 import jakarta.persistence.*;
+import org.estg.ipp.pt.Classes.Enum.Permissions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,9 @@ public class Group {
 
     private String name;
     private String address;
-    private String port;
+    private int port;
+    private boolean isPublic;
+    private Permissions requiredPermissions;
     private Long createdBy;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -45,11 +48,11 @@ public class Group {
         this.address = address;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
@@ -67,5 +70,25 @@ public class Group {
 
     public void setUsers(List<User> users) {
         this.users = users;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean aPublic) {
+        isPublic = aPublic;
+    }
+
+    public Permissions getRequiredPermissions() {
+        return requiredPermissions;
+    }
+
+    public void setRequiredPermissions(Permissions requiredPermissions) {
+        this.requiredPermissions = requiredPermissions;
     }
 }

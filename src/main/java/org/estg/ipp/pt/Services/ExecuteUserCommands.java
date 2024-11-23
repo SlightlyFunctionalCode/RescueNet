@@ -21,7 +21,6 @@ import java.util.regex.Matcher;
 import static java.lang.System.out;
 import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.*;
 import static org.estg.ipp.pt.Notifications.*;
-import static org.estg.ipp.pt.Server.pendingApprovals;
 
 @Component
 public class ExecuteUserCommands {
@@ -134,13 +133,12 @@ public class ExecuteUserCommands {
                 if (createGroupMatcher.matches()) {
                     String help = createGroupMatcher.group("help");
                     String name = createGroupMatcher.group("name");
-                    String address = createGroupMatcher.group("address");
-                    String port = createGroupMatcher.group("port");
+                    String publicOrPrivate = createGroupMatcher.group("publicOrPrivate");
 
                     if (help != null) {
                         out.println(CREATE_GROUP_HELP);
-                    } else if (name != null && address != null && port != null) {
-                        processCreateGroupCommand(payload, name, address, port, out);
+                    } else if (name != null && publicOrPrivate != null) {
+                        processCreateGroupCommand(payload, name, publicOrPrivate, out);
                     } else {
                         out.println("ERRO: Formato inválido para /create_group. Use -h para descobrir os parâmetros");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
@@ -240,13 +238,11 @@ public class ExecuteUserCommands {
         }
 
         /*TODO: Verificar permissões*/
-        if (!groupService.isUserInGroup(name, user.getId())) {
-            groupService.addUserToGroup(name, user);
-        } else {
-            System.out.println("utilizador já pertence ao grupo");
-        }
+        //if (!groupService.isUserInGroup(name, user.getId())) {
+           // groupService.addUserToGroup(name, user);
+
         // Buscar o grupo com os parâmetros fornecidos
-        Group group = groupService.getUserGroupByName(user.getId(), name); // Método para buscar o grupo
+        Group group = groupService.getUserGroupByNameAndVerify(user.getId(), name); // Método para buscar o grupo
         if (group == null) {
             out.println("ERRO: Grupo não encontrado");
             return;
@@ -254,9 +250,15 @@ public class ExecuteUserCommands {
 
         out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
 
+        try {
+            userService.joinGroup(user, group);
+        } catch (IllegalArgumentException e) {
+            out.println("ERRO: " + e.getMessage());
+            return;
+        }
         // Agora, permitir que o usuário entre no chat
         try {
-            GroupChat.startChat(group.getAddress(), Integer.parseInt(group.getPort()), username); // Chama o método para iniciar o chat multicast
+            GroupChat.startChat(group.getAddress(), group.getPort(), username); // Chama o método para iniciar o chat multicast
         } catch (IOException e) {
             out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
         }
@@ -277,15 +279,20 @@ public class ExecuteUserCommands {
         }
     }
 
-    private void processCreateGroupCommand(String username, String name, String address, String port, PrintWriter out) {
+    private void processCreateGroupCommand(String username, String name, String publicOrPrivate, PrintWriter out) {
         User userWithPermissions = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
         if (userWithPermissions == null) {
             out.println("ERRO: Usuário não encontrado");
             return;
         }
 
+        if(!publicOrPrivate.equalsIgnoreCase("public") && !publicOrPrivate.equalsIgnoreCase("private")) {
+            out.println("Verifique se o tipo de grupo está public ou private");
+            return;
+        }
+
         try {
-            Group newGroup = groupService.addCustomGroup(userWithPermissions.getId(), name, address, port);
+            Group newGroup = groupService.addCustomGroup(userWithPermissions.getId(), name, publicOrPrivate);
             if (newGroup == null) {
                 out.println("ERRO: Grupo não pode ser criado");
             } else {
@@ -326,15 +333,16 @@ public class ExecuteUserCommands {
             out.println("SUCESSO: Operação realizada.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Comando executado: \" + operation.getName() + \" (por \" + username + \")\""));
         } else {
+            pendingApprovals.put(username, operation.getName());
             if (usersWithPermissionsOnline.isEmpty()) {
-                pendingApprovals.put(username, operationName);  // Salva a solicitação
                 out.println("PENDENTE: Solicitação enviada para aprovação.");
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
 
-                sendNotificationToUserInGroup(username, "PENDENTE: Solicitação enviada para aprovação.", usersWithPermissionsOnline, userService, groupService);
+                notifyUser(username, "PENDENTE: Solicitação enviada para aprovação.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
             } else {
                 for (String approver : usersWithPermissionsOnline) {
-                    notifyUser(approver, "Solicitação para aprovação do comando'" + operationName + "'por" + username, usersWithPermissionsOnline, multicastGroups);
+                    User approverUser = userService.getUserByName(approver);
+                    notifyUser(approver, "Solicitação para aprovação do comando '" + operation + "' por " + username, usersWithPermissionsOnline, approverUser.getCurrentGroup(), pendingApprovals);
                 }
                 out.println("PENDENTE: Solicitação enviada para aprovação.");
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
@@ -346,8 +354,9 @@ public class ExecuteUserCommands {
                                        Map<String, String> pendingApprovals,
                                        Set<String> usersWithPermissionsOnline,
                                        List<Group> multicastGroups) {
+        User user = userService.getUserByName(requester);
         if (!pendingApprovals.containsKey(requester)) {
-            notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, multicastGroups);
+            notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
             out.println("ERRO: Comando desconhecido.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
 
@@ -359,23 +368,23 @@ public class ExecuteUserCommands {
 
         if (action.equals("/approve")) {
             sendNotificationToGroups("Comando executado: " + operationName + " (por " + username + ")", multicastGroups);
-            notifyUser(requester, "SUCESSO: Sua solicitação de operação foi aprovada.", usersWithPermissionsOnline, multicastGroups);
+            notifyUser(requester, "SUCESSO: Sua solicitação de operação foi aprovada.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
             out.println("APPROVE: Aprovado com sucesso");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Comando executado: " + operationName + " (por " + username + ")"));
 
         } else if (action.equals("/reject")) {
-            notifyUser(requester, "ERRO: Sua solicitação de operação foi rejeitada.", usersWithPermissionsOnline, multicastGroups);
-            notifyUser(username, "SUCESSO: Operação rejeitada.", usersWithPermissionsOnline, multicastGroups);
+            notifyUser(requester, "ERRO: Sua solicitação de operação foi rejeitada.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
+            notifyUser(username, "SUCESSO: Operação rejeitada.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
             out.println("Reject: Rejectado com sucesso");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação rejeitada."));
         } else {
-            notifyUser(username, "ERRO: Comando desconhecido. Use APPROVE ou REJECT.", usersWithPermissionsOnline, multicastGroups);
+            notifyUser(username, "ERRO: Comando desconhecido. Use APPROVE ou REJECT.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
             out.println("ERRO: Comando desconhecido.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
         }
     }
 
-    public static void saveNotificationForLater(String username, String message) {
+    public static void saveNotificationForLater(String username, String message, Map<String, String> pendingApprovals) {
         // Aqui você poderia salvar as notificações que não puderam ser enviadas
         // Exemplo: armazenar em uma tabela no banco de dados ou em uma lista temporária
         out.println("Notificação salva para " + username + ": " + message);

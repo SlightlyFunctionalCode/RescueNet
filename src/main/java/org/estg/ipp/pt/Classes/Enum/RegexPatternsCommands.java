@@ -10,7 +10,7 @@ public enum RegexPatternsCommands {
     REQUEST("^(?<command>/\\w+|\\w+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$"),
     JOIN("^/join(?:\\s(?<help>-h))?(?:\\s(?<name>.+))?:(?<requester>.+)$"),
     CHANGE_PERMISSIONS("^/change_permission(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<permission>.+))?:(?<requester>.+)$"),
-    CREATE_GROUP("^/create_group(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<address>.+)\\s(?<port>.+))?:(?<requester>.+)$");
+    CREATE_GROUP("^/create_group(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<publicOrPrivate>.+))?:(?<requester>.+)$");
 
     private final Pattern pattern;
 
