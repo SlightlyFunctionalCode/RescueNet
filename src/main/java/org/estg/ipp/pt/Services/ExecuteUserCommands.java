@@ -170,20 +170,34 @@ public class ExecuteUserCommands {
 
                         Socket receiver = Server.getUserSocket(targetUsername);
 
-                        ServerSocket privateServerSocket = null; // 0 means any available port
+                        ServerSocket privateServerSocket = null;
+
                         try {
-                            privateServerSocket = new ServerSocket(0);
+                            privateServerSocket = new ServerSocket(0);  // Create a ServerSocket to listen on an available port
+                            int privatePort = privateServerSocket.getLocalPort(); // Get the dynamically assigned port
+                            System.out.println("Private chat will use port: " + privatePort);
+
+                            // Notify both parties about the same connection details
+                            String connectionInfo = sender.getInetAddress().getHostAddress() + ":" + privatePort;
+                            out.println("CHAT_START:" + connectionInfo);  // Notify the sender
+                            notifyUser(targetUsername, "CHAT_REQUEST:" + connectionInfo, usersWithPermissionsOnline, targetUser.getCurrentGroup(), pendingApprovals);
+
+                            // Wait for the receiver to connect to this privateServerSocket
+                            sender = privateServerSocket.accept();  // Wait for the receiver to connect
+                            System.out.println("Sender connected on port: " + privatePort);
+
+                            receiver = privateServerSocket.accept();
+                            System.out.println("Receiver connected on port: " + privatePort);
+
+                            // Start a thread to handle the private chat
+                            Socket finalReceiverSocket = receiver;
+                            Socket finalSenderSocket = sender;
+                            ServerSocket finalPrivateServerSocket = privateServerSocket;
+                            new Thread(() -> handlePrivateChat(finalSenderSocket, finalReceiverSocket, finalPrivateServerSocket)).start();
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            System.err.println("Error creating server socket for private chat: " + e.getMessage());
+                            out.println("ERRO: Could not create private chat server.");
                         }
-                        int privatePort = privateServerSocket.getLocalPort(); // Get the dynamically assigned por
-
-                        // Notify both sender and recipient with connection details
-                        String senderInfo = sender.getInetAddress().getHostAddress() + ":" + privatePort;
-                        String recipientInfo = receiver.getInetAddress().getHostAddress() + ":" + privatePort;
-
-                        out.println("CHAT_START:" + recipientInfo); // Notify sender
-                        notifyUser(targetUsername, "CHAT_REQUEST:" + senderInfo, usersWithPermissionsOnline, targetUser.getCurrentGroup(), pendingApprovals); // Notify recipient
                     } else {
                         out.println("ERRO: Por favor, forneça o nome de utilizador do destinatário. Use -h para ajuda.");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
@@ -196,6 +210,61 @@ public class ExecuteUserCommands {
             }
         }
     }
+
+    private void handlePrivateChat(Socket senderSocket, Socket receiverSocket, ServerSocket privateServerSocket) {
+        try { // Wait for the receiver to connect
+            BufferedReader senderIn = new BufferedReader(new InputStreamReader(senderSocket.getInputStream()));
+            PrintWriter senderOut = new PrintWriter(senderSocket.getOutputStream(), true);
+            BufferedReader receiverIn = new BufferedReader(new InputStreamReader(receiverSocket.getInputStream()));
+            PrintWriter receiverOut = new PrintWriter(receiverSocket.getOutputStream(), true);
+
+            System.out.println("Private chat connection established between sender and receiver.");
+
+            // Threads for bidirectional communication
+            Thread senderToReceiver = new Thread(() -> {
+                try {
+                    String message;
+                    while ((message = senderIn.readLine()) != null) {
+                        System.out.println("Sender: " + message);
+                        receiverOut.println(message);  // Forward to receiver
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error forwarding message from sender to receiver: " + e.getMessage());
+                }
+            });
+
+            Thread receiverToSender = new Thread(() -> {
+                try {
+                    String message;
+                    while ((message = receiverIn.readLine()) != null) {
+                        System.out.println("Receiver: " + message);
+                        senderOut.println(message);  // Forward to sender
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error forwarding message from receiver to sender: " + e.getMessage());
+                }
+            });
+
+            // Start the threads
+            senderToReceiver.start();
+            receiverToSender.start();
+
+            // Wait for threads to finish
+            senderToReceiver.join();
+            receiverToSender.join();
+
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error handling private chat: " + e.getMessage());
+        } finally {
+            try {
+                privateServerSocket.close();  // Close the server socket after chat ends
+                senderSocket.close();         // Close sender's socket
+            } catch (IOException e) {
+                System.err.println("Error closing sockets: " + e.getMessage());
+            }
+        }
+    }
+
 
     private void processExport(String request, PrintWriter out) {
         Matcher exportMatcher = RegexPatternsCommands.EXPORT.matcher(request);
