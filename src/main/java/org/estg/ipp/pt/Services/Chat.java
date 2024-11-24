@@ -14,7 +14,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class GroupChat {
+public class Chat {
     private static volatile boolean running = true; // Sinalizador de execução
 
     public static boolean startChat(String groupAddress, int port, String name) throws IOException {
@@ -38,6 +38,21 @@ public class GroupChat {
                     } else if (RegexPatterns.NOTIFICATION.matcher(received).matches()) {
                         System.out.println("⚠️ " +
                                 RegexPatterns.NOTIFICATION.matcher(received).replaceFirst("$1").trim());
+                    } else if (received.startsWith("CHAT_REQUEST")) {
+                        String[] parts = received.split(":");
+                        String _address = parts[1];
+                        String _port = parts[2];
+
+                        System.out.println("Chat request received from: " + _address + ":" + _port);
+                        System.out.print("Type 'yes' to accept or 'no' to decline: ");
+
+                        Scanner scanner = new Scanner(System.in);
+                        String response = scanner.nextLine();
+                        if (response.equalsIgnoreCase("yes")) {
+                            startPrivateChat(_address, _port, name);
+                        } else {
+                            System.out.println("Chat request declined.");
+                        }
                     } else {
                         System.out.println(received);
                     }
@@ -95,35 +110,68 @@ public class GroupChat {
                             if (line.equals("--END HELP--")) break;
                             System.out.println(line);
                         }
+                    } else if (serverResponse.startsWith("CHAT_START")) {
+                        String[] parts = serverResponse.split(":");
+                        String _address = parts[1];
+                        String _port = parts[2];
+                        startPrivateChat(_address, _port, name); // Initiate private chat
                     } else {
                         System.out.println(serverResponse);
                     }
                 } catch (NullPointerException | IOException e) {
                     System.err.println("Erro ao comunicar com o servidor: " + e.getMessage());
                 }
-            } else {
-                Pattern sendToPattern = Pattern.compile("^SEND TO:(.*)");
-
-                Matcher sendToMatcher = sendToPattern.matcher(msg);
-                if (sendToMatcher.find()) {
-                    String targetUser = RegexPatterns.SEND_TO.matcher(msg).replaceFirst("$1").trim();
-                    String fullMsg = "USER: " + targetUser + " " + name + ": " +
-                            msg.substring(("SEND TO:" + targetUser).length()).trim();
-                    byte[] buffer = fullMsg.getBytes();
-
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
-                    socket.send(packet);
-                } else {
-                    String fullMsg = name + ": " + msg;
-                    byte[] buffer = fullMsg.getBytes();
-
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
-                    socket.send(packet);
-                }
             }
+
         }
-        return false;
+        return true;
+    }
+
+    private static void startPrivateChat(String address, String port, String name) throws IOException {
+        int _port;
+        try {
+            _port = Integer.parseInt(port);
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Invalid port number.");
+            return;
+        }
+
+        try (Socket privateSocket = new Socket(address, _port);
+             BufferedReader privateIn = new BufferedReader(new InputStreamReader(privateSocket.getInputStream()));
+             PrintWriter privateOut = new PrintWriter(privateSocket.getOutputStream(), true)) {
+
+            System.out.println("Private chat started with " + address + ":" + _port);
+
+            // Receiver thread to handle incoming messages
+            Thread receiverThread = new Thread(() -> {
+                try {
+                    String incomingMessage;
+                    while ((incomingMessage = privateIn.readLine()) != null) {
+                        System.out.println("Private message: " + incomingMessage);
+                    }
+                } catch (IOException e) {
+                    System.out.println("Private chat closed.");
+                }
+            });
+            receiverThread.start();
+
+            // Scanner for sending messages
+            Scanner scanner = new Scanner(System.in);
+            while (true) {
+                System.out.print("Your message (type 'exit' to end): ");
+                String message = scanner.nextLine();
+                if (message.equalsIgnoreCase("exit")) {
+                    break;
+                }
+                privateOut.println(name + ": " + message);
+            }
+
+            System.out.println("Exiting private chat...");
+        } catch (IOException e) {
+            System.err.println("Error in private chat with " + address + ":" + port + ": " + e.getMessage());
+        }
     }
 }
+
 
 

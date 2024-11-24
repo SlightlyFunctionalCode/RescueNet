@@ -1,7 +1,7 @@
 package org.estg.ipp.pt;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
-import org.estg.ipp.pt.Services.GroupChat;
+import org.estg.ipp.pt.Services.Chat;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.BufferedReader;
@@ -69,7 +69,7 @@ public class Client {
                             if (matcher.find()) {
                                 String groupAddress = matcher.group(1);
                                 int port = Integer.parseInt(matcher.group(2));
-                                boolean returnToMenu = GroupChat.startChat(groupAddress, port, usernameOrEmail);
+                                boolean returnToMenu = Chat.startChat(groupAddress, port, usernameOrEmail);
 
                                 if (!returnToMenu) {
                                     keepRunning = false; // Sai completamente do programa

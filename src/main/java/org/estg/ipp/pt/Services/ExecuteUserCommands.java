@@ -7,6 +7,7 @@ import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
+import org.estg.ipp.pt.Server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -163,90 +164,36 @@ public class ExecuteUserCommands {
                     String targetUsername = chatMatcher.group("targetUsername");
                     String username = chatMatcher.group("username");
                     if (targetUsername != null && !targetUsername.isEmpty()) {
-                        initiateChatSession(username, targetUsername, out, serverAddress, usersWithPermissionsOnline, pendingApprovals);
+                        Socket sender = Server.getUserSocket(username);
+
+                        User targetUser = userService.getUserByName(targetUsername);
+
+                        Socket receiver = Server.getUserSocket(targetUsername);
+
+                        ServerSocket privateServerSocket = null; // 0 means any available port
+                        try {
+                            privateServerSocket = new ServerSocket(0);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        int privatePort = privateServerSocket.getLocalPort(); // Get the dynamically assigned por
+
+                        // Notify both sender and recipient with connection details
+                        String senderInfo = sender.getInetAddress().getHostAddress() + ":" + privatePort;
+                        String recipientInfo = receiver.getInetAddress().getHostAddress() + ":" + privatePort;
+
+                        out.println("CHAT_START:" + recipientInfo); // Notify sender
+                        notifyUser(targetUsername, "CHAT_REQUEST:" + senderInfo, usersWithPermissionsOnline, targetUser.getCurrentGroup(), pendingApprovals); // Notify recipient
                     } else {
-                        out.println("ERRO: Por favor, forneça o nome de usuário do destinatário. Use -h para ajuda.");
+                        out.println("ERRO: Por favor, forneça o nome de utilizador do destinatário. Use -h para ajuda.");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
+
                     }
                 } else {
                     out.println("ERRO: Formato inválido para /chat. Use -h para ajuda.");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
                 }
             }
-            default -> {
-                out.println("ERRO: Comando de utilizador inválido");
-                logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando de utilizador inválido"));
-            }
-        }
-    }
-
-    private void initiateChatSession(String requester, String targetUsername, PrintWriter out, InetAddress serverAddress, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
-        User requesterUser = userService.getUserByName(requester);
-        User targetUser = userService.getUserByName(targetUsername);
-
-        if (requesterUser == null || targetUser == null) {
-            out.println("ERRO: Usuário não encontrado.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Usuário não encontrado para /chat."));
-            return;
-        }
-
-        Socket targetSocket = getUserSocket(targetUsername); // Retrieve target user's socket
-        if (targetSocket == null) {
-            out.println("ERRO: O destinatário não está online.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "O destinatário não está online."));
-            return;
-        }
-
-        // Simulate connection handshake
-        try {
-            int port = groupService.getAvailablePort(); // Method to get an available port
-
-            // Notify both users about the chat initiation
-            notifyUser(requester, "SUCESSO: Iniciando chat com " + targetUsername + " no endereço: " + serverAddress + ":" + port, usersWithPermissionsOnline, targetUser.getCurrentGroup(), pendingApprovals);
-            notifyUser(targetUsername, "SUCESSO: Iniciando chat com " + requester + " no endereço: " + serverAddress + ":" + port, usersWithPermissionsOnline, requesterUser.getCurrentGroup(), pendingApprovals);
-
-            // Start chat handler threads for both users
-            new Thread(() -> startTwoClientChatServer(port, requester, targetUsername)).start(); // Start the server for communication
-            out.println("SUCESSO: Chat iniciado. Conecte-se ao endereço: " + serverAddress + ":" + port);
-
-        } catch (IOException e) {
-            out.println("ERRO: Não foi possível iniciar o chat.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Erro ao iniciar o chat: " + e.getMessage()));
-        }
-    }
-
-    private void startTwoClientChatServer(int port, String requester, String targetUsername) {
-        try (ServerSocket chatServerSocket = new ServerSocket(port)) {
-            System.out.println("Chat server iniciado na porta " + port);
-
-            // Accept connections from the two clients
-            Socket client1 = chatServerSocket.accept(); // First user connects
-            Socket client2 = chatServerSocket.accept(); // Second user connects
-
-            // Start threads to handle communication and save messages
-            new Thread(() -> handleTwoClientCommunication(client1, client2, requester, targetUsername)).start();
-            new Thread(() -> handleTwoClientCommunication(client2, client1, targetUsername, requester)).start();
-
-        } catch (IOException e) {
-            System.err.println("Erro ao iniciar o servidor de chat: " + e.getMessage());
-        }
-    }
-
-    private void handleTwoClientCommunication(Socket fromClient, Socket toClient, String sender, String receiver) {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(fromClient.getInputStream()));
-             PrintWriter out = new PrintWriter(toClient.getOutputStream(), true)) {
-
-            String message;
-            while ((message = in.readLine()) != null) {
-                // Save the message to the database
-                Message chatMessage = new Message(sender, receiver, message, LocalDateTime.now());
-                messageService.saveMessage(chatMessage);
-
-                // Forward the message to the other client
-                out.println(message);
-            }
-        } catch (IOException e) {
-            System.err.println("Erro na comunicação do cliente: " + e.getMessage());
         }
     }
 
@@ -353,7 +300,7 @@ public class ExecuteUserCommands {
         }
         // Agora, permitir que o usuário entre no chat
         try {
-            GroupChat.startChat(group.getAddress(), group.getPort(), username); // Chama o método para iniciar o chat multicast
+            Chat.startChat(group.getAddress(), group.getPort(), username); // Chama o método para iniciar o chat multicast
         } catch (IOException e) {
             out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
         }
