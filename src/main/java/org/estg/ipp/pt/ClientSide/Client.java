@@ -1,6 +1,11 @@
-package org.estg.ipp.pt;
+package org.estg.ipp.pt.ClientSide;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
+import org.estg.ipp.pt.ClientSide.Classes.DefaultCommandHandler;
+import org.estg.ipp.pt.ClientSide.Classes.DefaultMessageHandler;
+import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
+import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
+import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
 import org.estg.ipp.pt.Services.Chat;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -16,6 +21,7 @@ import java.util.regex.Matcher;
 public class Client {
 
     public static void main(String[] args) throws IOException {
+        //String serverAddress = "26.253.125.100";
         String serverAddress = "localhost";
         int serverPort = 5000;
 
@@ -69,11 +75,15 @@ public class Client {
                             if (matcher.find()) {
                                 String groupAddress = matcher.group(1);
                                 int port = Integer.parseInt(matcher.group(2));
-                                boolean returnToMenu = Chat.startChat(groupAddress, port, usernameOrEmail);
 
-                                if (!returnToMenu) {
-                                    keepRunning = false; // Sai completamente do programa
-                                }
+                                MessageHandler messageHandler = new DefaultMessageHandler(null);
+                                CommandHandler commandHandler = new DefaultCommandHandler(null, serverAddress);
+
+                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, messageHandler, commandHandler);
+                                ((DefaultMessageHandler) messageHandler).setChatService(chatService);
+                                ((DefaultCommandHandler) commandHandler).setChatService(chatService);
+
+                                chatService.startChat(groupAddress, port, usernameOrEmail);
                             }
                         } else if (RegexPatterns.LOGIN_FAILED.matches(response)) {
                             System.out.println("Falha ao iniciar sessão. Verifique suas credenciais.");

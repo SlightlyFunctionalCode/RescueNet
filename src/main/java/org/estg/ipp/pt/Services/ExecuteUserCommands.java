@@ -5,7 +5,6 @@ import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
-import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Server;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,6 @@ import java.util.regex.Matcher;
 import static java.lang.System.out;
 import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.*;
 import static org.estg.ipp.pt.Notifications.*;
-import static org.estg.ipp.pt.Server.*;
 
 @Component
 public class ExecuteUserCommands {
