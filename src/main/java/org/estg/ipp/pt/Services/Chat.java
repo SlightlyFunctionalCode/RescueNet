@@ -121,8 +121,26 @@ public class Chat {
                 } catch (NullPointerException | IOException e) {
                     System.err.println("Erro ao comunicar com o servidor: " + e.getMessage());
                 }
-            }
+            } else {
+                Pattern sendToPattern = Pattern.compile("^SEND TO:(.*)");
 
+                Matcher sendToMatcher = sendToPattern.matcher(msg);
+                if (sendToMatcher.find()) {
+                    String targetUser = RegexPatterns.SEND_TO.matcher(msg).replaceFirst("$1").trim();
+                    String fullMsg = "USER: " + targetUser + " " + name + ": " +
+                            msg.substring(("SEND TO:" + targetUser).length()).trim();
+                    byte[] buffer = fullMsg.getBytes();
+
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
+                    socket.send(packet);
+                } else {
+                    String fullMsg = name + ": " + msg;
+                    byte[] buffer = fullMsg.getBytes();
+
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
+                    socket.send(packet);
+                }
+            }
         }
         return true;
     }
@@ -160,6 +178,7 @@ public class Chat {
             while (true) {
                 System.out.print("Your message (type 'exit' to end): ");
                 String message = scanner.nextLine();
+                System.out.println("your message" + message);
                 if (message.equalsIgnoreCase("exit")) {
                     break;
                 }
