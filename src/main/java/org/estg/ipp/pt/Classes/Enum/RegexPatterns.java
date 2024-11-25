@@ -18,7 +18,8 @@ public enum RegexPatterns {
     EMAIL("^(?<email>[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})$"),               // Email validation
     LOGIN_SUCCESS("^SUCESSO:.*Grupo:\\s(?<address>[\\d\\.]+):(?<port>\\d+)$"), // Login success with address and port
     LOGIN_FAILED("^FAILED$"),                                              // Login failed
-    GENERIC_RESPONSE("^(?<status>SUCESSO|FAILED|ERROR):.*$");      // Generic server response validation
+    GENERIC_RESPONSE("^(?<status>SUCESSO|FAILED|ERROR):.*$"),   // Generic server response validation
+    READY("^(?<username>.+)$");
 
     private final Pattern pattern;
 

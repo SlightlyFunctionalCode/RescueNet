@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 
 import static java.lang.System.out;
-import static org.estg.ipp.pt.Notifications.notifyUser;
+import static org.estg.ipp.pt.Notifications.notifyGroup;
 import static org.estg.ipp.pt.Server.*;
 
 @Component
@@ -26,7 +26,7 @@ public class ExecuteInternalCommands {
     public GroupService groupService;
 
     public boolean isInternalCommand(String command) {
-        return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT");
+        return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT") || command.equals("READY");
     }
 
     public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
@@ -34,6 +34,7 @@ public class ExecuteInternalCommands {
             case "REGISTER" -> handleRegister(payload, out);
             case "LOGIN" -> handleLogin(payload, out, clientSocket, groupList, usersWithPermissionsOnline, pendingApprovals);
             case "LOGOUT" -> handleLogout(payload, out);
+            case "READY" -> handlePenddingRequest(payload, out, pendingApprovals);
             default -> out.println("ERRO: Comando interno inválido");
         }
     }
@@ -73,6 +74,7 @@ public class ExecuteInternalCommands {
     private void handleLogin(String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
         Matcher loginMatcher = RegexPatterns.LOGIN.matcher(payload);
         System.out.println("loginMatcher: " + loginMatcher);
+
         if (loginMatcher.matches()) {
             String usernameOrEmail = loginMatcher.group("username");
             String password = loginMatcher.group("password");
@@ -89,9 +91,15 @@ public class ExecuteInternalCommands {
             }
 
             String response = loginUser(usernameOrEmail, password, clientSocket, groupList,
-                    usersWithPermissionsOnline, pendingApprovals);
+                    usersWithPermissionsOnline);
             System.out.println(response);
 
+
+            /*TODO: Devo guardar junto a permissao*/
+            if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {
+                usersWithPermissionsOnline.add(user.getName());
+                System.out.println("User com permissões deu join");
+            }
             out.println(response);
 
             } else {
@@ -99,7 +107,7 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private String loginUser(String usernameOrEmail, String password, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
+    private String loginUser(String usernameOrEmail, String password, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline) {
 
         User user = userService.authenticate(usernameOrEmail, password);
 
@@ -111,24 +119,12 @@ public class ExecuteInternalCommands {
         // Após login bem-sucedido, armazenar o socket e verificar permissões
         userSockets.put(username, clientSocket);
 
-        /*TODO: Devo guardar junto a permissao*/
-        if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {
-            usersWithPermissionsOnline.add(username);
-            // Enviar notificações para pedidos pendentes
-            for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
-                String requestingUser = entry.getKey();
-                String operationName = entry.getValue();
-                notifyUser(username, "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.",
-                        usersWithPermissionsOnline, user.getCurrentGroup(),  pendingApprovals);
-            }
-        }
+        Group group = groupService.getUserGroupByNameAndVerify(user.getId(), user.getPermissions().name());
 
-        Group group = groupService.getUserGroupByNameAndVerify(user.getId(), user.getPermissions().toString());
         try {
             userService.joinGroup(user, group);
         } catch (IllegalArgumentException e) {
         }
-
         return "SUCESSO: Login realizado. Grupo: " + group.getAddress() + ":" + group.getPort();
     }
 
@@ -147,6 +143,24 @@ public class ExecuteInternalCommands {
             out.println("SUCESSO: Logout realizado");
         } else {
             out.println("ERRO: Usuário não está logado");
+        }
+    }
+
+    private void handlePenddingRequest(String payload, PrintWriter out, Map<String, String> pendingApprovals) {
+        Matcher registerMatcher = RegexPatterns.READY.matcher(payload);
+        if (registerMatcher.matches()) {
+            String username = registerMatcher.group("username");
+            User user = userService.getUserByName(username);
+            if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {
+                // Enviar notificações para pedidos pendentes
+                for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
+                    String requestingUser = entry.getKey();
+                    String operationName = entry.getValue();
+                    System.out.println(user.getCurrentGroup().getAddress());
+                    System.out.println(user.getCurrentGroup().getPort());
+                    notifyGroup(user.getCurrentGroup(), "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.");
+                }
+            }
         }
     }
 

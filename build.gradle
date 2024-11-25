@@ -26,7 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // Postgresql Connector
-    implementation 'org.postgresql:postgresql:42.7.2' // Use the latest stable version
+    implementation 'org.postgresql:postgresql:42.7.3' // Use the latest stable version
     // Spring Boot Starter Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // JWT

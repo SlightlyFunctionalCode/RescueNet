@@ -88,6 +88,7 @@ public class GroupService {
 
             // Adicionar o usuário ao grupo
             group.getUsers().add(user);
+            user.setCurrentGroup(group);
 
             // Salvar apenas o grupo (o relacionamento bidirecional será tratado automaticamente)
             groupRepository.save(group);
@@ -132,6 +133,12 @@ public class GroupService {
 
         // Verificar se o usuário pertence ao grupo
         return group.getUsers().stream().anyMatch(user -> user.getId().equals(userId));
+    }
+
+    public Group getGroupByName(String groupName) {
+
+        return groupRepository.findByName(groupName)
+                .orElseThrow(() -> new IllegalArgumentException("Grupo com nome " + groupName + " não encontrado"));
     }
 
     public Group addCustomGroup(Long id, String name, String publicOrPrivate) {

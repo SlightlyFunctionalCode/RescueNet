@@ -366,6 +366,7 @@ public class ExecuteUserCommands {
             return;
         }
         // Agora, permitir que o usuário entre no chat
+        /*Todo: mudar isto*/
         try {
             Chat.startChat(group.getAddress(), group.getPort(), username); // Chama o método para iniciar o chat multicast
         } catch (IOException e) {
@@ -413,7 +414,7 @@ public class ExecuteUserCommands {
         }
     }
 
-    private void processOperationCommand(String username, String operationName, PrintWriter out,
+    private void processOperationCommand(String username, String command, PrintWriter out,
                                          Map<String, String> pendingApprovals,
                                          Set<String> usersWithPermissionsOnline, List<Group> multicastGroups) {
         User user = userService.getUserByName(username);
@@ -423,7 +424,7 @@ public class ExecuteUserCommands {
             return;
         }
 
-        Operation operation = switch (operationName) {
+        Operation operation = switch (command) {
             case "/evac" -> new Operation("Operação de evacuação em massa", Permissions.HIGH_LEVEL);
             case "/resdist" -> new Operation("Distribuição de Recursos de Emergência", Permissions.LOW_LEVEL);
             case "/emerg" -> new Operation("Ativação de comunicações de Emergência", Permissions.MEDIUM_LEVEL);
@@ -446,18 +447,15 @@ public class ExecuteUserCommands {
             if (usersWithPermissionsOnline.isEmpty()) {
                 out.println("PENDENTE: Solicitação enviada para aprovação.");
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
-
-                notifyUser(username, "PENDENTE: Solicitação enviada para aprovação.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
             } else {
-                for (String approver : usersWithPermissionsOnline) {
-                    User approverUser = userService.getUserByName(approver);
-                    notifyUser(approver, "Solicitação para aprovação do comando '" + operation + "' por " + username, usersWithPermissionsOnline, approverUser.getCurrentGroup(), pendingApprovals);
-                }
-                out.println("PENDENTE: Solicitação enviada para aprovação.");
-                logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
+                Group group = groupService.getGroupByName(operation.getRequiredPermission().name());
+                System.out.println(group.getAddress());
+                System.out.println(group.getPort());
+                notifyGroup(group, "Pedido pendente: O usuário " + username + " solicitou a operação '" + operation.getName() + "'. Aprove ou rejeite.");
             }
         }
     }
+
 
     private void handleApprovalCommand(String action, String username, String requester, PrintWriter out,
                                        Map<String, String> pendingApprovals,

@@ -23,6 +23,13 @@ public class Chat {
         socket.joinGroup(group);
 
         running = true; // Reset do sinalizador ao iniciar o chat
+        try (Socket serverSocket = new Socket("localhost", 5000);
+             PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true)) {
+            out.println("READY:" + name);
+            System.out.println("READY enviado ao servidor");
+        } catch (IOException e) {
+            System.err.println("Erro ao notificar servidor sobre READY: " + e.getMessage());
+        }
 
         Thread receiveThread = new Thread(() -> {
             byte[] buffer = new byte[1024];
