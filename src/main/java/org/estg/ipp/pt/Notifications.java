@@ -19,27 +19,6 @@ import static org.estg.ipp.pt.Services.ExecuteUserCommands.saveNotificationForLa
 
 public class Notifications {
 
-    public static void sendNotificationToGroups(String message, List<Group> multicastGroups) {
-        try {
-            DatagramSocket socket = new DatagramSocket();
-
-            // Iterar sobre todos os grupos de multicast
-            for (Group group : multicastGroups) {
-                InetAddress groupAddress = InetAddress.getByName(group.getAddress());
-                byte[] msg = message.getBytes();
-
-                DatagramPacket packet = new DatagramPacket(msg, msg.length, groupAddress, group.getPort());
-                socket.send(packet);
-
-                System.out.println("Enviando notificação para " + group.getAddress() + ":" + group.getPort() + " - " + message);
-            }
-
-            socket.close();
-        } catch (IOException e) {
-            System.out.println("Erro ao enviar notificação: " + e.getMessage());
-        }
-    }
-
     protected static void sendNotificationToGroup(String message, Group group) {
         DatagramSocket socket;
         try {
@@ -61,7 +40,7 @@ public class Notifications {
     }
 
     public static void notifyUser(String username, String message, Set<String> usersWithPermissionsOnline,
-                                  Group group, Map<String, String> pendingApprovals) {
+                                   Map<String, String> pendingApprovals) {
         // Log para debug
         Socket socket = userSockets.get(username);
         if (socket == null || socket.isClosed()) {

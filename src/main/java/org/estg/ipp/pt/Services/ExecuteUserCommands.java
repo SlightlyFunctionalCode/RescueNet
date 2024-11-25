@@ -40,7 +40,7 @@ public class ExecuteUserCommands {
     public MessageService messageService;
 
     public void handleUserCommand(InetAddress serverAddress, String command, String request, String requester, String payload, PrintWriter out,
-                                  Map<String, String> pendingApprovals, Set<String> usersWithPermissionsOnline, List<Group> multicastGroups) {
+                                  Map<String, String> pendingApprovals, Set<String> usersWithPermissionsOnline) {
 
         /*TODO: Adicionar Comando para adicionar pessoas aos grupos personalizados*/
         /*TODO: Adicionar comando para listar grupos que um user pode dar join */
@@ -48,7 +48,7 @@ public class ExecuteUserCommands {
         /*TODO: Adicionar comando para mandar menssagem para um utilizador especifico (/chat)*/
         switch (command) {
             case "/evac", "/resdist", "/emerg" ->
-                    processOperationCommand(payload, command, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
+                    processOperationCommand(payload, command, out, pendingApprovals, usersWithPermissionsOnline);
             case "/approve" -> {
                 Matcher approveMatcher = RegexPatternsCommands.APPROVE.matcher(request);
                 if (approveMatcher.matches()) {
@@ -58,7 +58,7 @@ public class ExecuteUserCommands {
                     if (help != null) {
                         out.println(APPROVE_HELP);
                     } else if (requester != null) {
-                        handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
+                        handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline);
                     } else {
                         out.println("ERRO: Formato inválido para APPROVE. Use -h para descobrir os parâmetros");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para APPROVE"));
@@ -77,7 +77,7 @@ public class ExecuteUserCommands {
                     if (help != null) {
                         out.println(REJECT_HELP);
                     } else if (requester != null) {
-                        handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline, multicastGroups);
+                        handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline);
                     } else {
                         out.println("ERRO: Formato inválido para REJECT. Use -h para descobrir os parâmetros");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para REJECT"));
@@ -178,7 +178,7 @@ public class ExecuteUserCommands {
                             // Notify both parties about the same connection details
                             String connectionInfo = sender.getInetAddress().getHostAddress() + ":" + privatePort;
                             out.println("CHAT_START:" + connectionInfo);  // Notify the sender
-                            notifyUser(targetUsername, "CHAT_REQUEST:" + connectionInfo, usersWithPermissionsOnline, targetUser.getCurrentGroup(), pendingApprovals);
+                            notifyUser(targetUsername, "CHAT_REQUEST:" + connectionInfo, usersWithPermissionsOnline, pendingApprovals);
 
                             // Wait for the receiver to connect to this privateServerSocket
                             sender = privateServerSocket.accept();  // Wait for the receiver to connect
@@ -416,7 +416,7 @@ public class ExecuteUserCommands {
 
     private void processOperationCommand(String username, String command, PrintWriter out,
                                          Map<String, String> pendingApprovals,
-                                         Set<String> usersWithPermissionsOnline, List<Group> multicastGroups) {
+                                         Set<String> usersWithPermissionsOnline) {
         User user = userService.getUserByName(username);
         if (user == null) {
             out.println("ERRO: Utilizador não encontrado.");
@@ -439,7 +439,10 @@ public class ExecuteUserCommands {
 
         if (user.getPermissions().ordinal() >= operation.getRequiredPermission().ordinal()) {
             // Permissão suficiente - executar a operação
-            sendNotificationToGroups("Comando executado: " + operation.getName() + " (por " + username + ")", multicastGroups);
+            List<Group> groups =  groupService.getAllGroups();
+            for(Group group : groups) {
+                notifyGroup(group, "Comando executado: " + operation.getName() + " (por " + username + ")");
+            }
             out.println("SUCESSO: Operação realizada.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Comando executado: \" + operation.getName() + \" (por \" + username + \")\""));
         } else {
@@ -459,11 +462,10 @@ public class ExecuteUserCommands {
 
     private void handleApprovalCommand(String action, String username, String requester, PrintWriter out,
                                        Map<String, String> pendingApprovals,
-                                       Set<String> usersWithPermissionsOnline,
-                                       List<Group> multicastGroups) {
+                                       Set<String> usersWithPermissionsOnline) {
         User user = userService.getUserByName(requester);
         if (!pendingApprovals.containsKey(requester)) {
-            notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
+            notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, pendingApprovals);
             out.println("ERRO: Comando desconhecido.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
 
@@ -472,20 +474,22 @@ public class ExecuteUserCommands {
 
         String operationName = pendingApprovals.remove(requester);
 
-
         if (action.equals("/approve")) {
-            sendNotificationToGroups("Comando executado: " + operationName + " (por " + username + ")", multicastGroups);
-            notifyUser(requester, "SUCESSO: Sua solicitação de operação foi aprovada.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
+           List<Group> groups =  groupService.getAllGroups();
+           for(Group group : groups) {
+                notifyGroup(group, operationName);
+           }
+            notifyUser(requester, "SUCESSO: Sua solicitação de operação foi aprovada.", usersWithPermissionsOnline, pendingApprovals);
             out.println("APPROVE: Aprovado com sucesso");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Comando executado: " + operationName + " (por " + username + ")"));
 
         } else if (action.equals("/reject")) {
-            notifyUser(requester, "ERRO: Sua solicitação de operação foi rejeitada.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
-            notifyUser(username, "SUCESSO: Operação rejeitada.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
+            notifyUser(requester, "ERRO: Sua solicitação de operação foi rejeitada.", usersWithPermissionsOnline, pendingApprovals);
+            notifyUser(username, "SUCESSO: Operação rejeitada.", usersWithPermissionsOnline, pendingApprovals);
             out.println("Reject: Rejectado com sucesso");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação rejeitada."));
         } else {
-            notifyUser(username, "ERRO: Comando desconhecido. Use APPROVE ou REJECT.", usersWithPermissionsOnline, user.getCurrentGroup(), pendingApprovals);
+            notifyUser(username, "ERRO: Comando desconhecido. Use APPROVE ou REJECT.", usersWithPermissionsOnline, pendingApprovals);
             out.println("ERRO: Comando desconhecido.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
         }

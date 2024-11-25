@@ -114,7 +114,6 @@ public class ExecuteInternalCommands {
         if (user == null) {
             return "FAILED: Usuário inválido!";
         }
-
         String username = user.getName();
         // Após login bem-sucedido, armazenar o socket e verificar permissões
         userSockets.put(username, clientSocket);
@@ -135,7 +134,6 @@ public class ExecuteInternalCommands {
         }
         return socket;
     }
-
 
     private void handleLogout(String username, PrintWriter out) {
         if (userSockets.containsKey(username)) {

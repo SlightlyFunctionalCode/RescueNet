@@ -112,7 +112,7 @@ public class Server {
                     } else {
                         userCommands.handleUserCommand(
                                 serverSocket.getInetAddress(), command, request, requester, payload, out,
-                                pendingApprovals, usersWithPermissionsOnline, userCommands.groupService.getAllGroups());
+                                pendingApprovals, usersWithPermissionsOnline);
                     }
                 } else {
                     out.println("ERRO: Formato de solicitação inválido");
