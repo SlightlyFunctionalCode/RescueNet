@@ -3,6 +3,8 @@ package org.estg.ipp.pt;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Services.GroupService;
+import org.estg.ipp.pt.Services.MulticastManager;
+import org.estg.ipp.pt.Services.MulticastManagerService;
 import org.estg.ipp.pt.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,7 @@ import static org.estg.ipp.pt.Services.ExecuteUserCommands.saveNotificationForLa
 
 public class Notifications {
 
-    protected static void sendNotificationToGroup(String message, Group group) {
+    public static void sendNotificationToGroup(String message, Group group) {
         DatagramSocket socket;
         try {
             socket = new DatagramSocket();
@@ -85,11 +87,19 @@ public class Notifications {
     }
 
     public static void notifyGroup(Group notifyGroup, String message) {
-        try (MulticastSocket multicastSocket = new MulticastSocket()) {
-            InetAddress  group = InetAddress.getByName(notifyGroup.getAddress());
-            byte[] buffer = message.getBytes();
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, notifyGroup.getPort());
-            multicastSocket.send(packet); // Envia para todos no grupo multicast
+        try {
+            // Obtém a instância do MulticastManagerService
+            MulticastManagerService service = MulticastManagerService.getInstance();
+
+            // Obtém ou cria o MulticastManager associado ao grupo
+            MulticastManager manager = service.getOrCreateMulticastManager(
+                    notifyGroup.getAddress(),
+                    notifyGroup.getPort()
+            );
+
+            // Envia a mensagem usando o MulticastManager
+            manager.sendMessage(message);
+
         } catch (IOException e) {
             System.out.println("Erro ao enviar mensagem multicast: " + e.getMessage());
         }

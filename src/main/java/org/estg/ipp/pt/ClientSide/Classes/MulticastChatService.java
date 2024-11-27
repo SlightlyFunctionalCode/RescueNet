@@ -3,73 +3,68 @@ package org.estg.ipp.pt.ClientSide.Classes;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
+import org.estg.ipp.pt.Services.MulticastManager;
+import org.estg.ipp.pt.Services.MulticastManagerService;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
+import java.net.Socket;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MulticastChatService extends AbstractChatService {
-    private final MessageHandler messageHandler;
+    private final MulticastManagerService multicastManagerService;
     private final CommandHandler commandHandler;
+    private final MessageHandler messageHandler;
 
-    public MulticastChatService(String groupAddress, int port, String name, MessageHandler messageHandler, CommandHandler commandHandler) throws IOException {
+    public MulticastChatService(String groupAddress, int port, String name,
+                                MulticastManagerService multicastManagerService,
+                                CommandHandler commandHandler, MessageHandler messageHandler) throws IOException {
         super(groupAddress, port, name);
-        this.messageHandler = messageHandler;
+        this.multicastManagerService = multicastManagerService;
         this.commandHandler = commandHandler;
+        this.messageHandler = messageHandler;
     }
 
     @Override
     public void startChat(String groupAddress, int port, String name) throws IOException {
-        Thread receiveThread = new Thread(() -> {
-            byte[] buffer = new byte[1024];
-            while (running) {
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                try {
-                    socket.receive(packet);
-                    String received = new String(packet.getData(), 0, packet.getLength());
-                    messageHandler.handleMessage(received);
-                } catch (IOException e) {
-                    if (!running) {
-                        break;
-                    }
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-        receiveThread.start();
 
+        try (Socket serverSocket = new Socket("localhost", 5000);
+             PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true)) {
+            out.println("READY:" + name);
+            System.out.println("READY enviado ao servidor");
+        } catch (IOException e) {
+            System.err.println("Erro ao notificar servidor sobre READY: " + e.getMessage());
+        }
+        // Criar ou obter o MulticastManager
+        MulticastManager multicastManager = multicastManagerService.getOrCreateMulticastManager(groupAddress, port);
+
+        // Enviar uma mensagem de boas-vindas (opcional)
+        multicastManager.sendMessage(name + " entrou no chat!");
+
+        // Iniciar a recepção de mensagens em uma thread separada
+        multicastManager.receiveMessages(messageHandler);  // Passa o MessageHandler para processar as mensagens recebidas
+
+        // Iniciar o envio de mensagens
         Scanner scanner = new Scanner(System.in);
-        System.out.println("JOIN ON CHAT " + groupAddress + ": ");
+        System.out.println("Digite a mensagem (/logout para sair): ");
         boolean shouldExit = false;
 
         while (!shouldExit) {
             String msg = scanner.nextLine();
             if (msg.equalsIgnoreCase("/logout")) {
                 commandHandler.handleCommand("/logout", name);
-                return;
+                shouldExit = true;
             } else if (msg.startsWith("/")) {
                 commandHandler.handleCommand(msg, name);
             } else {
-                Pattern sendToPattern = Pattern.compile("^SEND TO:(.*)");
-
-                Matcher sendToMatcher = sendToPattern.matcher(msg);
-                if (sendToMatcher.find()) {
-                    String targetUser = RegexPatterns.SEND_TO.matcher(msg).replaceFirst("$1").trim();
-                    String fullMsg = "USER: " + targetUser + " " + name + ": " + msg.substring(("SEND TO:" + targetUser).length()).trim();
-                    sendMessage(fullMsg);
-                } else {
-                    String fullMsg = name + ": " + msg;
-                    sendMessage(fullMsg);
-                }
+                // Enviar a mensagem para o grupo multicast
+                System.out.println("Enviando mensagem: " + name + ": " + msg);
+                multicastManager.sendMessage(name + ": " + msg);
             }
         }
-    }
 
-    private void sendMessage(String message) throws IOException {
-        byte[] buffer = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, socket.getLocalPort());
-        socket.send(packet);
+        // Fechar o socket quando sair
+        multicastManager.close();
     }
 }

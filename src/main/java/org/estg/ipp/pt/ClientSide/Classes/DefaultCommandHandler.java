@@ -2,6 +2,8 @@ package org.estg.ipp.pt.ClientSide.Classes;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
+import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
+import org.estg.ipp.pt.Services.MulticastManagerService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,6 +58,19 @@ public class DefaultCommandHandler implements CommandHandler {
                 String address = parts[1];
                 String port = parts[2];
                 startPrivateChat(address, port, name);
+            } else if (serverResponse.startsWith("JOIN_GROUP")) {
+                String[] parts = serverResponse.split(":");
+                String address = parts[1];
+                String port = parts[2];
+                try {
+                    MessageHandler messageHandler = new DefaultMessageHandler(null);
+                    CommandHandler commandHandler = new DefaultCommandHandler(null, "localhost");
+                    MulticastManagerService multicastManager = MulticastManagerService.getInstance();
+                    MulticastChatService chatService = new MulticastChatService(address, Integer.parseInt(port), name, multicastManager, commandHandler, messageHandler);
+                    chatService.startChat(address, Integer.parseInt(port), name); // Chama o método para iniciar o chat multicast
+                } catch (IOException e) {
+                    out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
+                }
             } else {
                 System.out.println(serverResponse);
             }

@@ -6,7 +6,7 @@ import org.estg.ipp.pt.ClientSide.Classes.DefaultMessageHandler;
 import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
-import org.estg.ipp.pt.Services.Chat;
+import org.estg.ipp.pt.Services.MulticastManagerService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.BufferedReader;
@@ -78,10 +78,8 @@ public class Client {
 
                                 MessageHandler messageHandler = new DefaultMessageHandler(null);
                                 CommandHandler commandHandler = new DefaultCommandHandler(null, serverAddress);
-
-                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, messageHandler, commandHandler);
-                                ((DefaultMessageHandler) messageHandler).setChatService(chatService);
-                                ((DefaultCommandHandler) commandHandler).setChatService(chatService);
+                                MulticastManagerService multicastManager = MulticastManagerService.getInstance();
+                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, multicastManager, commandHandler, messageHandler);
 
                                 chatService.startChat(groupAddress, port, usernameOrEmail);
                             }

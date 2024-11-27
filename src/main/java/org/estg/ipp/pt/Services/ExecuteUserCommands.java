@@ -6,6 +6,11 @@ import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.User;
+import org.estg.ipp.pt.ClientSide.Classes.DefaultCommandHandler;
+import org.estg.ipp.pt.ClientSide.Classes.DefaultMessageHandler;
+import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
+import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
+import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
 import org.estg.ipp.pt.Server;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,7 +45,7 @@ public class ExecuteUserCommands {
     public MessageService messageService;
 
     public void handleUserCommand(InetAddress serverAddress, String command, String request, String requester, String payload, PrintWriter out,
-                                  Map<String, String> pendingApprovals, Set<String> usersWithPermissionsOnline) {
+                                  Map<String, String> pendingApprovals, Set<String> usersWithPermissionsOnline) throws IOException {
 
         /*TODO: Adicionar Comando para adicionar pessoas aos grupos personalizados*/
         /*TODO: Adicionar comando para listar grupos que um user pode dar join */
@@ -366,12 +371,8 @@ public class ExecuteUserCommands {
             return;
         }
         // Agora, permitir que o usuário entre no chat
-        /*Todo: mudar isto*/
-        try {
-            Chat.startChat(group.getAddress(), group.getPort(), username); // Chama o método para iniciar o chat multicast
-        } catch (IOException e) {
-            out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
-        }
+        String connectionInfo = group.getAddress() + ":" + group.getPort();
+        out.println("CHAT_GROUP:" + connectionInfo);
     }
 
     private void processChangePermissionCommand(String username, String name, Permissions permission, PrintWriter out) {
@@ -419,7 +420,7 @@ public class ExecuteUserCommands {
                                          Set<String> usersWithPermissionsOnline) {
         User user = userService.getUserByName(username);
         if (user == null) {
-            out.println("ERRO: Utilizador não encontrado.");
+            System.out.println("ERRO: Utilizador não encontrado.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Utilizador não encontrado."));
             return;
         }
@@ -432,15 +433,15 @@ public class ExecuteUserCommands {
         };
 
         if (operation == null) {
-            out.println("ERRO: Operação desconhecida.");
+            System.out.println("ERRO: Operação desconhecida.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Operação desconhecida."));
             return;
         }
 
         if (user.getPermissions().ordinal() >= operation.getRequiredPermission().ordinal()) {
             // Permissão suficiente - executar a operação
-            List<Group> groups =  groupService.getAllGroups();
-            for(Group group : groups) {
+            List<Group> groups = groupService.getAllGroups();
+            for (Group group : groups) {
                 notifyGroup(group, "Comando executado: " + operation.getName() + " (por " + username + ")");
             }
             out.println("SUCESSO: Operação realizada.");
@@ -452,8 +453,8 @@ public class ExecuteUserCommands {
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
             } else {
                 Group group = groupService.getGroupByName(operation.getRequiredPermission().name());
-                System.out.println(group.getAddress());
-                System.out.println(group.getPort());
+                out.println(group.getAddress());
+                out.println(group.getPort());
                 notifyGroup(group, "Pedido pendente: O usuário " + username + " solicitou a operação '" + operation.getName() + "'. Aprove ou rejeite.");
             }
         }
@@ -462,7 +463,7 @@ public class ExecuteUserCommands {
 
     private void handleApprovalCommand(String action, String username, String requester, PrintWriter out,
                                        Map<String, String> pendingApprovals,
-                                       Set<String> usersWithPermissionsOnline) {
+                                       Set<String> usersWithPermissionsOnline) throws IOException {
         User user = userService.getUserByName(requester);
         if (!pendingApprovals.containsKey(requester)) {
             notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, pendingApprovals);
@@ -475,10 +476,10 @@ public class ExecuteUserCommands {
         String operationName = pendingApprovals.remove(requester);
 
         if (action.equals("/approve")) {
-           List<Group> groups =  groupService.getAllGroups();
-           for(Group group : groups) {
+            List<Group> groups = groupService.getAllGroups();
+            for (Group group : groups) {
                 notifyGroup(group, operationName);
-           }
+            }
             notifyUser(requester, "SUCESSO: Sua solicitação de operação foi aprovada.", usersWithPermissionsOnline, pendingApprovals);
             out.println("APPROVE: Aprovado com sucesso");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Comando executado: " + operationName + " (por " + username + ")"));
