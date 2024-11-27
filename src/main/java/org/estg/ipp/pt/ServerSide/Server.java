@@ -1,13 +1,10 @@
-package org.estg.ipp.pt;
+package org.estg.ipp.pt.ServerSide;
 
-import org.estg.ipp.pt.Classes.Enum.Permissions;
-import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Log;
-import org.estg.ipp.pt.Classes.User;
-import org.estg.ipp.pt.Services.Operation;
-import org.estg.ipp.pt.Services.UserService;
+import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
+import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
 import org.estg.ipp.pt.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -26,9 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.*;
 import java.util.regex.Matcher;
-
-import static java.lang.System.out;
-import static org.estg.ipp.pt.Notifications.*;
 
 @SpringBootApplication(scanBasePackages = "org.estg.ipp.pt")
 public class Server {
@@ -110,9 +104,13 @@ public class Server {
                     if (internalCommands.isInternalCommand(command)) {
                         internalCommands.handleInternalCommand(command, payload, out, clientSocket, userCommands.groupService.getAllGroups(), usersWithPermissionsOnline, pendingApprovals);
                     } else {
-                        userCommands.handleUserCommand(
-                                serverSocket.getInetAddress(), command, request, requester, payload, out,
-                                pendingApprovals, usersWithPermissionsOnline);
+                        try {
+                            userCommands.handleUserCommand(
+                                    serverSocket.getInetAddress(), command, request, requester, payload, out,
+                                    pendingApprovals, usersWithPermissionsOnline);
+                        }catch (IOException e) {
+                            throw new IOException(e.getMessage());
+                        }
                     }
                 } else {
                     out.println("ERRO: Formato de solicitação inválido");

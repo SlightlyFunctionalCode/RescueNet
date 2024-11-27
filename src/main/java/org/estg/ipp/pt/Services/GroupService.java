@@ -86,13 +86,13 @@ public class GroupService {
             return;
         }
 
-            // Adicionar o usuário ao grupo
-            group.getUsers().add(user);
-            user.setCurrentGroup(group);
+        // Adicionar o usuário ao grupo
+        group.getUsers().add(user);
+        user.setCurrentGroup(group);
 
-            // Salvar apenas o grupo (o relacionamento bidirecional será tratado automaticamente)
-            groupRepository.save(group);
-            System.out.println("Usuário adicionado ao grupo com sucesso!");
+        // Salvar apenas o grupo (o relacionamento bidirecional será tratado automaticamente)
+        groupRepository.save(group);
+        System.out.println("Usuário adicionado ao grupo com sucesso!");
     }
 
     @Transactional
@@ -100,13 +100,6 @@ public class GroupService {
         // Buscar o grupo pelo nome
         Group group = groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo com nome " + groupName + " não encontrado"));
-
-        User verifyUser = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User não existe"));
-
-        if(group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) < Permissions.fromPermissions(verifyUser.getPermissions())) {
-            addUserToGroup(group.getName(), verifyUser);
-        }
 
         // Verificar se o usuário pertence ao grupo
         boolean userInGroup = group.getUsers().stream().anyMatch(user -> user.getId().equals(userId));
@@ -195,13 +188,21 @@ public class GroupService {
     }
 
     @Transactional
-    public void removeUserFromRestrictedGroups(User user, Permissions newPermissions) {
-        // Buscar todos os grupos privados
-        List<Group> privateGroups = groupRepository.findByisPublic(false);
+    public void removeUserFromRestrictedGroups(User user, Group group) {
+        // Remover o usuário do grupo
+        group.getUsers().remove(user);
+        groupRepository.save(group);
+        System.out.println("Usuário removido do grupo: " + group.getName());
+    }
 
+
+    @Transactional
+    public void removeUserFromGroup(User user, Permissions newPermissions) {
+        // Buscar todos os grupos privados
+        List<Group> publicGroups = groupRepository.findByisPublic(true);
         // Iterar pelos grupos e verificar permissões
-        for (Group group : privateGroups) {
-            if (Permissions.fromPermissions(group.getRequiredPermissions()) > Permissions.fromPermissions(newPermissions)) {
+        for (Group group : publicGroups) {
+            if (Permissions.fromPermissions(group.getRequiredPermissions()) > Permissions.fromPermissions(newPermissions) && group.getUsers().contains(user)) {
                 // Remover o usuário do grupo
                 group.getUsers().remove(user);
                 groupRepository.save(group);

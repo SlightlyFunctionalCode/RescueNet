@@ -1,9 +1,11 @@
-package org.estg.ipp.pt.Services;
+package org.estg.ipp.pt.ServerSide.Classes;
 
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
+import org.estg.ipp.pt.Services.GroupService;
+import org.estg.ipp.pt.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +15,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 
 import static java.lang.System.out;
-import static org.estg.ipp.pt.Notifications.notifyGroup;
-import static org.estg.ipp.pt.Server.*;
+import static org.estg.ipp.pt.ClientSide.Notifications.notifyGroup;
+import static org.estg.ipp.pt.ServerSide.Server.userSockets;
 
 @Component
 public class ExecuteInternalCommands {
@@ -50,7 +52,7 @@ public class ExecuteInternalCommands {
             user.setName(username);
             user.setEmail(email);
             user.setPassword(password);
-            user.setPermissions(Permissions.LOW_LEVEL);
+            user.setPermissions(Permissions.NO_LEVEL);
 
             try {
                 // Registra o usuário no banco de dados
@@ -60,9 +62,7 @@ public class ExecuteInternalCommands {
                     out.println("FAILED: Utilizador com nome ou email já existente");
                     return; // Retorna sem associar ao grupo se o registro falhar
                 }
-
                 out.println("SUCESSO: Utilizador registrado com sucesso");
-
             } catch (Exception e) {
                 out.println("ERRO: Falha ao registrar utilizador - " + e.getMessage());
             }
@@ -96,7 +96,7 @@ public class ExecuteInternalCommands {
 
 
             /*TODO: Devo guardar junto a permissao*/
-            if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {
+            if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL || user.getPermissions() == Permissions.LOW_LEVEL) {
                 usersWithPermissionsOnline.add(user.getName());
                 System.out.println("User com permissões deu join");
             }

@@ -1,22 +1,17 @@
-package org.estg.ipp.pt;
+package org.estg.ipp.pt.ClientSide;
 
 import org.estg.ipp.pt.Classes.Group;
-import org.estg.ipp.pt.Classes.User;
-import org.estg.ipp.pt.Services.GroupService;
-import org.estg.ipp.pt.Services.MulticastManager;
+import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
 import org.estg.ipp.pt.Services.MulticastManagerService;
-import org.estg.ipp.pt.Services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.*;
 
-import static org.estg.ipp.pt.Server.*;
-import static org.estg.ipp.pt.Services.ExecuteInternalCommands.getUserSocket;
-import static org.estg.ipp.pt.Services.ExecuteUserCommands.saveNotificationForLater;
+import static org.estg.ipp.pt.ServerSide.Classes.Server.*;
+import static org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands.getUserSocket;
+import static org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands.saveNotificationForLater;
 
 
 public class Notifications {

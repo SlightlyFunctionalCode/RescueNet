@@ -136,12 +136,6 @@ public class UserService {
             // Salvar as alterações no banco de dados
             userRepository.save(user);
 
-            if (newPermissions.compareTo(previousPermission) < 0) {
-                // Filtrar grupos privados que exigem certo nível de permissões
-
-            }
-
-
             System.out.println("Permissões do usuário atualizadas com sucesso.");
             return true;
         } else {

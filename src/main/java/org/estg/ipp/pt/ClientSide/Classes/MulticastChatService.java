@@ -1,14 +1,12 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
-import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
-import org.estg.ipp.pt.Services.MulticastManager;
+import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
 import org.estg.ipp.pt.Services.MulticastManagerService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.DatagramPacket;
 import java.net.Socket;
 import java.util.Scanner;
 

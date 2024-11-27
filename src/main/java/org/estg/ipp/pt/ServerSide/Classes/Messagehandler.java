@@ -1,4 +1,4 @@
-package org.estg.ipp.pt.Services;
+package org.estg.ipp.pt.ServerSide.Classes;
 
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
 

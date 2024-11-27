@@ -1,4 +1,4 @@
-package org.estg.ipp.pt.Services;
+package org.estg.ipp.pt.ServerSide.Classes;
 
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
@@ -6,12 +6,7 @@ import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.User;
-import org.estg.ipp.pt.ClientSide.Classes.DefaultCommandHandler;
-import org.estg.ipp.pt.ClientSide.Classes.DefaultMessageHandler;
-import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
-import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
-import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
-import org.estg.ipp.pt.Server;
+import org.estg.ipp.pt.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +26,8 @@ import java.util.regex.Matcher;
 
 import static java.lang.System.out;
 import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.*;
-import static org.estg.ipp.pt.Notifications.*;
+import static org.estg.ipp.pt.ClientSide.Notifications.*;
+import static org.estg.ipp.pt.ServerSide.Server.getUserSocket;
 
 @Component
 public class ExecuteUserCommands {
@@ -167,11 +163,11 @@ public class ExecuteUserCommands {
                     String targetUsername = chatMatcher.group("targetUsername");
                     String username = chatMatcher.group("username");
                     if (targetUsername != null && !targetUsername.isEmpty()) {
-                        Socket sender = Server.getUserSocket(username);
+                        Socket sender = getUserSocket(username);
 
                         User targetUser = userService.getUserByName(targetUsername);
 
-                        Socket receiver = Server.getUserSocket(targetUsername);
+                        Socket receiver = getUserSocket(targetUsername);
 
                         ServerSocket privateServerSocket = null;
 
@@ -350,28 +346,29 @@ public class ExecuteUserCommands {
             out.println("ERRO: Usuário não encontrado");
             return;
         }
-
-        /*TODO: Verificar permissões*/
-        //if (!groupService.isUserInGroup(name, user.getId())) {
-        // groupService.addUserToGroup(name, user);
-
         // Buscar o grupo com os parâmetros fornecidos
-        Group group = groupService.getUserGroupByNameAndVerify(user.getId(), name); // Método para buscar o grupo
+        Group group = groupService.getGroupByName(name);// Método para buscar o grupo
         if (group == null) {
             out.println("ERRO: Grupo não encontrado");
             return;
         }
-
-        out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
-        try {
-            userService.joinGroup(user, group);
-        } catch (IllegalArgumentException e) {
-            out.println("ERRO: " + e.getMessage());
-            return;
+        if(group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) < Permissions.fromPermissions(user.getPermissions())) {
+            if(!groupService.isUserInGroup(group.getName(), user.getId())) {
+                groupService.addUserToGroup(group.getName(), user);
+            }
+            out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
+            try {
+                userService.joinGroup(user, group);
+            } catch (IllegalArgumentException e) {
+                out.println("ERRO: " + e.getMessage());
+                return;
+            }
+            // Agora, permitir que o usuário entre no chat
+            String connectionInfo = group.getAddress() + ":" + group.getPort();
+            out.println("CHAT_GROUP:" + connectionInfo);
+        }else{
+            out.println("Grupo é privado ou não tem permissões para dar join nesse grupo");
         }
-        // Agora, permitir que o usuário entre no chat
-        String connectionInfo = group.getAddress() + ":" + group.getPort();
-        out.println("CHAT_GROUP:" + connectionInfo);
     }
 
     private void processChangePermissionCommand(String username, String name, Permissions permission, PrintWriter out) {
@@ -380,9 +377,11 @@ public class ExecuteUserCommands {
             out.println("ERRO: Usuário não encontrado");
             return;
         }
+        User userUpdated = userService.getUserByName(name);
         System.out.println(userWithPermissions.getPermissions());
         if (Permissions.fromPermissions(userWithPermissions.getPermissions()) >= Permissions.fromPermissions(Permissions.HIGH_LEVEL)) {
             userService.updateUserPermissions(name, permission);
+            groupService.removeUserFromGroup(userUpdated, permission);
             out.println("SUCESSO: Usuário " + name + " promovido para " + permission.name());
         } else {
             out.println("ERRO: Usuário sem permissões para usar este comando");
