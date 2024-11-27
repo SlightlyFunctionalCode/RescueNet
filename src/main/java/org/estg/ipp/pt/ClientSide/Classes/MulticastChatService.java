@@ -59,7 +59,6 @@ public class MulticastChatService extends AbstractChatService {
                 commandHandler.handleCommand(msg, name);
             } else {
                 // Enviar a mensagem para o grupo multicast
-                System.out.println("Enviando mensagem: " + name + ": " + msg);
                 multicastManager.sendMessage(name + ": " + msg);
             }
         }

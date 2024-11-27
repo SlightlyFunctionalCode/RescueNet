@@ -35,7 +35,6 @@ public class MulticastManager {
                 try {
                     socket.receive(packet);
                     String receivedMessage = new String(packet.getData(), 0, packet.getLength());
-                    System.out.println("Recebendo mensagem: " + receivedMessage + " de " + packet.getAddress());
                     messageHandler.handleMessage(receivedMessage);
                 } catch (IOException e) {
                     e.printStackTrace();

@@ -101,6 +101,13 @@ public class GroupService {
         Group group = groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo com nome " + groupName + " não encontrado"));
 
+        User verifyUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User não existe"));
+
+        if(group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) < Permissions.fromPermissions(verifyUser.getPermissions())) {
+            addUserToGroup(group.getName(), verifyUser);
+        }
+
         // Verificar se o usuário pertence ao grupo
         boolean userInGroup = group.getUsers().stream().anyMatch(user -> user.getId().equals(userId));
 
@@ -194,7 +201,7 @@ public class GroupService {
 
         // Iterar pelos grupos e verificar permissões
         for (Group group : privateGroups) {
-            if (group.getRequiredPermissions().compareTo(newPermissions) > 0) {
+            if (Permissions.fromPermissions(group.getRequiredPermissions()) > Permissions.fromPermissions(newPermissions)) {
                 // Remover o usuário do grupo
                 group.getUsers().remove(user);
                 groupRepository.save(group);

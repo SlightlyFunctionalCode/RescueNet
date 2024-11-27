@@ -363,7 +363,6 @@ public class ExecuteUserCommands {
         }
 
         out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
-
         try {
             userService.joinGroup(user, group);
         } catch (IllegalArgumentException e) {
