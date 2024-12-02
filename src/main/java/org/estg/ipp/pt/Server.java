@@ -4,16 +4,15 @@ import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
-import org.estg.ipp.pt.ClientSide.Notifications;
+import org.estg.ipp.pt.ServerSide.Services.Notifications;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
-import org.estg.ipp.pt.Services.*;
+import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,8 +27,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
-@EnableJpaRepositories(basePackages = "org.estg.ipp.pt.Repositories")
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.estg.ipp.pt.ServerSide")
 public class Server {
 
     @Autowired

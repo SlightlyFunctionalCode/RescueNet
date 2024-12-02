@@ -1,15 +1,13 @@
-package org.estg.ipp.pt.Controller;
+package org.estg.ipp.pt.ServerSide.Controller;
 
 import com.itextpdf.text.DocumentException;
 import org.estg.ipp.pt.Classes.Enum.TagType;
-import org.estg.ipp.pt.Services.LogService;
+import org.estg.ipp.pt.ServerSide.Services.LogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;

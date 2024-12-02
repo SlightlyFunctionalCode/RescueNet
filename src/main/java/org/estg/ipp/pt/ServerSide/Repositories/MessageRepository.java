@@ -1,4 +1,4 @@
-package org.estg.ipp.pt.Repositories;
+package org.estg.ipp.pt.ServerSide.Repositories;
 
 import org.estg.ipp.pt.Classes.Message;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,4 +1,4 @@
-package org.estg.ipp.pt.Services;
+package org.estg.ipp.pt.ServerSide.Services;
 
 import org.estg.ipp.pt.ServerSide.Classes.Messagehandler;
 import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
@@ -28,7 +28,7 @@ public class MulticastManagerService {
         if (!multicastManagers.containsKey(groupKey)) {
             MulticastManager manager = new MulticastManager(groupAddress, port);
             multicastManagers.put(groupKey, manager);
-            manager.receiveMessages(new Messagehandler()); // Exemplo: crie sua implementação de handler
+            manager.receiveMessages();
         }
         return multicastManagers.get(groupKey);
     }

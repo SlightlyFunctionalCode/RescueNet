@@ -5,8 +5,8 @@ import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Server;
-import org.estg.ipp.pt.Services.GroupService;
-import org.estg.ipp.pt.Services.UserService;
+import org.estg.ipp.pt.ServerSide.Services.GroupService;
+import org.estg.ipp.pt.ServerSide.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ import java.net.Socket;
 import java.util.*;
 import java.util.regex.Matcher;
 
-import static org.estg.ipp.pt.ClientSide.Notifications.notifyGroup;
+import static org.estg.ipp.pt.ServerSide.Services.Notifications.notifyGroup;
 
 @Component
 public class ExecuteInternalCommands {

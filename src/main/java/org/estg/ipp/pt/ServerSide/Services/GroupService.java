@@ -1,18 +1,16 @@
-package org.estg.ipp.pt.Services;
+package org.estg.ipp.pt.ServerSide.Services;
 
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
-import org.estg.ipp.pt.Repositories.GroupRepository;
-import org.estg.ipp.pt.Repositories.UserRepository;
-import org.hibernate.Hibernate;
+import org.estg.ipp.pt.ServerSide.Repositories.GroupRepository;
+import org.estg.ipp.pt.ServerSide.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

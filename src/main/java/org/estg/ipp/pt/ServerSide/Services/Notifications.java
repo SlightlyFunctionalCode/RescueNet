@@ -1,9 +1,8 @@
-package org.estg.ipp.pt.ClientSide;
+package org.estg.ipp.pt.ServerSide.Services;
 
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Server;
 import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
-import org.estg.ipp.pt.Services.MulticastManagerService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -54,7 +53,6 @@ public class Notifications {
     }
 
     public static void sendMessage(String targetUsername, String message) {
-        System.out.println("hellooooooooooooo");
         Socket targetSocket = Server.getUserSocket(targetUsername);
         if (targetSocket != null) {
             try {

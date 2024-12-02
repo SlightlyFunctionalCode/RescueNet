@@ -3,7 +3,7 @@ package org.estg.ipp.pt.ClientSide.Classes;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
-import org.estg.ipp.pt.Services.MulticastManagerService;
+import org.estg.ipp.pt.ServerSide.Services.MulticastManagerService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,20 +53,14 @@ public class DefaultCommandHandler implements CommandHandler {
                     if (line.equals("--END HELP--")) break;
                     System.out.println(line);
                 }
-            } else if (serverResponse.startsWith("CHAT_START")) {
-                String[] parts = serverResponse.split(":");
-                String address = parts[1];
-                String port = parts[2];
-                startPrivateChat(address, port, name);
             } else if (serverResponse.startsWith("JOIN_GROUP")) {
                 String[] parts = serverResponse.split(":");
                 String address = parts[1];
                 String port = parts[2];
                 try {
-                    MessageHandler messageHandler = new DefaultMessageHandler(null);
                     CommandHandler commandHandler = new DefaultCommandHandler(null, "localhost");
                     MulticastManagerService multicastManager = MulticastManagerService.getInstance();
-                    MulticastChatService chatService = new MulticastChatService(address, Integer.parseInt(port), name, multicastManager, commandHandler, messageHandler, serverSocket);
+                    MulticastChatService chatService = new MulticastChatService(address, Integer.parseInt(port), name, multicastManager, commandHandler, serverSocket);
                     chatService.startChat(address, Integer.parseInt(port), name); // Chama o método para iniciar o chat multicast
                 } catch (IOException e) {
                     out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
@@ -77,11 +71,5 @@ public class DefaultCommandHandler implements CommandHandler {
         } catch (NullPointerException | IOException e) {
             System.err.println("Erro ao comunicar com o servidor: " + e.getMessage());
         }
-    }
-
-    private void startPrivateChat(String address, String port, String name) throws IOException {
-        chatService.stopChat();
-        DefaultMessageHandler handler = new DefaultMessageHandler(chatService);
-        handler.startPrivateChat(address, port, name);
     }
 }

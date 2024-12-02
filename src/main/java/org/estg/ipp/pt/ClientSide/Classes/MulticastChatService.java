@@ -3,27 +3,24 @@ package org.estg.ipp.pt.ClientSide.Classes;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
 import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
-import org.estg.ipp.pt.Services.MulticastManagerService;
+import org.estg.ipp.pt.ServerSide.Services.MulticastManagerService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class MulticastChatService extends AbstractChatService {
     private final MulticastManagerService multicastManagerService;
     private final CommandHandler commandHandler;
-    private final MessageHandler messageHandler;
     private final Socket serverSocket;
 
     public MulticastChatService(String groupAddress, int port, String name,
                                 MulticastManagerService multicastManagerService,
-                                CommandHandler commandHandler, MessageHandler messageHandler, Socket serverSocket) throws IOException {
+                                CommandHandler commandHandler, Socket serverSocket) throws IOException {
         super(groupAddress, port, name);
         this.multicastManagerService = multicastManagerService;
         this.commandHandler = commandHandler;
-        this.messageHandler = messageHandler;
         this.serverSocket = serverSocket;
     }
 
@@ -48,7 +45,7 @@ public class MulticastChatService extends AbstractChatService {
                 }
             }).start();
 
-            multicastManager.receiveMessages(messageHandler);
+            multicastManager.receiveMessages();
 
             Scanner scanner = new Scanner(System.in);
             System.out.println("Digite a mensagem (/logout para sair): ");

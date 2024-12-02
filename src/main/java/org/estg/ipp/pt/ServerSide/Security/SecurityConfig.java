@@ -1,4 +1,4 @@
-package org.estg.ipp.pt.Security;
+package org.estg.ipp.pt.ServerSide.Security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

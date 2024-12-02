@@ -1,4 +1,4 @@
-package org.estg.ipp.pt.Services;
+package org.estg.ipp.pt.ServerSide.Services;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfDocument;
@@ -7,13 +7,12 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Log;
-import org.estg.ipp.pt.Repositories.LogRepository;
+import org.estg.ipp.pt.ServerSide.Repositories.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;

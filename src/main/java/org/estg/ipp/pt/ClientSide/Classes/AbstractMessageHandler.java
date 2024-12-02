@@ -9,13 +9,11 @@ public abstract class AbstractMessageHandler implements MessageHandler {
 
     @Override
     public void handleMessage(String message) {
-        System.out.println("OAOLDOASDOASDOO: " + message);
         if (RegexPatterns.DIRECTED_MESSAGE.matcher(message).matches()) {
             System.out.println("Mensagem direcionada a você: " + RegexPatterns.DIRECTED_MESSAGE.matcher(message).replaceFirst("$2"));
         } else if (RegexPatterns.NOTIFICATION.matcher(message).matches()) {
             System.out.println("⚠️ " + RegexPatterns.NOTIFICATION.matcher(message).replaceFirst("$1").trim());
         } else {
-            System.out.println(message);
         }
     }
 

@@ -1,8 +1,7 @@
-package org.estg.ipp.pt.Services;
+package org.estg.ipp.pt.ServerSide.Services;
 
-import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.Message;
-import org.estg.ipp.pt.Repositories.MessageRepository;
+import org.estg.ipp.pt.ServerSide.Repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

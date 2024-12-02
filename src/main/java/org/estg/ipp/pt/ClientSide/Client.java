@@ -2,11 +2,10 @@ package org.estg.ipp.pt.ClientSide;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.ClientSide.Classes.DefaultCommandHandler;
-import org.estg.ipp.pt.ClientSide.Classes.DefaultMessageHandler;
 import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
-import org.estg.ipp.pt.Services.MulticastManagerService;
+import org.estg.ipp.pt.ServerSide.Services.MulticastManagerService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.BufferedReader;
@@ -76,10 +75,9 @@ public class Client {
                                 String groupAddress = matcher.group(1);
                                 int port = Integer.parseInt(matcher.group(2));
 
-                                MessageHandler messageHandler = new DefaultMessageHandler(null);
                                 CommandHandler commandHandler = new DefaultCommandHandler(null, serverAddress);
                                 MulticastManagerService multicastManager = MulticastManagerService.getInstance();
-                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, multicastManager, commandHandler, messageHandler, socket);
+                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, multicastManager, commandHandler, socket);
 
                                 chatService.startChat(groupAddress, port, usernameOrEmail);
                             }

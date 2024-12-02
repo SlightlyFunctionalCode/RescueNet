@@ -4,18 +4,14 @@ import org.estg.ipp.pt.Classes.Enum.*;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.User;
-import org.estg.ipp.pt.ClientSide.Notifications;
-import org.estg.ipp.pt.Services.*;
+import org.estg.ipp.pt.ServerSide.Services.Notifications;
+import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -24,10 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import static java.lang.System.out;
 import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.*;
-import static org.estg.ipp.pt.ClientSide.Notifications.*;
-import static org.estg.ipp.pt.Server.getUserSocket;
+import static org.estg.ipp.pt.ServerSide.Services.Notifications.*;
 
 @Component
 public class ExecuteUserCommands {
@@ -165,13 +159,11 @@ public class ExecuteUserCommands {
                     String username = chatMatcher.group("username");
                     if (targetUsername != null && !targetUsername.isEmpty() && message != null && !message.isEmpty()) {
                         Notifications.sendMessage(targetUsername, "PRIVATE:" + username + ": " + message);
-                        out.println("👌");
+                        out.println("Mensagem enviada com sucesso.");
                     } else {
                         out.println("ERRO: Por favor, forneça o nome de utilizador do destinatário. Use -h para ajuda.");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
-
                     }
-
                 } else {
                     out.println("ERRO: Formato inválido para /chat. Use -h para ajuda.");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));

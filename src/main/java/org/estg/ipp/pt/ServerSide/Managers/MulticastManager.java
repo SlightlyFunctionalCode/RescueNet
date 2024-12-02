@@ -27,7 +27,7 @@ public class MulticastManager {
         socket.send(packet);
     }
 
-    public void receiveMessages(MessageHandler messageHandler) {
+    public void receiveMessages() {
         new Thread(() -> {
             byte[] buffer = new byte[1024];
             while (true) {
@@ -35,7 +35,7 @@ public class MulticastManager {
                 try {
                     socket.receive(packet);
                     String receivedMessage = new String(packet.getData(), 0, packet.getLength());
-                    messageHandler.handleMessage(receivedMessage);
+                    System.out.println(receivedMessage);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

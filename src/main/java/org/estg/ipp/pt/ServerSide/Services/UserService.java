@@ -1,18 +1,13 @@
-package org.estg.ipp.pt.Services;
+package org.estg.ipp.pt.ServerSide.Services;
 
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
-import org.estg.ipp.pt.Repositories.UserRepository;
-import org.hibernate.Hibernate;
+import org.estg.ipp.pt.ServerSide.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Permission;
 import java.util.Optional;
 
 @Service
