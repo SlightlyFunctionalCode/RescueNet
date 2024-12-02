@@ -4,6 +4,7 @@ import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.User;
+import org.estg.ipp.pt.Server;
 import org.estg.ipp.pt.Services.GroupService;
 import org.estg.ipp.pt.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,7 @@ import java.net.Socket;
 import java.util.*;
 import java.util.regex.Matcher;
 
-import static java.lang.System.out;
 import static org.estg.ipp.pt.ClientSide.Notifications.notifyGroup;
-import static org.estg.ipp.pt.Server.userSockets;
 
 @Component
 public class ExecuteInternalCommands {
@@ -122,7 +121,7 @@ public class ExecuteInternalCommands {
         }
         String username = user.getName();
         // Após login bem-sucedido, armazenar o socket e verificar permissões
-        userSockets.put(username, clientSocket);
+        Server.addUserSocket(username, clientSocket);
 
         Group group = groupService.getGroupByName("GERAL");
 
@@ -134,8 +133,8 @@ public class ExecuteInternalCommands {
     }
 
     private void handleLogout(String username, PrintWriter out) {
-        if (userSockets.containsKey(username)) {
-            userSockets.remove(username);
+        if (Server.getUserSocket(username)!=null) {
+            Server.removeUserSocket(username);
             out.println("SUCESSO: Logout realizado");
         } else {
             out.println("ERRO: Usuário não está logado");

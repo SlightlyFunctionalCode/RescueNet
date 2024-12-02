@@ -1,6 +1,7 @@
 package org.estg.ipp.pt.ClientSide;
 
 import org.estg.ipp.pt.Classes.Group;
+import org.estg.ipp.pt.Server;
 import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
 import org.estg.ipp.pt.Services.MulticastManagerService;
 
@@ -10,7 +11,6 @@ import java.net.*;
 import java.util.*;
 
 import static org.estg.ipp.pt.Server.getUserSocket;
-
 
 public class Notifications {
 
@@ -38,6 +38,7 @@ public class Notifications {
 
         // Obter o socket associado ao utilizador
         Socket socket = getUserSocket(username);
+
         if (socket == null || socket.isClosed()) {
             System.out.println("Socket indisponível para " + username + ". Registrando notificação pendente.");
             return;
@@ -49,6 +50,22 @@ public class Notifications {
             System.out.println("Notificação enviada para o utilizador " + username + ": " + message);
         } catch (IOException e) {
             System.out.println("Erro ao enviar notificação para " + username + ": " + e.getMessage());
+        }
+    }
+
+    public static void sendMessage(String targetUsername, String message) {
+        System.out.println("hellooooooooooooo");
+        Socket targetSocket = Server.getUserSocket(targetUsername);
+        if (targetSocket != null) {
+            try {
+                PrintWriter targetOutput = new PrintWriter(targetSocket.getOutputStream(), true);
+                targetOutput.println(message);
+                System.out.println("Envio de " + message + " para o utilizador " + targetUsername);
+            } catch (IOException e) {
+                System.out.println("Error sending message to " + targetUsername);
+            }
+        } else {
+            System.out.println("User not found: " + targetUsername);
         }
     }
 

@@ -66,7 +66,7 @@ public class DefaultCommandHandler implements CommandHandler {
                     MessageHandler messageHandler = new DefaultMessageHandler(null);
                     CommandHandler commandHandler = new DefaultCommandHandler(null, "localhost");
                     MulticastManagerService multicastManager = MulticastManagerService.getInstance();
-                    MulticastChatService chatService = new MulticastChatService(address, Integer.parseInt(port), name, multicastManager, commandHandler, messageHandler);
+                    MulticastChatService chatService = new MulticastChatService(address, Integer.parseInt(port), name, multicastManager, commandHandler, messageHandler, serverSocket);
                     chatService.startChat(address, Integer.parseInt(port), name); // Chama o método para iniciar o chat multicast
                 } catch (IOException e) {
                     out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());

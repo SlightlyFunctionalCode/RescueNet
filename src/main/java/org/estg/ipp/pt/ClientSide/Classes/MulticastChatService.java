@@ -7,6 +7,7 @@ import org.estg.ipp.pt.Services.MulticastManagerService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -14,54 +15,61 @@ public class MulticastChatService extends AbstractChatService {
     private final MulticastManagerService multicastManagerService;
     private final CommandHandler commandHandler;
     private final MessageHandler messageHandler;
+    private final Socket serverSocket;
 
     public MulticastChatService(String groupAddress, int port, String name,
                                 MulticastManagerService multicastManagerService,
-                                CommandHandler commandHandler, MessageHandler messageHandler) throws IOException {
+                                CommandHandler commandHandler, MessageHandler messageHandler, Socket serverSocket) throws IOException {
         super(groupAddress, port, name);
         this.multicastManagerService = multicastManagerService;
         this.commandHandler = commandHandler;
         this.messageHandler = messageHandler;
+        this.serverSocket = serverSocket;
     }
+
 
     @Override
     public void startChat(String groupAddress, int port, String name) throws IOException {
 
-        try (Socket serverSocket = new Socket("localhost", 5000);
-             PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true)) {
+        try {
+            PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
             out.println("READY:" + name);
-            System.out.println("READY enviado ao servidor");
-        } catch (IOException e) {
-            System.err.println("Erro ao notificar servidor sobre READY: " + e.getMessage());
-        }
-        // Criar ou obter o MulticastManager
-        MulticastManager multicastManager = multicastManagerService.getOrCreateMulticastManager(groupAddress, port);
+            System.out.println("READY sent to server");
 
-        // Enviar uma mensagem de boas-vindas (opcional)
-        multicastManager.sendMessage(name + " entrou no chat!");
+            MulticastManager multicastManager = multicastManagerService.getOrCreateMulticastManager(groupAddress, port);
 
-        // Iniciar a recepção de mensagens em uma thread separada
-        multicastManager.receiveMessages(messageHandler);  // Passa o MessageHandler para processar as mensagens recebidas
+            multicastManager.sendMessage(name + " entrou no chat!");
 
-        // Iniciar o envio de mensagens
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Digite a mensagem (/logout para sair): ");
-        boolean shouldExit = false;
+            Scanner serverInput = new Scanner(serverSocket.getInputStream());
+            new Thread(() -> {
+                while (serverInput.hasNextLine()) {
+                    String serverMessage = serverInput.nextLine();
+                    System.out.println("**" + serverMessage + "**");
+                }
+            }).start();
 
-        while (!shouldExit) {
-            String msg = scanner.nextLine();
-            if (msg.equalsIgnoreCase("/logout")) {
-                commandHandler.handleCommand("/logout", name);
-                shouldExit = true;
-            } else if (msg.startsWith("/")) {
-                commandHandler.handleCommand(msg, name);
-            } else {
-                // Enviar a mensagem para o grupo multicast
-                multicastManager.sendMessage(name + ": " + msg);
+            multicastManager.receiveMessages(messageHandler);
+
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Digite a mensagem (/logout para sair): ");
+            boolean shouldExit = false;
+
+            while (!shouldExit) {
+                String msg = scanner.nextLine();
+                if (msg.equalsIgnoreCase("/logout")) {
+                    commandHandler.handleCommand("/logout", name);
+                    shouldExit = true;
+                    multicastManager.close();
+
+                } else if (msg.startsWith("/")) {
+                    commandHandler.handleCommand(msg, name);
+                } else {
+                    multicastManager.sendMessage(name + ":" + msg);
+                }
             }
-        }
 
-        // Fechar o socket quando sair
-        multicastManager.close();
+        } catch (IOException e) {
+            System.err.println("Error during chat session: " + e.getMessage());
+        }
     }
 }

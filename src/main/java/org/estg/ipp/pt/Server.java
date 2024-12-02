@@ -2,7 +2,9 @@ package org.estg.ipp.pt;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
+import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
+import org.estg.ipp.pt.ClientSide.Notifications;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
 import org.estg.ipp.pt.Services.*;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 @EnableJpaRepositories(basePackages = "org.estg.ipp.pt.Repositories")
@@ -38,8 +41,7 @@ public class Server {
 
     public final Map<String, String> pendingApprovals = new HashMap<>();
     public final Set<String> usersWithPermissionsOnline = new HashSet<>();
-    public static final Map<String, Socket> userSockets = new HashMap<>();
-
+    private static final ConcurrentHashMap<String, Socket> clients = new ConcurrentHashMap<>();
     @Autowired
     private LogService logService;
 
@@ -76,9 +78,22 @@ public class Server {
             }
         };
     }
+
     // Method to retrieve user socket by username
     public static Socket getUserSocket(String username) {
-        return userSockets.get(username);
+        return clients.get(username);
+    }
+
+    public static void removeUserSocket(String username) {
+        try {
+            clients.remove(username);
+        } catch (Exception e) {
+            System.err.println("Erro ao efetuar logout: " + e.getMessage());
+        }
+    }
+
+    public static void addUserSocket(String username, Socket socket) {
+        clients.put(username, socket);
     }
 
     private void handleClient(Socket clientSocket) {
@@ -107,10 +122,15 @@ public class Server {
                             userCommands.handleUserCommand(
                                     serverSocket.getInetAddress(), command, request, requester, payload, out,
                                     pendingApprovals, usersWithPermissionsOnline);
-                        }catch (IOException e) {
+                        } catch (IOException e) {
                             throw new IOException(e.getMessage());
                         }
                     }
+                } else if (request.startsWith("CHAT")) {
+                    GroupService groupService = new GroupService();
+
+                    Group group = groupService.getGroupByName("HIGH_LEVEL");
+                    Notifications.notifyGroup(group, request.substring(4));
                 } else {
                     out.println("ERRO: Formato de solicitação inválido");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato de solicitação inválido"));

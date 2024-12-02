@@ -79,7 +79,7 @@ public class Client {
                                 MessageHandler messageHandler = new DefaultMessageHandler(null);
                                 CommandHandler commandHandler = new DefaultCommandHandler(null, serverAddress);
                                 MulticastManagerService multicastManager = MulticastManagerService.getInstance();
-                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, multicastManager, commandHandler, messageHandler);
+                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, multicastManager, commandHandler, messageHandler, socket);
 
                                 chatService.startChat(groupAddress, port, usernameOrEmail);
                             }
