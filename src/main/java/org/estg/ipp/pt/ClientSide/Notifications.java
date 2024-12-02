@@ -9,9 +9,7 @@ import java.io.PrintWriter;
 import java.net.*;
 import java.util.*;
 
-import static org.estg.ipp.pt.ServerSide.Classes.Server.*;
-import static org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands.getUserSocket;
-import static org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands.saveNotificationForLater;
+import static org.estg.ipp.pt.Server.getUserSocket;
 
 
 public class Notifications {
@@ -36,29 +34,61 @@ public class Notifications {
         socket.close();
     }
 
-    public static void notifyUser(String username, String message, Set<String> usersWithPermissionsOnline,
-                                   Map<String, String> pendingApprovals) {
-        // Log para debug
-        Socket socket = userSockets.get(username);
+    public static void notify(String username, String message) {
+
+        // Obter o socket associado ao utilizador
+        Socket socket = getUserSocket(username);
         if (socket == null || socket.isClosed()) {
-            System.out.println("Tentando notificar " + username + ", mas o socket está indisponível.");
+            System.out.println("Socket indisponível para " + username + ". Registrando notificação pendente.");
             return;
         }
-
+        // Tentar enviar a mensagem via socket
         try {
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-            writer.println(message); // Enviar mensagem para o cliente
+            writer.println(message);
             System.out.println("Notificação enviada para o utilizador " + username + ": " + message);
         } catch (IOException e) {
             System.out.println("Erro ao enviar notificação para " + username + ": " + e.getMessage());
         }
-        if (usersWithPermissionsOnline.contains(username)) {
-            // Se o usuário não está online, você pode decidir se ainda assim quer registrar a notificação
-            System.out.println("Utilizador não está online, aguardando conexão...");
-            // Aqui você pode salvar a notificação em algum local de espera ou log, se necessário
-            // Exemplo:
+    }
+
+    public static void notifyUser(String username, String message,
+                                  Set<String> usersWithPermissionsOnline,
+                                  Map<String, String> pendingApprovals) {
+        // Verificar se o usuário está online
+        if (!usersWithPermissionsOnline.contains(username)) {
+            System.out.println("Utilizador " + username + " não está online. Registrando notificação pendente.");
+            saveNotificationForLater(username, message, pendingApprovals);
+            return;
+        }
+
+        // Obter o socket associado ao utilizador
+        Socket socket = getUserSocket(username);
+        if (socket == null || socket.isClosed()) {
+            System.out.println("Socket indisponível para " + username + ". Registrando notificação pendente.");
+            saveNotificationForLater(username, message, pendingApprovals);
+            return;
+        }
+
+        // Tentar enviar a mensagem via socket
+        try {
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println(message);
+            System.out.println("Notificação enviada para o utilizador " + username + ": " + message);
+        } catch (IOException e) {
+            System.out.println("Erro ao enviar notificação para " + username + ": " + e.getMessage());
             saveNotificationForLater(username, message, pendingApprovals);
         }
+    }
+
+    /**
+     * Salva a notificação para ser entregue posteriormente.
+     */
+    private static void saveNotificationForLater(String username, String message,
+                                                 Map<String, String> pendingApprovals) {
+        // Adiciona a notificação ao map ou log para entrega posterior
+        pendingApprovals.put(username, message);
+        System.out.println("Notificação salva para entrega posterior: " + message + " para " + username);
     }
 
     protected static void sendMessageToUser(String username, String message, Set<String> usersWithPermissionsOnline) {

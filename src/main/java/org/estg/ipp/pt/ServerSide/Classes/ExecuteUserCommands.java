@@ -1,11 +1,10 @@
 package org.estg.ipp.pt.ServerSide.Classes;
 
-import org.estg.ipp.pt.Classes.Enum.Permissions;
-import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
-import org.estg.ipp.pt.Classes.Enum.TagType;
+import org.estg.ipp.pt.Classes.Enum.*;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.User;
+import org.estg.ipp.pt.ClientSide.Notifications;
 import org.estg.ipp.pt.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,6 +18,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 import static java.lang.System.out;
 import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.*;
 import static org.estg.ipp.pt.ClientSide.Notifications.*;
-import static org.estg.ipp.pt.ServerSide.Server.getUserSocket;
+import static org.estg.ipp.pt.Server.getUserSocket;
 
 @Component
 public class ExecuteUserCommands {
@@ -202,9 +202,22 @@ public class ExecuteUserCommands {
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
 
                     }
+
                 } else {
                     out.println("ERRO: Formato inválido para /chat. Use -h para ajuda.");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
+                }
+            }
+            case "/commands" -> {
+                System.out.println(request);
+                Matcher commandsHelper = RegexPatternsCommands.COMMANDS.matcher(request);
+                if (commandsHelper.matches()) {
+                    out.println("COMMANDS START");
+                    String name = commandsHelper.group("name");
+                    handleCommandHelper(name, pendingApprovals, usersWithPermissionsOnline);
+                }else{
+                    out.println("ERRO: Formato inválido para /create_group. Use -h para descobrir os parâmetros");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
                 }
             }
         }
@@ -352,11 +365,8 @@ public class ExecuteUserCommands {
             out.println("ERRO: Grupo não encontrado");
             return;
         }
-        if(group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) < Permissions.fromPermissions(user.getPermissions())) {
-            if(!groupService.isUserInGroup(group.getName(), user.getId())) {
-                groupService.addUserToGroup(group.getName(), user);
-            }
-            out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
+        if (group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) < Permissions.fromPermissions(user.getPermissions())) {
+            System.out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
             try {
                 userService.joinGroup(user, group);
             } catch (IllegalArgumentException e) {
@@ -366,7 +376,7 @@ public class ExecuteUserCommands {
             // Agora, permitir que o usuário entre no chat
             String connectionInfo = group.getAddress() + ":" + group.getPort();
             out.println("CHAT_GROUP:" + connectionInfo);
-        }else{
+        } else {
             out.println("Grupo é privado ou não tem permissões para dar join nesse grupo");
         }
     }
@@ -378,13 +388,20 @@ public class ExecuteUserCommands {
             return;
         }
         User userUpdated = userService.getUserByName(name);
+        List<Group> groups = groupService.getAllGroups();
         System.out.println(userWithPermissions.getPermissions());
+        userService.updateUserPermissions(name, permission);
         if (Permissions.fromPermissions(userWithPermissions.getPermissions()) >= Permissions.fromPermissions(Permissions.HIGH_LEVEL)) {
-            userService.updateUserPermissions(name, permission);
-            groupService.removeUserFromGroup(userUpdated, permission);
+                groupService.removeUserFromGroup(userUpdated, permission);
             out.println("SUCESSO: Usuário " + name + " promovido para " + permission.name());
         } else {
-            out.println("ERRO: Usuário sem permissões para usar este comando");
+
+            for (Group group : groups) {
+                if(group.isPublic() && Permissions.fromPermissions(userUpdated.getPermissions()) > Permissions.fromPermissions(group.getRequiredPermissions())){
+                    groupService.addUserToGroup(group.getName(), userUpdated);
+                }
+            }
+            out.println("SUCESSO: Usuário " + name + " promovido para " + permission.name());
         }
     }
 
@@ -461,8 +478,7 @@ public class ExecuteUserCommands {
 
     private void handleApprovalCommand(String action, String username, String requester, PrintWriter out,
                                        Map<String, String> pendingApprovals,
-                                       Set<String> usersWithPermissionsOnline) throws IOException {
-        User user = userService.getUserByName(requester);
+                                       Set<String> usersWithPermissionsOnline){
         if (!pendingApprovals.containsKey(requester)) {
             notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, pendingApprovals);
             out.println("ERRO: Comando desconhecido.");
@@ -494,14 +510,65 @@ public class ExecuteUserCommands {
         }
     }
 
-    public static void saveNotificationForLater(String username, String message, Map<String, String> pendingApprovals) {
-        // Aqui você poderia salvar as notificações que não puderam ser enviadas
-        // Exemplo: armazenar em uma tabela no banco de dados ou em uma lista temporária
-        out.println("Notificação salva para " + username + ": " + message);
 
-        // Exemplo de armazenamento simples em um Map ou Lista
-        // Você pode usar uma abordagem diferente dependendo de como deseja salvar as notificações
-        pendingApprovals.put(username, message);  // Mapa fictício para armazenar as notificações pendentes
-        // Se você estiver usando um banco de dados, faria a inserção aqui
+    private void handleCommandHelper(String username,  Map<String, String> pendingApprovals,
+                                     Set<String> usersWithPermissionsOnline) {
+        User user = userService.getUserByName(username);
+        System.out.println(user.getName() + user.getPermissions());
+        List<String> commandsHighLevel = new ArrayList<>();
+        List<String> commandsMediumLevel = new ArrayList<>();
+        List<String> commandsLowLevel = new ArrayList<>();
+        List<String> commandsNoLevel = new ArrayList<>();
+
+
+        if (user.getPermissions() == Permissions.HIGH_LEVEL) {
+            // Obter a lista de comandos disponíveis para HIGH_LEVEL
+            for(HighLevelCommands command : HighLevelCommands.values()) {
+                commandsHighLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for (MediumLevelCommands command : MediumLevelCommands.values()) {
+                commandsHighLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for(LowLevelCommands command : LowLevelCommands.values()) {
+                commandsHighLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for(NoLevelCommands command : NoLevelCommands.values()) {
+                commandsHighLevel.add(command.name() + " - " + command.getDescription());
+            }
+            // Exibir os comandos (exemplo simples)
+            for(String temp : commandsHighLevel) {
+                Notifications.notify(username, temp);
+            }
+        }else if(user.getPermissions() == Permissions.MEDIUM_LEVEL) {
+            for (MediumLevelCommands command : MediumLevelCommands.values()) {
+                commandsMediumLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for(LowLevelCommands command : LowLevelCommands.values()) {
+                commandsMediumLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for(NoLevelCommands command : NoLevelCommands.values()) {
+                commandsMediumLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for(String temp : commandsMediumLevel) {
+                Notifications.notify(username, temp);
+            }
+        }else if(user.getPermissions() == Permissions.LOW_LEVEL) {
+            for(LowLevelCommands command : LowLevelCommands.values()) {
+                commandsLowLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for(NoLevelCommands command : NoLevelCommands.values()) {
+                commandsLowLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for(String temp : commandsLowLevel) {
+                Notifications.notify(username, temp);
+            }
+        }else if(user.getPermissions() == Permissions.NO_LEVEL) {
+            for(NoLevelCommands command : NoLevelCommands.values()) {
+                commandsNoLevel.add(command.name() + " - " + command.getDescription());
+            }
+            for(String temp : commandsNoLevel) {
+                Notifications.notify(username, temp);
+            }
+        }
     }
 }

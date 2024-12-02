@@ -1,4 +1,4 @@
-package org.estg.ipp.pt.ServerSide;
+package org.estg.ipp.pt;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
@@ -11,6 +11,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,7 +25,8 @@ import java.util.Set;
 import java.util.*;
 import java.util.regex.Matcher;
 
-@SpringBootApplication(scanBasePackages = "org.estg.ipp.pt")
+@EnableJpaRepositories(basePackages = "org.estg.ipp.pt.Repositories")
+@SpringBootApplication
 public class Server {
 
     @Autowired
@@ -74,9 +76,6 @@ public class Server {
             }
         };
     }
-
-
-
     // Method to retrieve user socket by username
     public static Socket getUserSocket(String username) {
         return userSockets.get(username);

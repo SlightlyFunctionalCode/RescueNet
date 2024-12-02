@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 
 import static java.lang.System.out;
 import static org.estg.ipp.pt.ClientSide.Notifications.notifyGroup;
-import static org.estg.ipp.pt.ServerSide.Server.userSockets;
+import static org.estg.ipp.pt.Server.userSockets;
 
 @Component
 public class ExecuteInternalCommands {
@@ -62,6 +62,15 @@ public class ExecuteInternalCommands {
                     out.println("FAILED: Utilizador com nome ou email já existente");
                     return; // Retorna sem associar ao grupo se o registro falhar
                 }
+                System.out.println("Adicionando user ao grupo default");
+                List<Group> groups = groupService.getAllGroups();
+                for (Group group : groups) {
+                    if(group.isPublic() && Permissions.fromPermissions(user.getPermissions()) > Permissions.fromPermissions(group.getRequiredPermissions())){
+                        groupService.addUserToGroup(group.getName(), user);
+                    }
+                }
+
+
                 out.println("SUCESSO: Utilizador registrado com sucesso");
             } catch (Exception e) {
                 out.println("ERRO: Falha ao registrar utilizador - " + e.getMessage());
@@ -85,9 +94,6 @@ public class ExecuteInternalCommands {
             // Após salvar o usuário, associa-o a um grupo padrão
             if(user == null){
                 out.println("User inválido");
-            }else {
-                System.out.println("Adicionando user ao grupo default");
-                groupService.addUserToGroup(user.getPermissions().toString(), user);
             }
 
             String response = loginUser(usernameOrEmail, password, clientSocket, groupList,
@@ -118,21 +124,13 @@ public class ExecuteInternalCommands {
         // Após login bem-sucedido, armazenar o socket e verificar permissões
         userSockets.put(username, clientSocket);
 
-        Group group = groupService.getUserGroupByNameAndVerify(user.getId(), user.getPermissions().name());
+        Group group = groupService.getGroupByName("GERAL");
 
         try {
             userService.joinGroup(user, group);
         } catch (IllegalArgumentException e) {
         }
         return "SUCESSO: Login realizado. Grupo: " + group.getAddress() + ":" + group.getPort();
-    }
-
-    public static Socket getUserSocket(String username) {
-        Socket socket = userSockets.get(username);
-        if (socket == null) {
-            out.println("Erro: Socket do utilizador " + username + " não encontrado.");
-        }
-        return socket;
     }
 
     private void handleLogout(String username, PrintWriter out) {

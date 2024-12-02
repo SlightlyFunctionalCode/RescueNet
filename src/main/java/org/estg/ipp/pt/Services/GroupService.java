@@ -187,6 +187,7 @@ public class GroupService {
         return savedGroup;
     }
 
+
     @Transactional
     public void removeUserFromRestrictedGroups(User user, Group group) {
         // Remover o usuário do grupo
