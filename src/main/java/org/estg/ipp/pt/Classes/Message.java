@@ -1,6 +1,7 @@
 package org.estg.ipp.pt.Classes;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,20 +13,41 @@ public class Message {
 
     private String sender;
     private String receiver;
+    private boolean isRead = false;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
     private LocalDateTime timestamp;
 
-    // Constructors
-    public Message() {}
+    private boolean isApprovalRequest = false;
 
-    public Message(String sender, String receiver, String content, LocalDateTime timestamp) {
+    // Constructors
+    public Message() {
+    }
+
+    public Message(String sender, String receiver, String content, boolean isRead, boolean isApprovalRequest) {
         this.sender = sender;
         this.receiver = receiver;
         this.content = content;
-        this.timestamp = timestamp;
+        this.timestamp = LocalDateTime.now();
+        this.isRead = isRead;
+        this.isApprovalRequest = isApprovalRequest;
+    }
+
+    public Message(String sender, String receiver, String content, boolean isApprovalRequest) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.content = content;
+        this.timestamp = LocalDateTime.now();
+        this.isApprovalRequest = isApprovalRequest;
+    }
+
+    public Message(String sender, String receiver, String content) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.content = content;
+        this.timestamp = LocalDateTime.now();
     }
 
     // Getters and Setters
@@ -63,5 +85,25 @@ public class Message {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public boolean isApprovalRequest() {
+        return isApprovalRequest;
+    }
+
+    public void setApprovalRequest(boolean approvalRequest) {
+        isApprovalRequest = approvalRequest;
     }
 }

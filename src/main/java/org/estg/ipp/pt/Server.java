@@ -4,7 +4,8 @@ import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
-import org.estg.ipp.pt.ServerSide.Services.Notifications;
+import org.estg.ipp.pt.Classes.Message;
+import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
 import org.estg.ipp.pt.ServerSide.Services.*;
@@ -35,7 +36,6 @@ public class Server {
 
     @Autowired
     private ExecuteUserCommands userCommands;
-
 
     public final Map<String, String> pendingApprovals = new HashMap<>();
     public final Set<String> usersWithPermissionsOnline = new HashSet<>();
@@ -128,7 +128,7 @@ public class Server {
                     GroupService groupService = new GroupService();
 
                     Group group = groupService.getGroupByName("HIGH_LEVEL");
-                    Notifications.notifyGroup(group, request.substring(4));
+                    NotificationHandler.notifyGroup(group, request.substring(4));
                 } else {
                     out.println("ERRO: Formato de solicitação inválido");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato de solicitação inválido"));

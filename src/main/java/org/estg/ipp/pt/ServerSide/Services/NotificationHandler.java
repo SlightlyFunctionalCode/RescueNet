@@ -1,6 +1,7 @@
 package org.estg.ipp.pt.ServerSide.Services;
 
 import org.estg.ipp.pt.Classes.Group;
+import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Server;
 import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
 
@@ -11,7 +12,7 @@ import java.util.*;
 
 import static org.estg.ipp.pt.Server.getUserSocket;
 
-public class Notifications {
+public class NotificationHandler {
 
     public static void sendNotificationToGroup(String message, Group group) {
         DatagramSocket socket;
@@ -52,18 +53,25 @@ public class Notifications {
         }
     }
 
-    public static void sendMessage(String targetUsername, String message) {
+    public static void sendMessage(String targetUsername, String username, String message, MessageService messageService) {
         Socket targetSocket = Server.getUserSocket(targetUsername);
+
+        Long id = messageService.saveMessage(new Message(username, targetUsername, ""));
+
+        String content = String.format("PRIVATE:/%s/ %s: %s", id.toString(), username, message);
+
+        messageService.updateContent(content, id);
+
         if (targetSocket != null) {
             try {
                 PrintWriter targetOutput = new PrintWriter(targetSocket.getOutputStream(), true);
                 targetOutput.println(message);
-                System.out.println("Envio de " + message + " para o utilizador " + targetUsername);
+                System.out.printf("Envio de %s para o utilizador %s%n", content, targetUsername);
             } catch (IOException e) {
-                System.out.println("Error sending message to " + targetUsername);
+                System.out.printf("Error sending message to %s%n", targetUsername);
             }
         } else {
-            System.out.println("User not found: " + targetUsername);
+            System.out.printf("Utilizador %s offline. A guardar mensagem para quando o utilizador fizer login%n", targetUsername);
         }
     }
 

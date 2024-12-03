@@ -4,7 +4,7 @@ import org.estg.ipp.pt.Classes.Enum.*;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.User;
-import org.estg.ipp.pt.ServerSide.Services.Notifications;
+import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
 import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.*;
-import static org.estg.ipp.pt.ServerSide.Services.Notifications.*;
+import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.*;
 
 @Component
 public class ExecuteUserCommands {
@@ -158,10 +158,10 @@ public class ExecuteUserCommands {
                     String message = chatMatcher.group("message");
                     String username = chatMatcher.group("username");
                     if (targetUsername != null && !targetUsername.isEmpty() && message != null && !message.isEmpty()) {
-                        Notifications.sendMessage(targetUsername, "PRIVATE:" + username + ": " + message);
+                        NotificationHandler.sendMessage(targetUsername, username, message,messageService);
                         out.println("Mensagem enviada com sucesso.");
                     } else {
-                        out.println("ERRO: Por favor, forneça o nome de utilizador do destinatário. Use -h para ajuda.");
+                        out.println("ERRO: Por favor, forneça o nome de utilizador do destinatário e a mensagem. Use -h para ajuda.");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
                     }
                 } else {
@@ -443,7 +443,7 @@ public class ExecuteUserCommands {
             }
             // Exibir os comandos (exemplo simples)
             for (String temp : commandsHighLevel) {
-                Notifications.notify(username, temp);
+                NotificationHandler.notify(username, temp);
             }
         } else if (user.getPermissions() == Permissions.MEDIUM_LEVEL) {
             for (MediumLevelCommands command : MediumLevelCommands.values()) {
@@ -456,7 +456,7 @@ public class ExecuteUserCommands {
                 commandsMediumLevel.add(command.name() + " - " + command.getDescription());
             }
             for (String temp : commandsMediumLevel) {
-                Notifications.notify(username, temp);
+                NotificationHandler.notify(username, temp);
             }
         } else if (user.getPermissions() == Permissions.LOW_LEVEL) {
             for (LowLevelCommands command : LowLevelCommands.values()) {
@@ -466,14 +466,14 @@ public class ExecuteUserCommands {
                 commandsLowLevel.add(command.name() + " - " + command.getDescription());
             }
             for (String temp : commandsLowLevel) {
-                Notifications.notify(username, temp);
+                NotificationHandler.notify(username, temp);
             }
         } else if (user.getPermissions() == Permissions.NO_LEVEL) {
             for (NoLevelCommands command : NoLevelCommands.values()) {
                 commandsNoLevel.add(command.name() + " - " + command.getDescription());
             }
             for (String temp : commandsNoLevel) {
-                Notifications.notify(username, temp);
+                NotificationHandler.notify(username, temp);
             }
         }
     }

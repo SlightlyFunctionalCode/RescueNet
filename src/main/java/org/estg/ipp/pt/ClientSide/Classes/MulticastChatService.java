@@ -42,6 +42,7 @@ public class MulticastChatService extends AbstractChatService {
                 while (serverInput.hasNextLine()) {
                     String serverMessage = serverInput.nextLine();
                     System.out.println("**" + serverMessage + "**");
+                    handleIncomingMessage(serverMessage,out);
                 }
             }).start();
 
@@ -68,5 +69,21 @@ public class MulticastChatService extends AbstractChatService {
         } catch (IOException e) {
             System.err.println("Error during chat session: " + e.getMessage());
         }
+    }
+
+    public void handleIncomingMessage(String message, PrintWriter out) {
+
+        // Extract the message ID (assume message format contains messageId)
+        String messageId = message.split("/")[1];
+
+        System.out.println(message);
+
+        // Send an isRead confirmation to the server
+        sendIsReadConfirmation(messageId, out);
+    }
+
+    private void sendIsReadConfirmation(String messageId, PrintWriter out) {
+        String confirmationMessage = "CONFIRM_READ: " + messageId;
+        out.println(confirmationMessage);
     }
 }

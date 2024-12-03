@@ -3,9 +3,12 @@ package org.estg.ipp.pt.ServerSide.Classes;
 import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.Classes.Group;
+import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Server;
 import org.estg.ipp.pt.ServerSide.Services.GroupService;
+import org.estg.ipp.pt.ServerSide.Services.MessageService;
+import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
 import org.estg.ipp.pt.ServerSide.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +18,7 @@ import java.net.Socket;
 import java.util.*;
 import java.util.regex.Matcher;
 
-import static org.estg.ipp.pt.ServerSide.Services.Notifications.notifyGroup;
+import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGroup;
 
 @Component
 public class ExecuteInternalCommands {
@@ -26,6 +29,9 @@ public class ExecuteInternalCommands {
     @Autowired
     public GroupService groupService;
 
+    @Autowired
+    private MessageService messageService;
+
     public boolean isInternalCommand(String command) {
         return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT") || command.equals("READY");
     }
@@ -33,10 +39,24 @@ public class ExecuteInternalCommands {
     public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
         switch (command) {
             case "REGISTER" -> handleRegister(payload, out);
-            case "LOGIN" -> handleLogin(payload, out, clientSocket, groupList, usersWithPermissionsOnline, pendingApprovals);
+            case "LOGIN" ->
+                    handleLogin(payload, out, clientSocket, groupList, usersWithPermissionsOnline, pendingApprovals);
             case "LOGOUT" -> handleLogout(payload, out);
             case "READY" -> handlePenddingRequest(payload, out, pendingApprovals);
+            case "CONFIRM_READ" -> handleIsReadConfirmation(payload);
+
             default -> out.println("ERRO: Comando interno inválido");
+        }
+    }
+
+    private void handleIsReadConfirmation(String payload) {
+        String messageId = payload.substring("CONFIRM_READ: ".length());
+
+        try {
+            messageService.markAsRead(Long.parseLong(messageId));
+            System.out.println("Message " + messageId + " marked as read.");
+        } catch (Exception e) {
+            System.err.println("Failed to mark message as read: " + e.getMessage());
         }
     }
 
@@ -64,11 +84,10 @@ public class ExecuteInternalCommands {
                 System.out.println("Adicionando user ao grupo default");
                 List<Group> groups = groupService.getAllGroups();
                 for (Group group : groups) {
-                    if(group.isPublic() && Permissions.fromPermissions(user.getPermissions()) > Permissions.fromPermissions(group.getRequiredPermissions())){
+                    if (group.isPublic() && Permissions.fromPermissions(user.getPermissions()) > Permissions.fromPermissions(group.getRequiredPermissions())) {
                         groupService.addUserToGroup(group.getName(), user);
                     }
                 }
-
 
                 out.println("SUCESSO: Utilizador registrado com sucesso");
             } catch (Exception e) {
@@ -91,24 +110,32 @@ public class ExecuteInternalCommands {
             User user = userService.getUserByName(usernameOrEmail);
 
             // Após salvar o usuário, associa-o a um grupo padrão
-            if(user == null){
+            if (user == null) {
                 out.println("User inválido");
+                return;
             }
 
             String response = loginUser(usernameOrEmail, password, clientSocket, groupList,
                     usersWithPermissionsOnline);
             System.out.println(response);
 
-
             /*TODO: Devo guardar junto a permissao*/
             if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL || user.getPermissions() == Permissions.LOW_LEVEL) {
                 usersWithPermissionsOnline.add(user.getName());
                 System.out.println("User com permissões deu join");
             }
-            out.println(response);
 
-            } else {
+            out.println(response);
+        } else {
             out.println("ERRO: Formato inválido para LOGIN");
+        }
+    }
+
+    private void sendUnreadChatMessage(String username) {
+        List<Message> unreadMessages = messageService.getUnreadMessages(username);
+
+        for (Message unreadMessage : unreadMessages) {
+            NotificationHandler.sendMessage(unreadMessage.getReceiver(), unreadMessage.getSender(), unreadMessage.getContent(), messageService);
         }
     }
 
@@ -133,7 +160,7 @@ public class ExecuteInternalCommands {
     }
 
     private void handleLogout(String username, PrintWriter out) {
-        if (Server.getUserSocket(username)!=null) {
+        if (Server.getUserSocket(username) != null) {
             Server.removeUserSocket(username);
             out.println("SUCESSO: Logout realizado");
         } else {
@@ -145,6 +172,9 @@ public class ExecuteInternalCommands {
         Matcher registerMatcher = RegexPatterns.READY.matcher(payload);
         if (registerMatcher.matches()) {
             String username = registerMatcher.group("username");
+
+            sendUnreadChatMessage(username);
+
             User user = userService.getUserByName(username);
             if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {
                 // Enviar notificações para pedidos pendentes
