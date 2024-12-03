@@ -3,6 +3,7 @@ package org.estg.ipp.pt.ServerSide.Classes;
 import org.estg.ipp.pt.Classes.Enum.*;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
+import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
 import org.estg.ipp.pt.ServerSide.Services.*;
@@ -158,8 +159,20 @@ public class ExecuteUserCommands {
                     String message = chatMatcher.group("message");
                     String username = chatMatcher.group("username");
                     if (targetUsername != null && !targetUsername.isEmpty() && message != null && !message.isEmpty()) {
-                        NotificationHandler.sendMessage(targetUsername, username, message,messageService);
-                        out.println("Mensagem enviada com sucesso.");
+                        Long id = messageService.saveMessage(new Message(username, targetUsername, ""));
+
+                        String content = String.format("PRIVATE:/%s/ %s: %s", id.toString(), username, message);
+
+                        Message createdMessage;
+                        try {
+                            createdMessage = messageService.updateContent(content, id);
+
+                            NotificationHandler.sendMessage(targetUsername, createdMessage);
+                            out.println("Mensagem enviada com sucesso.");
+                        } catch (IllegalArgumentException e) {
+                            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));
+                            out.println("ERRO: Por favor, forneça o nome de utilizador do destinatário e a mensagem. Use -h para ajuda.");
+                        }
                     } else {
                         out.println("ERRO: Por favor, forneça o nome de utilizador do destinatário e a mensagem. Use -h para ajuda.");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /chat"));

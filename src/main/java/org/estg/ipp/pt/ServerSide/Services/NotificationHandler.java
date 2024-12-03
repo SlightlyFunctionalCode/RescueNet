@@ -53,20 +53,14 @@ public class NotificationHandler {
         }
     }
 
-    public static void sendMessage(String targetUsername, String username, String message, MessageService messageService) {
+    public static void sendMessage(String targetUsername, Message message) {
         Socket targetSocket = Server.getUserSocket(targetUsername);
-
-        Long id = messageService.saveMessage(new Message(username, targetUsername, ""));
-
-        String content = String.format("PRIVATE:/%s/ %s: %s", id.toString(), username, message);
-
-        messageService.updateContent(content, id);
 
         if (targetSocket != null) {
             try {
                 PrintWriter targetOutput = new PrintWriter(targetSocket.getOutputStream(), true);
-                targetOutput.println(message);
-                System.out.printf("Envio de %s para o utilizador %s%n", content, targetUsername);
+                targetOutput.println(message.getContent());
+                System.out.printf("Envio de %s para o utilizador %s%n", message.getContent(), targetUsername);
             } catch (IOException e) {
                 System.out.printf("Error sending message to %s%n", targetUsername);
             }

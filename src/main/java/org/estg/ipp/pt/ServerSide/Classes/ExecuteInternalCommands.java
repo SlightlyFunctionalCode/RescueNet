@@ -33,7 +33,7 @@ public class ExecuteInternalCommands {
     private MessageService messageService;
 
     public boolean isInternalCommand(String command) {
-        return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT") || command.equals("READY");
+        return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT") || command.equals("READY") || command.equals("CONFIRM_READ");
     }
 
     public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
@@ -43,22 +43,35 @@ public class ExecuteInternalCommands {
                     handleLogin(payload, out, clientSocket, groupList, usersWithPermissionsOnline, pendingApprovals);
             case "LOGOUT" -> handleLogout(payload, out);
             case "READY" -> handlePenddingRequest(payload, out, pendingApprovals);
-            case "CONFIRM_READ" -> handleIsReadConfirmation(payload);
+            case "CONFIRM_READ" -> new Thread(() -> handleIsReadConfirmation(command + ":" + payload)).start();
 
             default -> out.println("ERRO: Comando interno inválido");
         }
     }
 
     private void handleIsReadConfirmation(String payload) {
-        String messageId = payload.substring("CONFIRM_READ: ".length());
-
         try {
-            messageService.markAsRead(Long.parseLong(messageId));
-            System.out.println("Message " + messageId + " marked as read.");
+            Matcher confirmMatcher = RegexPatterns.CONFIRM_READ.matcher(payload.trim());
+            if (confirmMatcher.matches()) {
+                String messageId = confirmMatcher.group("id");
+
+                if (messageId == null) {
+                    System.err.println("Failed to mark message as read");
+                    return;
+                }
+
+                // Parse and mark as read
+                long messageIdLong = Long.parseLong(messageId);
+                messageService.markAsRead(messageIdLong);
+                System.out.println("Message " + messageId + " marked as read by Thread: " + Thread.currentThread().getName());
+            } else {
+                System.err.println("Invalid CONFIRM_READ payload: " + payload);
+            }
         } catch (Exception e) {
-            System.err.println("Failed to mark message as read: " + e.getMessage());
+            System.err.println("Error processing CONFIRM_READ: " + e.getMessage());
         }
     }
+
 
     private void handleRegister(String payload, PrintWriter out) {
         Matcher registerMatcher = RegexPatterns.REGISTER.matcher(payload);
@@ -135,7 +148,8 @@ public class ExecuteInternalCommands {
         List<Message> unreadMessages = messageService.getUnreadMessages(username);
 
         for (Message unreadMessage : unreadMessages) {
-            NotificationHandler.sendMessage(unreadMessage.getReceiver(), unreadMessage.getSender(), unreadMessage.getContent(), messageService);
+
+            NotificationHandler.sendMessage(unreadMessage.getReceiver(), unreadMessage);
         }
     }
 
@@ -188,7 +202,6 @@ public class ExecuteInternalCommands {
             }
         }
     }
-
 }
 
 

@@ -1,5 +1,7 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
+import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
+import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
 import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
@@ -9,6 +11,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MulticastChatService extends AbstractChatService {
     private final MulticastManagerService multicastManagerService;
@@ -41,8 +45,9 @@ public class MulticastChatService extends AbstractChatService {
             new Thread(() -> {
                 while (serverInput.hasNextLine()) {
                     String serverMessage = serverInput.nextLine();
-                    System.out.println("**" + serverMessage + "**");
-                    handleIncomingMessage(serverMessage,out);
+                    String processedMessage = handleIncomingMessage(serverMessage, out);
+
+                    System.out.println("**" + processedMessage + "**");
                 }
             }).start();
 
@@ -71,19 +76,26 @@ public class MulticastChatService extends AbstractChatService {
         }
     }
 
-    public void handleIncomingMessage(String message, PrintWriter out) {
+    public String handleIncomingMessage(String message, PrintWriter out) {
+        Matcher messageMatcher = RegexPatterns.MESSAGE.matcher(message);
+        if (messageMatcher.matches()) {
+            String messageId = messageMatcher.group("id");
 
-        // Extract the message ID (assume message format contains messageId)
-        String messageId = message.split("/")[1];
+            if (messageId != null) {
+                // Send an isRead confirmation to the server
+                messageId = messageId.replace("/", "");
+                sendIsReadConfirmation(messageId, out);
 
-        System.out.println(message);
+                Pattern pattern = Pattern.compile("/.+?/"); // Matches text enclosed by single slashes
 
-        // Send an isRead confirmation to the server
-        sendIsReadConfirmation(messageId, out);
+                return message.replaceAll(pattern.pattern(), "");
+            }
+        }
+        return null;
     }
 
     private void sendIsReadConfirmation(String messageId, PrintWriter out) {
-        String confirmationMessage = "CONFIRM_READ: " + messageId;
+        String confirmationMessage = "CONFIRM_READ:" + messageId;
         out.println(confirmationMessage);
     }
 }

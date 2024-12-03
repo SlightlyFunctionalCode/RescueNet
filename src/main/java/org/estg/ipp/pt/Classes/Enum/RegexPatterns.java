@@ -19,7 +19,9 @@ public enum RegexPatterns {
     LOGIN_SUCCESS("^SUCESSO:.*Grupo:\\s(?<address>[\\d\\.]+):(?<port>\\d+)$"), // Login success with address and port
     LOGIN_FAILED("^FAILED$"),                                              // Login failed
     GENERIC_RESPONSE("^(?<status>SUCESSO|FAILED|ERROR):.*$"),   // Generic server response validation
-    READY("^(?<username>.+)$");
+    READY("^(?<username>.+)$"),
+    MESSAGE("^PRIVATE:(?<id>/\\d+/).+$"),
+    CONFIRM_READ("^CONFIRM_READ:(?<id>\\d+)$");
 
     private final Pattern pattern;
 

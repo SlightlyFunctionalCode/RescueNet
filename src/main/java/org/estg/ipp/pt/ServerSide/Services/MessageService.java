@@ -18,15 +18,20 @@ public class MessageService {
         return messageRepository.save(message).getId();
     }
 
-    public void updateContent(String content, Long messageId) {
+    public Message updateContent(String content, Long messageId) {
         Optional<Message> messageOptional = messageRepository.findById(messageId);
         if (messageOptional.isPresent()) {
             Message message = messageOptional.get();
             message.setContent(content);
-            messageRepository.save(message);
+            return messageRepository.save(message);
         } else {
             throw new IllegalArgumentException("Message not found with ID: " + messageId);
         }
+    }
+
+    public boolean isSameMessage(Long messageId) {
+        Optional<Message> messageOptional = messageRepository.findById(messageId);
+        return messageOptional.isPresent();
     }
 
     public List<Message> getUnreadChatMessages(String receiver, String sender) {
