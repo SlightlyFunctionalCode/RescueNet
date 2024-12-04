@@ -4,7 +4,6 @@ import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
-import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
@@ -28,7 +27,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
-@SpringBootApplication(scanBasePackages = "org.estg.ipp.pt.ServerSide")
+@SpringBootApplication(scanBasePackages = {"org.estg.ipp.pt.ServerSide", "org.estg.ipp.pt.Security"})
 public class Server {
 
     @Autowired
@@ -37,7 +36,6 @@ public class Server {
     @Autowired
     private ExecuteUserCommands userCommands;
 
-    public final Map<String, String> pendingApprovals = new HashMap<>();
     public final Set<String> usersWithPermissionsOnline = new HashSet<>();
     private static final ConcurrentHashMap<String, Socket> clients = new ConcurrentHashMap<>();
     @Autowired
@@ -51,7 +49,7 @@ public class Server {
 
     @Bean
     public CommandLineRunner startServer(ExecuteInternalCommands executeInternalCommands) {
-        return args -> {
+        return _ -> {
             int serverPort = 5000;
 
             executeInternalCommands.groupService.initializeDefaultGroups();
@@ -105,30 +103,22 @@ public class Server {
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.USER_ACTION, "Solicitação recebida: " + request));
 
                 Matcher requestMatcher = RegexPatternsCommands.REQUEST.matcher(request);
-                System.out.println(requestMatcher);
                 if (requestMatcher.matches()) {
                     String command = requestMatcher.group("command");
                     String requester = requestMatcher.group("requester");
                     String payload = requestMatcher.group("payload") != null ? requestMatcher.group("payload") : "";
-                    System.out.println(command);
-                    System.out.println(payload);
                     // Delegar o comando à classe correta
                     if (internalCommands.isInternalCommand(command)) {
-                        internalCommands.handleInternalCommand(command, payload, out, clientSocket, userCommands.groupService.getAllGroups(), usersWithPermissionsOnline, pendingApprovals);
+                        internalCommands.handleInternalCommand(command, payload, out, clientSocket, userCommands.groupService.getAllGroups(), usersWithPermissionsOnline);
                     } else {
                         try {
                             userCommands.handleUserCommand(
-                                    serverSocket.getInetAddress(), command, request, requester, payload, out,
-                                    pendingApprovals, usersWithPermissionsOnline);
+                                    command, request, requester, payload, out,
+                                    usersWithPermissionsOnline);
                         } catch (IOException e) {
                             throw new IOException(e.getMessage());
                         }
                     }
-                } else if (request.startsWith("CHAT")) {
-                    GroupService groupService = new GroupService();
-
-                    Group group = groupService.getGroupByName("HIGH_LEVEL");
-                    NotificationHandler.notifyGroup(group, request.substring(4));
                 } else {
                     out.println("ERRO: Formato de solicitação inválido");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato de solicitação inválido"));

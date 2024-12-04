@@ -18,4 +18,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findMessageByIsReadIsFalseAndReceiver(String receiver);
 
     List<Message> findChatMessageByIsApprovalRequestIsTrue();
+
+    boolean existsBySenderAndIsApprovalRequestIsTrue(String sender);
 }

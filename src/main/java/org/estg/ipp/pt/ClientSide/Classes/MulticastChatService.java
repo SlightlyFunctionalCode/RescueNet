@@ -86,12 +86,12 @@ public class MulticastChatService extends AbstractChatService {
                 messageId = messageId.replace("/", "");
                 sendIsReadConfirmation(messageId, out);
 
-                Pattern pattern = Pattern.compile("/.+?/"); // Matches text enclosed by single slashes
+                Pattern pattern = Pattern.compile("/.+?/");
 
                 return message.replaceAll(pattern.pattern(), "");
             }
         }
-        return null;
+        return message;
     }
 
     private void sendIsReadConfirmation(String messageId, PrintWriter out) {

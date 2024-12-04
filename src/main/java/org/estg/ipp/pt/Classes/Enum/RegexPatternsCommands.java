@@ -4,8 +4,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum RegexPatternsCommands {
-    APPROVE("^/approve(?:\\s(?<help>-h))?(?:\\s(?<requester>.+))?:(?<username>.+)$"),                                 // Approve-specific regex
-    REJECT("^/reject(?:\\s(?<help>-h))?(?:\\s(?<requester>.+))?:(?<username>.+)$"),
+    APPROVE("^/approve(?:\\s(?<help>-h))?(?:\\s(?<id>\\d+)\\s(?<requester>[^\\s:]+))?:(?<username>.+)$"),                                 // Approve-specific regex
+    REJECT("^/reject(?:\\s(?<help>-h))?(?:\\s(?<id>\\d+)\\s(?<requester>[^\\s:]+))?:(?<username>.+)$"),
     EXPORT("^/export(?:\\s(?<help>-h))?(?:\\s(?<startDate>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}))?(?:\\s(?<endDate>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}))?(?:\\s(?<tag>[^\\s:]+))?:(?<username>.+)$"),
     REQUEST("^(?<command>/\\w+|\\w+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$"),
     JOIN("^/join(?:\\s(?<help>-h))?(?:\\s(?<name>.+))?:(?<requester>.+)$"),

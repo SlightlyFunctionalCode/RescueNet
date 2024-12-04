@@ -36,13 +36,12 @@ public class ExecuteInternalCommands {
         return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT") || command.equals("READY") || command.equals("CONFIRM_READ");
     }
 
-    public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
+    public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline) {
         switch (command) {
             case "REGISTER" -> handleRegister(payload, out);
-            case "LOGIN" ->
-                    handleLogin(payload, out, clientSocket, groupList, usersWithPermissionsOnline, pendingApprovals);
+            case "LOGIN" -> handleLogin(payload, out, clientSocket, groupList, usersWithPermissionsOnline);
             case "LOGOUT" -> handleLogout(payload, out);
-            case "READY" -> handlePenddingRequest(payload, out, pendingApprovals);
+            case "READY" -> handlePendingRequest(payload, out);
             case "CONFIRM_READ" -> new Thread(() -> handleIsReadConfirmation(command + ":" + payload)).start();
 
             default -> out.println("ERRO: Comando interno inválido");
@@ -111,10 +110,8 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private void handleLogin(String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline, Map<String, String> pendingApprovals) {
+    private void handleLogin(String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline) {
         Matcher loginMatcher = RegexPatterns.LOGIN.matcher(payload);
-        System.out.println("loginMatcher: " + loginMatcher);
-
         if (loginMatcher.matches()) {
             String usernameOrEmail = loginMatcher.group("username");
             String password = loginMatcher.group("password");
@@ -133,7 +130,9 @@ public class ExecuteInternalCommands {
             System.out.println(response);
 
             /*TODO: Devo guardar junto a permissao*/
-            if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL || user.getPermissions() == Permissions.LOW_LEVEL) {
+            if (user.getPermissions() == Permissions.HIGH_LEVEL
+                    || user.getPermissions() == Permissions.MEDIUM_LEVEL
+                    || user.getPermissions() == Permissions.LOW_LEVEL) {
                 usersWithPermissionsOnline.add(user.getName());
                 System.out.println("User com permissões deu join");
             }
@@ -182,7 +181,7 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private void handlePenddingRequest(String payload, PrintWriter out, Map<String, String> pendingApprovals) {
+    private void handlePendingRequest(String payload) {
         Matcher registerMatcher = RegexPatterns.READY.matcher(payload);
         if (registerMatcher.matches()) {
             String username = registerMatcher.group("username");
@@ -192,12 +191,15 @@ public class ExecuteInternalCommands {
             User user = userService.getUserByName(username);
             if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {
                 // Enviar notificações para pedidos pendentes
-                for (Map.Entry<String, String> entry : pendingApprovals.entrySet()) {
-                    String requestingUser = entry.getKey();
-                    String operationName = entry.getValue();
-                    System.out.println(user.getCurrentGroup().getAddress());
-                    System.out.println(user.getCurrentGroup().getPort());
-                    notifyGroup(user.getCurrentGroup(), "Pedido pendente: O usuário " + requestingUser + " solicitou a operação '" + operationName + "'. Aprove ou rejeite.");
+
+                List<Message> pendingApprovals = messageService.getPendingApprovalRequests();
+
+                for (Message m : pendingApprovals) {
+                    String requestingUser = m.getSender();
+                    String operationName = m.getContent();
+
+
+                    notifyGroup(groupService.getGroupByName("HIGH_LEVEL"), "Pedido pendente: O utilizador " + requestingUser + " solicitou a operação '" + operationName + "'" + " com o id " + m.getId() + ". Aprove ou rejeite.");
                 }
             }
         }

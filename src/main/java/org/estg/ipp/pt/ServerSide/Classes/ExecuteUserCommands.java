@@ -1,5 +1,6 @@
 package org.estg.ipp.pt.ServerSide.Classes;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.estg.ipp.pt.Classes.Enum.*;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
@@ -35,26 +36,35 @@ public class ExecuteUserCommands {
     @Autowired
     public MessageService messageService;
 
-    public void handleUserCommand(InetAddress serverAddress, String command, String request, String requester, String payload, PrintWriter out,
-                                  Map<String, String> pendingApprovals, Set<String> usersWithPermissionsOnline) throws IOException {
+    public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
+                                  Set<String> usersWithPermissionsOnline) throws IOException {
 
         /*TODO: Adicionar Comando para adicionar pessoas aos grupos personalizados*/
         /*TODO: Adicionar comando para listar grupos que um user pode dar join */
         /*TODO: Adicionar comando para listar todos os comandos disponíveis */
-        /*TODO: Adicionar comando para mandar menssagem para um utilizador especifico (/chat)*/
         switch (command) {
             case "/evac", "/resdist", "/emerg" ->
-                    processOperationCommand(payload, command, out, pendingApprovals, usersWithPermissionsOnline);
+                    processOperationCommand(payload, command, out, usersWithPermissionsOnline);
             case "/approve" -> {
                 Matcher approveMatcher = RegexPatternsCommands.APPROVE.matcher(request);
                 if (approveMatcher.matches()) {
                     String help = approveMatcher.group("help");
-                    String username = approveMatcher.group("username");
 
+                    String username;
                     if (help != null) {
                         out.println(APPROVE_HELP);
                     } else if (requester != null) {
-                        handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline);
+                        long id = 0;
+                        try {
+                            id = Long.parseLong(approveMatcher.group("id"));
+                        } catch (NumberFormatException e) {
+                            out.println("ERRO: Formato inválido para APPROVE. Use -h para descobrir os parâmetros");
+                            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para APPROVE"));
+                        }
+
+                        requester = approveMatcher.group("requester");
+                        username = approveMatcher.group("username");
+                        handleApprovalCommand(command, id, username, requester, out);
                     } else {
                         out.println("ERRO: Formato inválido para APPROVE. Use -h para descobrir os parâmetros");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para APPROVE"));
@@ -68,12 +78,23 @@ public class ExecuteUserCommands {
                 Matcher rejectMatcher = RegexPatternsCommands.REJECT.matcher(request);
                 if (rejectMatcher.matches()) {
                     String help = rejectMatcher.group("help");
-                    String username = rejectMatcher.group("username");
+                    String username;
+
 
                     if (help != null) {
                         out.println(REJECT_HELP);
                     } else if (requester != null) {
-                        handleApprovalCommand(command, username, requester, out, pendingApprovals, usersWithPermissionsOnline);
+                        long id = 0;
+                        try {
+                            id = Long.parseLong(rejectMatcher.group("id"));
+                        } catch (NumberFormatException e) {
+                            out.println("ERRO: Formato inválido para REJECT. Use -h para descobrir os parâmetros");
+                            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para REJECT"));
+                        }
+
+                        requester = rejectMatcher.group("requester");
+                        username = rejectMatcher.group("username");
+                        handleApprovalCommand(command, id, username, requester, out);
                     } else {
                         out.println("ERRO: Formato inválido para REJECT. Use -h para descobrir os parâmetros");
                         logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para REJECT"));
@@ -83,9 +104,7 @@ public class ExecuteUserCommands {
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para REJECT"));
                 }
             }
-            case "/export" -> {
-                processExport(request, out);
-            }
+            case "/export" -> processExport(request, out);
             case "/join" -> {
                 Matcher joinMatcher = RegexPatternsCommands.JOIN.matcher(request);
                 if (joinMatcher.matches()) {
@@ -188,7 +207,7 @@ public class ExecuteUserCommands {
                 if (commandsHelper.matches()) {
                     out.println("COMMANDS START");
                     String name = commandsHelper.group("name");
-                    handleCommandHelper(name, pendingApprovals, usersWithPermissionsOnline);
+                    handleCommandHelper(name);
                 } else {
                     out.println("ERRO: Formato inválido para /create_group. Use -h para descobrir os parâmetros");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
@@ -350,7 +369,6 @@ public class ExecuteUserCommands {
     }
 
     private void processOperationCommand(String username, String command, PrintWriter out,
-                                         Map<String, String> pendingApprovals,
                                          Set<String> usersWithPermissionsOnline) {
         User user = userService.getUserByName(username);
         if (user == null) {
@@ -372,66 +390,57 @@ public class ExecuteUserCommands {
             return;
         }
 
-        if (user.getPermissions().ordinal() >= operation.getRequiredPermission().ordinal()) {
-            // Permissão suficiente - executar a operação
-            List<Group> groups = groupService.getAllGroups();
-            for (Group group : groups) {
-                notifyGroup(group, "Comando executado: " + operation.getName() + " (por " + username + ")");
-            }
-            out.println("SUCESSO: Operação realizada.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Comando executado: \" + operation.getName() + \" (por \" + username + \")\""));
+
+        Message message = new Message(username, "null", operation.getName(), true);
+
+        long id = messageService.saveMessage(message);
+        if (usersWithPermissionsOnline.isEmpty()) {
+            out.println("PENDENTE: Solicitação enviada para aprovação.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
         } else {
-            pendingApprovals.put(username, operation.getName());
-            if (usersWithPermissionsOnline.isEmpty()) {
-                out.println("PENDENTE: Solicitação enviada para aprovação.");
-                logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação realizada com sucesso: Solicitação enviada para aprovação."));
-            } else {
-                Group group = groupService.getGroupByName(operation.getRequiredPermission().name());
-                out.println(group.getAddress());
-                out.println(group.getPort());
-                notifyGroup(group, "Pedido pendente: O usuário " + username + " solicitou a operação '" + operation.getName() + "'. Aprove ou rejeite.");
-            }
+            Group group = groupService.getGroupByName(operation.getRequiredPermission().name());
+            out.println("O seu pedido foi enviado para revisão");
+            notifyGroup(group, "Pedido pendente: O utilizador " + username + " solicitou a operação '" + operation.getName() + "' com o id " + id + ". Aprove ou rejeite.");
         }
     }
 
-
-    private void handleApprovalCommand(String action, String username, String requester, PrintWriter out,
-                                       Map<String, String> pendingApprovals,
-                                       Set<String> usersWithPermissionsOnline) {
-        if (!pendingApprovals.containsKey(requester)) {
-            notifyUser(requester, "ERRO: Não há solicitações pendentes para este utilizador.", usersWithPermissionsOnline, pendingApprovals);
-            out.println("ERRO: Comando desconhecido.");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
+    private void handleApprovalCommand(String action, long id, String username, String requester, PrintWriter out) {
+        if (!messageService.isSameMessage(id)) {
+            out.println("ERRO: Não há solicitações pendentes para este utilizador.");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "ERRO: Não há solicitações pendentes para este utilizador."));
 
             return;
         }
 
-        String operationName = pendingApprovals.remove(requester);
+        try {
+            Message deleted = messageService.deleteMessageById(id);
+            String operationName = deleted.getContent();
 
-        if (action.equals("/approve")) {
-            List<Group> groups = groupService.getAllGroups();
-            for (Group group : groups) {
-                notifyGroup(group, operationName);
+            if (action.equals("/approve")) {
+                List<Group> groups = groupService.getAllGroups();
+                for (Group group : groups) {
+                    notifyGroup(group, operationName);
+                }
+                NotificationHandler.notify(requester, "SUCESSO: Sua solicitação de operação foi aprovada.");
+                out.println("APPROVE: Aprovado com sucesso");
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Comando executado: " + operationName + " (por " + username + ")"));
+
+            } else if (action.equals("/reject")) {
+                NotificationHandler.notify(requester, "ERRO: Sua solicitação de operação foi rejeitada.");
+                out.println("REJECT: Rejectado com sucesso");
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação rejeitada."));
+            } else {
+                out.println("ERRO: Comando desconhecido.");
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
             }
-            notifyUser(requester, "SUCESSO: Sua solicitação de operação foi aprovada.", usersWithPermissionsOnline, pendingApprovals);
-            out.println("APPROVE: Aprovado com sucesso");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Comando executado: " + operationName + " (por " + username + ")"));
-
-        } else if (action.equals("/reject")) {
-            notifyUser(requester, "ERRO: Sua solicitação de operação foi rejeitada.", usersWithPermissionsOnline, pendingApprovals);
-            notifyUser(username, "SUCESSO: Operação rejeitada.", usersWithPermissionsOnline, pendingApprovals);
-            out.println("Reject: Rejectado com sucesso");
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação rejeitada."));
-        } else {
-            notifyUser(username, "ERRO: Comando desconhecido. Use APPROVE ou REJECT.", usersWithPermissionsOnline, pendingApprovals);
+        } catch (EntityNotFoundException e) {
             out.println("ERRO: Comando desconhecido.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando desconhecido."));
         }
     }
 
 
-    private void handleCommandHelper(String username, Map<String, String> pendingApprovals,
-                                     Set<String> usersWithPermissionsOnline) {
+    private void handleCommandHelper(String username) {
         User user = userService.getUserByName(username);
         System.out.println(user.getName() + user.getPermissions());
         List<String> commandsHighLevel = new ArrayList<>();

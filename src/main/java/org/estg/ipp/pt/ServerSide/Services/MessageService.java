@@ -1,9 +1,11 @@
 package org.estg.ipp.pt.ServerSide.Services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.ServerSide.Repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +18,23 @@ public class MessageService {
     public Long saveMessage(Message message) {
         // Save the message in the database
         return messageRepository.save(message).getId();
+    }
+
+    public boolean hasUserSentApprovalRequests(String sender) {
+        return messageRepository.existsBySenderAndIsApprovalRequestIsTrue(sender);
+    }
+
+    @Transactional
+    public Message deleteMessageById(long id) {
+        // Retrieve the entity first
+        Optional<Message> messageOpt = messageRepository.findById(id);
+        if (messageOpt.isPresent()) {
+            Message message = messageOpt.get();
+            messageRepository.delete(message); // Delete the entity
+            return message; // Return the deleted entity
+        } else {
+            throw new EntityNotFoundException("Message with ID " + id + " not found.");
+        }
     }
 
     public Message updateContent(String content, Long messageId) {

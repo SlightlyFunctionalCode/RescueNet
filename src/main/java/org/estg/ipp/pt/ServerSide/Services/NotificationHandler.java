@@ -69,13 +69,12 @@ public class NotificationHandler {
         }
     }
 
-    public static void notifyUser(String username, String message,
-                                  Set<String> usersWithPermissionsOnline,
-                                  Map<String, String> pendingApprovals) {
+    public static void notifyApprovalRequest(String username, String message,
+                                  Set<String> usersWithPermissionsOnline, MessageService messageService) {
         // Verificar se o usuário está online
         if (!usersWithPermissionsOnline.contains(username)) {
             System.out.println("Utilizador " + username + " não está online. Registrando notificação pendente.");
-            saveNotificationForLater(username, message, pendingApprovals);
+            saveNotificationForLater(username, message, messageService);
             return;
         }
 
@@ -83,7 +82,7 @@ public class NotificationHandler {
         Socket socket = getUserSocket(username);
         if (socket == null || socket.isClosed()) {
             System.out.println("Socket indisponível para " + username + ". Registrando notificação pendente.");
-            saveNotificationForLater(username, message, pendingApprovals);
+            saveNotificationForLater(username, message, messageService);
             return;
         }
 
@@ -94,38 +93,21 @@ public class NotificationHandler {
             System.out.println("Notificação enviada para o utilizador " + username + ": " + message);
         } catch (IOException e) {
             System.out.println("Erro ao enviar notificação para " + username + ": " + e.getMessage());
-            saveNotificationForLater(username, message, pendingApprovals);
+            if (!message.startsWith("SUCESSO")) {
+                saveNotificationForLater(username, message, messageService);
+            }
         }
     }
 
     /**
      * Salva a notificação para ser entregue posteriormente.
      */
-    private static void saveNotificationForLater(String username, String message,
-                                                 Map<String, String> pendingApprovals) {
-        // Adiciona a notificação ao map ou log para entrega posterior
-        pendingApprovals.put(username, message);
-        System.out.println("Notificação salva para entrega posterior: " + message + " para " + username);
-    }
+    private static void saveNotificationForLater(String username, String message, MessageService messageService) {
+        Message approval = new Message(username, "null", message, true);
 
-    protected static void sendMessageToUser(String username, String message, Set<String> usersWithPermissionsOnline) {
-        // Verifica se o usuário está online e tem um socket ativo
-        if (usersWithPermissionsOnline.contains(username)) {
-            try {
-                Socket userSocket = getUserSocket(username);
-                if (userSocket != null) {
-                    PrintWriter userOut = new PrintWriter(userSocket.getOutputStream(), true);
-                    userOut.println(message);  // Envia a mensagem para o usuário
-                    System.out.println("Mensagem enviada para " + username + ": " + message);
-                } else {
-                    System.out.println("Erro: Socket do usuário " + username + " não encontrado.");
-                }
-            } catch (IOException e) {
-                System.out.println("Erro ao enviar mensagem para o usuário " + username + ": " + e.getMessage());
-            }
-        } else {
-            System.out.println("Usuário " + username + " não está online.");
-        }
+        messageService.saveMessage(approval);
+
+        System.out.println("Notificação salva para entrega posterior: " + message + " para " + username);
     }
 
     public static void notifyGroup(Group notifyGroup, String message) {
