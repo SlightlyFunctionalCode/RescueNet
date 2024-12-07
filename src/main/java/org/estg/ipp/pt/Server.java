@@ -1,5 +1,6 @@
 package org.estg.ipp.pt;
 
+import org.estg.ipp.pt.Classes.Enum.Permissions;
 import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
@@ -36,7 +37,10 @@ public class Server {
     @Autowired
     private ExecuteUserCommands userCommands;
 
-    public final Set<String> usersWithPermissionsOnline = new HashSet<>();
+    @Autowired
+    private GroupService groupService;
+
+    public final ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, Socket> clients = new ConcurrentHashMap<>();
     @Autowired
     private LogService logService;
@@ -109,7 +113,7 @@ public class Server {
                     String payload = requestMatcher.group("payload") != null ? requestMatcher.group("payload") : "";
                     // Delegar o comando à classe correta
                     if (internalCommands.isInternalCommand(command)) {
-                        internalCommands.handleInternalCommand(command, payload, out, clientSocket, userCommands.groupService.getAllGroups(), usersWithPermissionsOnline);
+                        internalCommands.handleInternalCommand(command, payload, out, clientSocket, groupService.getAllGroups(), usersWithPermissionsOnline);
                     } else {
                         try {
                             userCommands.handleUserCommand(

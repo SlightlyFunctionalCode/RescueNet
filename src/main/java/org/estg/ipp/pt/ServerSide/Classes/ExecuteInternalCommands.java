@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGroup;
@@ -36,12 +37,12 @@ public class ExecuteInternalCommands {
         return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT") || command.equals("READY") || command.equals("CONFIRM_READ");
     }
 
-    public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline) {
+    public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
         switch (command) {
             case "REGISTER" -> handleRegister(payload, out);
-            case "LOGIN" -> handleLogin(payload, out, clientSocket, groupList, usersWithPermissionsOnline);
+            case "LOGIN" -> handleLogin(payload, out, clientSocket, usersWithPermissionsOnline);
             case "LOGOUT" -> handleLogout(payload, out);
-            case "READY" -> handlePendingRequest(payload, out);
+            case "READY" -> handlePendingRequest(payload);
             case "CONFIRM_READ" -> new Thread(() -> handleIsReadConfirmation(command + ":" + payload)).start();
 
             default -> out.println("ERRO: Comando interno inválido");
@@ -110,7 +111,7 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private void handleLogin(String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline) {
+    private void handleLogin(String payload, PrintWriter out, Socket clientSocket, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
         Matcher loginMatcher = RegexPatterns.LOGIN.matcher(payload);
         if (loginMatcher.matches()) {
             String usernameOrEmail = loginMatcher.group("username");
@@ -125,15 +126,13 @@ public class ExecuteInternalCommands {
                 return;
             }
 
-            String response = loginUser(usernameOrEmail, password, clientSocket, groupList,
-                    usersWithPermissionsOnline);
+            String response = loginUser(usernameOrEmail, password, clientSocket);
             System.out.println(response);
 
-            /*TODO: Devo guardar junto a permissao*/
             if (user.getPermissions() == Permissions.HIGH_LEVEL
                     || user.getPermissions() == Permissions.MEDIUM_LEVEL
                     || user.getPermissions() == Permissions.LOW_LEVEL) {
-                usersWithPermissionsOnline.add(user.getName());
+                usersWithPermissionsOnline.put(user.getName(), user.getPermissions());
                 System.out.println("User com permissões deu join");
             }
 
@@ -152,7 +151,7 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private String loginUser(String usernameOrEmail, String password, Socket clientSocket, List<Group> groupList, Set<String> usersWithPermissionsOnline) {
+    private String loginUser(String usernameOrEmail, String password, Socket clientSocket) {
 
         User user = userService.authenticate(usernameOrEmail, password);
 
