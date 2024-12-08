@@ -1,6 +1,6 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
-import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
+import org.estg.ipp.pt.ClientSide.Classes.Enums.ServerResponseRegex;
 
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class ServerMessageProcessor {
     public String processIncomingMessage(String message, PrintWriter out) {
-        Matcher messageMatcher = RegexPatterns.MESSAGE.matcher(message);
+        Matcher messageMatcher = ServerResponseRegex.MESSAGE.matcher(message);
         if (messageMatcher.matches()) {
             String messageId = messageMatcher.group("id");
             if (messageId != null) {

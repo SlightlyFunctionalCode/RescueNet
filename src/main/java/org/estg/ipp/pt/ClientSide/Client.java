@@ -1,7 +1,7 @@
 package org.estg.ipp.pt.ClientSide;
 
-import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
+import org.estg.ipp.pt.ClientSide.Classes.Enums.ServerResponseRegex;
 import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -60,7 +60,7 @@ public class Client {
             System.out.print(Constants.INPUT_USER_EMAIL);
             email = scanner.nextLine();
 
-            if (RegexPatterns.EMAIL.matches(email)) {
+            if (ServerResponseRegex.EMAIL.matches(email)) {
                 break;
             } else {
                 System.out.println(Constants.ERROR_INVALID_EMAIL);
@@ -94,24 +94,21 @@ public class Client {
         }
         System.out.println(response);
 
-        if (RegexPatterns.LOGIN_SUCCESS.matches(response)) {
-            Matcher matcher = RegexPatterns.LOGIN_SUCCESS.matcher(response);
-            if (matcher.find()) {
-                String groupAddress = matcher.group(1);
-                int port = Integer.parseInt(matcher.group(2));
+        Matcher matcher = ServerResponseRegex.LOGIN_SUCCESS.matcher(response);
+        if (matcher.matches()) {
+                String groupAddress = matcher.group("address");
+                int port = Integer.parseInt(matcher.group("port"));
 
                 try {
                     MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, socket, serverAddress);
-
 
                     chatService.startChat(groupAddress, port, usernameOrEmail);
                 } catch (IOException e) {
                     System.out.println(Constants.ERROR_STARTING_CHAT_SESSION);
                 }
-            }
-        } else if (RegexPatterns.LOGIN_FAILED.matches(response)) {
+        } else if (ServerResponseRegex.LOGIN_FAILED.matches(response)) {
             System.out.println(Constants.ERROR_INVALID_CREDENTIALS);
-        } else if (!RegexPatterns.GENERIC_RESPONSE.matches(response)) {
+        } else if (!ServerResponseRegex.GENERIC_RESPONSE.matches(response)) {
             System.out.println(Constants.ERROR_GENERIC);
         }
     }

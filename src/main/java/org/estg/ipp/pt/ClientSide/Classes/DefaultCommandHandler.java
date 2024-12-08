@@ -1,7 +1,7 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
-import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
+import org.estg.ipp.pt.ClientSide.Classes.Enums.ServerResponseRegex;
 import org.estg.ipp.pt.ClientSide.Interfaces.ChatService;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 
@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.regex.Matcher;
 
 public class DefaultCommandHandler implements CommandHandler {
     private final String host;
@@ -27,15 +28,17 @@ public class DefaultCommandHandler implements CommandHandler {
 
             String serverResponse = in.readLine();
 
-            if (RegexPatterns.SERVER_PENDING.matches(serverResponse)) {
+            Matcher joinChatMatcher = ServerResponseRegex.SERVER_CHAT_GROUP.matcher(serverResponse);
+
+            if (ServerResponseRegex.SERVER_PENDING.matches(serverResponse)) {
                 System.out.println(Constants.SERVER_PENDING);
-            } else if (RegexPatterns.SERVER_SUCCESS.matches(serverResponse)) {
+            } else if (ServerResponseRegex.SERVER_SUCCESS.matches(serverResponse)) {
                 System.out.println(Constants.SERVER_SUCCESS);
-            } else if (RegexPatterns.SERVER_ERROR.matcher(serverResponse).matches()) {
-                System.out.println("Erro: " + RegexPatterns.SERVER_ERROR.matcher(serverResponse).replaceFirst("$1"));
-            } else if (RegexPatterns.SERVER_APPROVE.matches(serverResponse)) {
+            } else if (ServerResponseRegex.SERVER_ERROR.matcher(serverResponse).matches()) {
+                System.out.println("Erro: " + ServerResponseRegex.SERVER_ERROR.matcher(serverResponse).replaceFirst("$1"));
+            } else if (ServerResponseRegex.SERVER_APPROVE.matches(serverResponse)) {
                 System.out.println(Constants.SERVER_APPROVE);
-            } else if (RegexPatterns.SERVER_REJECT.matches(serverResponse)) {
+            } else if (ServerResponseRegex.SERVER_REJECT.matches(serverResponse)) {
                 System.out.println(Constants.SERVER_REJECT);
             } else if (serverResponse.startsWith(Constants.SERVER_START_HELP)) {
                 String line;
@@ -43,10 +46,9 @@ public class DefaultCommandHandler implements CommandHandler {
                     if (line.equals(Constants.SERVER_END_HELP)) break;
                     System.out.println(line);
                 }
-            } else if (serverResponse.startsWith("CHAT_GROUP")) {
-                String[] parts = serverResponse.split(":");
-                String newAddress = parts[1];
-                String newPort = parts[2];
+            } else if (joinChatMatcher.matches()) {
+                String newAddress = joinChatMatcher.group("address");
+                String newPort = joinChatMatcher.group("port");
                 try {
                     chatService.stopChat();
                     chatService = new MulticastChatService(newAddress, Integer.parseInt(newPort), name, serverSocket, host);
