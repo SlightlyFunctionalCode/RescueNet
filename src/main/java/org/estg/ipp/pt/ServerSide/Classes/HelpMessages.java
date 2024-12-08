@@ -79,6 +79,19 @@ public final class HelpMessages {
             --END HELP--
             """;
 
+    public static final String CHAT_HELP = """
+            --HELP--
+            - Os parâmetros que podem ser executados por /chat são:
+            -
+            - <targetUsername> nome do destinatário
+            -
+            - <message> mensagem que se pretende enviar
+            -
+            - Exemplos:
+            - /chat user hey como estás?
+            --END HELP--
+            """;
+
     private HelpMessages() {
         throw new UnsupportedOperationException("Não se pode instanciar uma classe de constantes");
     }

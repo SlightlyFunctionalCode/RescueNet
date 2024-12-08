@@ -165,10 +165,15 @@ public class ExecuteUserCommands {
             case "/chat" -> {
                 Matcher chatMatcher = RegexPatternsCommands.CHAT.matcher(request);
                 if (chatMatcher.matches()) {
+                    String help = chatMatcher.group("help");
                     String targetUsername = chatMatcher.group("targetUsername");
                     String message = chatMatcher.group("message");
                     String username = chatMatcher.group("username");
-                    if (targetUsername != null && !targetUsername.isEmpty() && message != null && !message.isEmpty()) {
+
+
+                    if (help != null) {
+                        out.println(CHAT_HELP);
+                    } else if (targetUsername != null && !targetUsername.isEmpty() && message != null && !message.isEmpty()) {
                         Long id = messageService.saveMessage(new Message(username, targetUsername, ""));
 
                         String content = String.format("PRIVATE:/%s/ %s: %s", id.toString(), username, message);

@@ -11,7 +11,7 @@ public enum RegexPatternsCommands {
     JOIN("^/join(?:\\s(?<help>-h))?(?:\\s(?<name>.+))?:(?<requester>.+)$"),
     CHANGE_PERMISSIONS("^/change_permission(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<permission>.+))?:(?<requester>.+)$"),
     CREATE_GROUP("^/create_group(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<publicOrPrivate>.+))?:(?<requester>.+)$"),
-    CHAT("^/chat(?:\\s(?<targetUsername>\\S+)\\s(?<message>.+))?:(?<username>.+)$"),
+    CHAT("^/chat(?:\\s(?<help>-h))?(?:\\s(?<targetUsername>\\S+)\\s(?<message>.+))?:(?<username>.+)$"),
     COMMANDS("^/commands:(?<name>.+)$");
 
     private final Pattern pattern;
