@@ -35,4 +35,6 @@ public interface ProcessCommandsInterface {
     void handleAddToGroup(String username, String requester, String group, PrintWriter out);
 
     void handleListGroups(String username, PrintWriter out);
+
+    void handleLeaveGroup(String username, String group, PrintWriter out);
 }

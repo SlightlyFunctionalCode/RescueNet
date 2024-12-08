@@ -379,4 +379,26 @@ public class ProcessCommands implements ProcessCommandsInterface {
         result.append("--END HELP--");
         out.println(result);
     }
+
+    public void handleLeaveGroup(String username, String groupName, PrintWriter out) {
+        User user = userService.getUserByName(username);
+        Group group;
+        try {
+            if (user == null) {
+                out.println("Erro: Erro ao sair do Grupo");
+                return;
+            } else if (groupName.equals("GERAL") || groupName.equals("HIGH_LEVEL") || groupName.equals("MEDIUM_LEVEL") || groupName.equals("LOW_LEVEL")) {
+                out.println("Erro: Não é possível sair dos grupos base");
+                return;
+            }
+
+            group = groupService.getUserGroupByNameAndVerify(user.getId(), groupName);
+
+            groupService.leaveGroup(user, group);
+
+            out.println("Você saiu do grupo");
+        } catch (Exception e) {
+            out.println("Erro: Erro ao sair do Grupo");
+        }
+    }
 }

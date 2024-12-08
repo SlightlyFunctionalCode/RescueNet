@@ -90,6 +90,17 @@ public final class HelpMessages {
             --END HELP--
             """;
 
+    public static final String LEAVE_HELP = """
+            --HELP--
+            - Os parâmetros que podem ser executados por /leave são:
+            -
+            - <groupName> nome do grupo
+            -
+            - Exemplos:
+            - /leave GROUP
+            --END HELP--
+            """;
+
     private HelpMessages() {
         throw new UnsupportedOperationException("Não se pode instanciar uma classe de constantes");
     }

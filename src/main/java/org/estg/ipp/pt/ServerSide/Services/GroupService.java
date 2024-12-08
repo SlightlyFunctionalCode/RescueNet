@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -185,13 +186,33 @@ public class GroupService {
         return savedGroup;
     }
 
+    @Transactional
+    public void leaveGroup(User user, Group group) {
+        group = groupRepository.findById(group.getId()).orElseThrow(() -> new RuntimeException("Group not found"));
+        int groupElements = group.getUsers().size();
+
+        if (groupElements <= 1) {
+            groupRepository.delete(group);
+        } else {
+            List<User> initial = group.getUsers();
+            initial.remove(user);
+            group.setUsers(initial);
+
+            if (user.getId().equals(group.getCreatedBy())) {
+                group.setCreatedBy(group.getUsers().getFirst().getId());
+            }
+            groupRepository.save(group);
+            System.out.println("Utilizador removido do grupo: " + group.getName());
+        }
+    }
+
 
     @Transactional
     public void removeUserFromRestrictedGroups(User user, Group group) {
         // Remover o usuário do grupo
         group.getUsers().remove(user);
         groupRepository.save(group);
-        System.out.println("Usuário removido do grupo: " + group.getName());
+        System.out.println("Utilizador removido do grupo: " + group.getName());
     }
 
 

@@ -48,7 +48,7 @@ public class Server {
     private ServerSocket serverSocket;
 
     public static void main(String[] args) {
-        SpringApplication.run(Server.class, args); // Start the Spring Boot application
+        SpringApplication.run(Server.class, args);
     }
 
     @Bean

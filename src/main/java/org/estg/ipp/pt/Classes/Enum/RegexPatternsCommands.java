@@ -15,7 +15,7 @@ public enum RegexPatternsCommands {
     COMMANDS("^/commands:(?<name>.+)$"),
     ADD_TO_GROUP("^/addToGroup(?:\\s(?<userToAdd>.+))\\s(?<group>[^\\s:]+)?:(?<username>.+)"),
     LIST_GROUPS("^/groups:(?<username>.+)$"),
-    ;
+    LEAVE_GROUP("^/leave(?:\\s(?<help>-h))?(?:\\s(?<groupName>\\S+))?:(?<username>.+)$");
 
 
     private final Pattern pattern;

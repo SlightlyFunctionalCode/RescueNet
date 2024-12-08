@@ -29,7 +29,6 @@ public class ExecuteUserCommands {
 
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
                                   ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) throws IOException {
-        /*TODO: Adicionar comando para listar grupos que um user pode dar join */
         /*TODO: Adicionar comando para listar todos os comandos disponíveis */
         /*TODO: Adicionar comando para alertar utilizadores */
         /*TODO: Adicionar comando para user poder sair de um grupo*/
@@ -209,7 +208,7 @@ public class ExecuteUserCommands {
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
                 }
             }
-            case "/addToGroup" ->{
+            case "/addToGroup" -> {
                 System.out.println(request);
                 Matcher addToGroup = RegexPatternsCommands.ADD_TO_GROUP.matcher(request);
                 if (addToGroup.matches()) {
@@ -218,16 +217,32 @@ public class ExecuteUserCommands {
                     String userToAdd = addToGroup.group("userToAdd");
                     String group = addToGroup.group("group");
                     processCommands.handleAddToGroup(user_request, userToAdd, group, out);
-                }else{
+                } else {
                     out.println("ERRO: Formato inválido para /addToGroup");
                 }
             }
-            case "/groups"->{
+            case "/groups" -> {
                 Matcher listGroups = RegexPatternsCommands.LIST_GROUPS.matcher(request);
                 if (listGroups.matches()) {
                     String username = listGroups.group("username");
                     processCommands.handleListGroups(username, out);
-                }else{
+                } else {
+                    out.println("ERRO: Formato inválido para /addToGroup");
+                }
+            }
+            case "/leave" -> {
+                Matcher listGroups = RegexPatternsCommands.LEAVE_GROUP.matcher(request);
+                if (listGroups.matches()) {
+                    String help = listGroups.group("help");
+                    String groupName = listGroups.group("groupName");
+                    String username = listGroups.group("username");
+
+                    if (help != null) {
+                        out.println(LEAVE_HELP);
+                    } else if (groupName != null && !groupName.isEmpty() && username != null && !username.isEmpty()) {
+                        processCommands.handleLeaveGroup(username, groupName, out);
+                    }
+                } else {
                     out.println("ERRO: Formato inválido para /addToGroup");
                 }
             }
