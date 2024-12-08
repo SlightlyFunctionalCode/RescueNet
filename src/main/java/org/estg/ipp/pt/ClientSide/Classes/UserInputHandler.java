@@ -31,11 +31,7 @@ public class UserInputHandler implements InputHandler {
                 shouldExit = true;
                 chatService.stopChat();
             } else if (msg.startsWith("/")) {
-                try {
                     commandHandler.handleCommand(msg, name, chatService);
-                } catch (IOException e) {
-                    System.out.println(Constants.ERROR_EXECUTING_COMMAND);
-                }
             } else {
                 try {
                     messageHandler.sendMessage(name + ":" + msg);

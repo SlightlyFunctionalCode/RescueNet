@@ -11,13 +11,12 @@ import java.net.SocketAddress;
 import java.net.InetSocketAddress;
 
 public abstract class AbstractChatService implements ChatService {
-    private volatile boolean running = true;
     private InetAddress group;
     private MulticastSocket socket;
     private String name;
     private String host;
     private int port;
-    private NetworkInterface networkInterface;
+    private final NetworkInterface networkInterface;
 
     public AbstractChatService(String groupAddress, int port, String host, String name) throws IOException {
         this.group = InetAddress.getByName(groupAddress);
@@ -34,7 +33,6 @@ public abstract class AbstractChatService implements ChatService {
 
     @Override
     public void stopChat() {
-        running = false;
         if (socket != null) {
             try {
                 SocketAddress groupSocketAddress = new InetSocketAddress(group, port);
@@ -45,14 +43,6 @@ public abstract class AbstractChatService implements ChatService {
                 socket.close();
             }
         }
-    }
-
-    public boolean isRunning() {
-        return running;
-    }
-
-    public void setRunning(boolean running) {
-        this.running = running;
     }
 
     public InetAddress getGroup() {
@@ -93,13 +83,5 @@ public abstract class AbstractChatService implements ChatService {
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-    public NetworkInterface getNetworkInterface() {
-        return networkInterface;
-    }
-
-    public void setNetworkInterface(NetworkInterface networkInterface) {
-        this.networkInterface = networkInterface;
     }
 }

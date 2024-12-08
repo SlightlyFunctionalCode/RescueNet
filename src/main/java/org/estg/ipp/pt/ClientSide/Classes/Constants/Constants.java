@@ -26,7 +26,6 @@ public final class Constants {
     public static final String ERROR_JOINING_CHAT = "ERRO: Falha ao tentar entrar no chat";
     public static final String ERROR_SERVER_CONNECTION = "Erro: Ocorreu um erro ao comunicar com o servidor";
     public static final String ERROR_LEAVING_CHAT = "Erro: Ocorreu um erro ao sair do chat multicast";
-    public static final String ERROR_EXECUTING_COMMAND = "Erro: Ocorreu um erro ao executar um comando";
 
     // Respostas de Comandos
     public static final String SERVER_PENDING = "Aguardando aprovação...";

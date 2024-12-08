@@ -20,7 +20,7 @@ public class DefaultCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(String command, String name, ChatService chatService) throws IOException {
+    public void handleCommand(String command, String name, ChatService chatService)  {
         try (Socket serverSocket = new Socket(host, 5000);
              PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()))) {
