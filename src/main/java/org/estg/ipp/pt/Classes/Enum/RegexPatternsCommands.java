@@ -12,8 +12,10 @@ public enum RegexPatternsCommands {
     CHANGE_PERMISSIONS("^/change_permission(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<permission>.+))?:(?<requester>.+)$"),
     CREATE_GROUP("^/create_group(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<publicOrPrivate>.+))?:(?<requester>.+)$"),
     CHAT("^/chat(?:\\s(?<help>-h))?(?:\\s(?<targetUsername>\\S+)\\s(?<message>.+))?:(?<username>.+)$"),
-    COMMANDS("^/commands:(?<name>.+)$");
+    COMMANDS("^/commands:(?<name>.+)$"),
+    ADDTOGROUP("^/addToGroup(?:\\s(?<userToAdd>.+))\\s(?<group>[^\\s:]+)?:(?<username>.+)");
 
+    
     private final Pattern pattern;
 
     RegexPatternsCommands(String regex) {

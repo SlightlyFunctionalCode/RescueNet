@@ -10,12 +10,14 @@ import org.estg.ipp.pt.ServerSide.Interfaces.ProcessCommandsInterface;
 import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -111,6 +113,7 @@ public class ProcessCommands implements ProcessCommandsInterface {
         logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
     }
 
+    @Transactional
     public void processJoinCommand(String username, String name, PrintWriter out) {
         // Buscar o usuário com o nome fornecido
         User user = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
@@ -124,7 +127,8 @@ public class ProcessCommands implements ProcessCommandsInterface {
             out.println("ERRO: Grupo não encontrado");
             return;
         }
-        if (group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) <= Permissions.fromPermissions(user.getPermissions())) {
+        if (group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) <= Permissions.fromPermissions(user.getPermissions())
+        || !group.isPublic() && group.getUsers().contains(user)) {
             System.out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
             try {
                 userService.joinGroup(user, group);
@@ -329,5 +333,18 @@ public class ProcessCommands implements ProcessCommandsInterface {
                 NotificationHandler.notify(username, temp);
             }
         }
+    }
+
+    public void handleAddToGroup(String username, String requester, String group, PrintWriter out){
+        User user = userService.getUserByName(username);
+        User userToAdd = userService.getUserByName(requester);
+        Group groupToAdd = groupService.getGroupByName(group);
+
+        if(!Objects.equals(user.getId(), groupToAdd.getId())){
+            out.println("Este group não foi criado por si!");
+        }
+
+        groupService.addUserToGroup(groupToAdd.getName(), userToAdd);
+
     }
 }

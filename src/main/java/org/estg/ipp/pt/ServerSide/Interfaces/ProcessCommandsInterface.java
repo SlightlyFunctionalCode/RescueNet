@@ -31,4 +31,6 @@ public interface ProcessCommandsInterface {
     void handleApprovalCommand(String action, long id, String username, String requester, PrintWriter out);
 
     void handleCommandHelper(String username);
+
+    void handleAddToGroup(String username, String requester, String group, PrintWriter out);
 }

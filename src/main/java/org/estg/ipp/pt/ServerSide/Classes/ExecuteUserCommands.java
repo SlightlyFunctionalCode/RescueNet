@@ -29,7 +29,6 @@ public class ExecuteUserCommands {
 
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
                                   ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) throws IOException {
-        /*TODO: Adicionar Comando para adicionar pessoas aos grupos personalizados*/
         /*TODO: Adicionar comando para listar grupos que um user pode dar join */
         /*TODO: Adicionar comando para listar todos os comandos disponíveis */
         /*TODO: Adicionar comando para alertar utilizadores */
@@ -205,8 +204,21 @@ public class ExecuteUserCommands {
                     String name = commandsHelper.group("name");
                     processCommands.handleCommandHelper(name);
                 } else {
-                    out.println("ERRO: Formato inválido para /create_group. Use -h para descobrir os parâmetros");
+                    out.println("ERRO: Formato inválido para /commands. Use -h para descobrir os parâmetros");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
+                }
+            }
+            case "/addToGroup" ->{
+                System.out.println(request);
+                Matcher addToGroup = RegexPatternsCommands.ADDTOGROUP.matcher(request);
+                if (addToGroup.matches()) {
+                    out.println("ADDTOGROUP START");
+                    String user_request = addToGroup.group("username");
+                    String userToAdd = addToGroup.group("userToAdd");
+                    String group = addToGroup.group("group");
+                    processCommands.handleAddToGroup(user_request, userToAdd, group, out);
+                }else{
+                    out.println("ERRO: Formato inválido para /addToGroup");
                 }
             }
             default -> {
