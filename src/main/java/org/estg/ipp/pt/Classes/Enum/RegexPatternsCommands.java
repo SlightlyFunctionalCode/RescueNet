@@ -15,7 +15,7 @@ public enum RegexPatternsCommands {
     COMMANDS("^/commands:(?<name>.+)$"),
     ADDTOGROUP("^/addToGroup(?:\\s(?<userToAdd>.+))\\s(?<group>[^\\s:]+)?:(?<username>.+)");
 
-    
+
     private final Pattern pattern;
 
     RegexPatternsCommands(String regex) {

@@ -32,6 +32,7 @@ public class ExecuteUserCommands {
         /*TODO: Adicionar comando para listar grupos que um user pode dar join */
         /*TODO: Adicionar comando para listar todos os comandos disponíveis */
         /*TODO: Adicionar comando para alertar utilizadores */
+        /*TODO: Adicionar comando para user poder sair de um grupo*/
         switch (command) {
             case "/evac", "/resdist", "/emerg" ->
                     processCommands.processOperationCommand(payload, command, out, usersWithPermissionsOnline);
