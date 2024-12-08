@@ -13,10 +13,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         System.out.println("SecurityConfig loaded");
-        http.csrf(AbstractHttpConfigurer::disable) // Disable CSRF if not needed
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // Allow all requests
-                .httpBasic(AbstractHttpConfigurer::disable) // Disable HTTP Basic authentication
-                .formLogin(AbstractHttpConfigurer::disable); // Disable form-based login
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

@@ -13,25 +13,19 @@ import java.util.Optional;
 @Service
 public class MessageService {
     @Autowired
-    private MessageRepository messageRepository;  // Ensure this is injected correctly by Spring
+    private MessageRepository messageRepository;
 
     public Long saveMessage(Message message) {
-        // Save the message in the database
         return messageRepository.save(message).getId();
-    }
-
-    public boolean hasUserSentApprovalRequests(String sender) {
-        return messageRepository.existsBySenderAndIsApprovalRequestIsTrue(sender);
     }
 
     @Transactional
     public Message deleteMessageById(long id) {
-        // Retrieve the entity first
         Optional<Message> messageOpt = messageRepository.findById(id);
         if (messageOpt.isPresent()) {
             Message message = messageOpt.get();
-            messageRepository.delete(message); // Delete the entity
-            return message; // Return the deleted entity
+            messageRepository.delete(message);
+            return message;
         } else {
             throw new EntityNotFoundException("Message with ID " + id + " not found.");
         }
@@ -51,10 +45,6 @@ public class MessageService {
     public boolean isSameMessage(Long messageId) {
         Optional<Message> messageOptional = messageRepository.findById(messageId);
         return messageOptional.isPresent();
-    }
-
-    public List<Message> getUnreadChatMessages(String receiver, String sender) {
-        return messageRepository.findMessageByIsReadIsFalseAndIsApprovalRequestIsFalseAndSenderAndReceiver(receiver, sender);
     }
 
     public List<Message> getPendingApprovalRequests() {

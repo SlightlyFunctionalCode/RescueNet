@@ -2,7 +2,6 @@ package org.estg.ipp.pt.ClientSide.Classes;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
-import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
 import org.estg.ipp.pt.ServerSide.Services.MulticastManagerService;
 
 import java.io.BufferedReader;
@@ -12,24 +11,14 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class DefaultCommandHandler implements CommandHandler {
-    private MulticastChatService chatService;
     private final String host;
 
-    public DefaultCommandHandler(MulticastChatService chatService, String host) {
-        this.chatService = chatService;
+    public DefaultCommandHandler(String host) {
         this.host = host;
     }
 
-    public MulticastChatService getChatService() {
-        return chatService;
-    }
-
-    public void setChatService(MulticastChatService chatService) {
-        this.chatService = chatService;
-    }
-
     @Override
-    public void handleCommand(String command, String name) throws IOException {
+    public void handleCommand(String command, String name, AbstractChatService multicastChatService) throws IOException {
         try (Socket serverSocket = new Socket(host, 5000);
              PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()))) {
@@ -53,15 +42,14 @@ public class DefaultCommandHandler implements CommandHandler {
                     if (line.equals("--END HELP--")) break;
                     System.out.println(line);
                 }
-            } else if (serverResponse.startsWith("JOIN_GROUP")) {
+            } else if (serverResponse.startsWith("CHAT_GROUP")) {
                 String[] parts = serverResponse.split(":");
-                String address = parts[1];
-                String port = parts[2];
+                String newAddress = parts[1];
+                String newPort = parts[2];
                 try {
-                    CommandHandler commandHandler = new DefaultCommandHandler(null, "localhost");
-                    MulticastManagerService multicastManager = MulticastManagerService.getInstance();
-                    MulticastChatService chatService = new MulticastChatService(address, Integer.parseInt(port), name, multicastManager, commandHandler, serverSocket);
-                    chatService.startChat(address, Integer.parseInt(port), name); // Chama o método para iniciar o chat multicast
+                    multicastChatService.stopChat();
+                    multicastChatService = new MulticastChatService(newAddress, Integer.parseInt(newPort), name, serverSocket, host);
+                    multicastChatService.startChat(newAddress, Integer.parseInt(newPort), name);
                 } catch (IOException e) {
                     out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
                 }

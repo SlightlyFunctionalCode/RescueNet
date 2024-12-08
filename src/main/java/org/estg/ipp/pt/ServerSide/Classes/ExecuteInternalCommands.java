@@ -189,14 +189,11 @@ public class ExecuteInternalCommands {
 
             User user = userService.getUserByName(username);
             if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {
-                // Enviar notificações para pedidos pendentes
-
                 List<Message> pendingApprovals = messageService.getPendingApprovalRequests();
 
                 for (Message m : pendingApprovals) {
                     String requestingUser = m.getSender();
                     String operationName = m.getContent();
-
 
                     notifyGroup(groupService.getGroupByName("HIGH_LEVEL"), "Pedido pendente: O utilizador " + requestingUser + " solicitou a operação '" + operationName + "'" + " com o id " + m.getId() + ". Aprove ou rejeite.");
                 }

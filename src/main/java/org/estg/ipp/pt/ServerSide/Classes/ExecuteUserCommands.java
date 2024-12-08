@@ -205,6 +205,10 @@ public class ExecuteUserCommands {
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
                 }
             }
+            default -> {
+                out.println("ERRO: Comando de utilizador inválido");
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Comando de utilizador inválido"));
+            }
         }
     }
 }

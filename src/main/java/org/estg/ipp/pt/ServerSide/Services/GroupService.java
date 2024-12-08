@@ -210,15 +210,6 @@ public class GroupService {
         }
     }
 
-    public String getGroupNameById(Long groupId) {
-        // Buscar o grupo pelo ID
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new IllegalArgumentException("Grupo com ID " + groupId + " não encontrado"));
-
-        // Retornar o nome do grupo
-        return group.getName();
-    }
-
     private String generateNextAddress(String baseAddress, Set<String> usedAddresses) {
         for (int i = 0; i < 256; i++) {
             String candidateAddress = baseAddress + i;
@@ -236,12 +227,5 @@ public class GroupService {
             }
         }
         throw new RuntimeException("Não há portas disponíveis.");
-    }
-
-    public int getAvailablePort() throws IOException {
-        try (ServerSocket tempSocket = new ServerSocket(0)) { // Bind to an available port
-            tempSocket.setReuseAddress(true);
-            return tempSocket.getLocalPort(); // Return the port number
-        }
     }
 }

@@ -112,19 +112,17 @@ public class ProcessCommands implements ProcessCommandsInterface {
     }
 
     public void processJoinCommand(String username, String name, PrintWriter out) {
-        // Buscar o usuário com o nome fornecido
-        User user = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
+        User user = userService.getUserByName(username);
         if (user == null) {
             out.println("ERRO: Usuário não encontrado");
             return;
         }
-        // Buscar o grupo com os parâmetros fornecidos
-        Group group = groupService.getGroupByName(name);// Método para buscar o grupo
+        Group group = groupService.getGroupByName(name);
         if (group == null) {
             out.println("ERRO: Grupo não encontrado");
             return;
         }
-        if (group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) < Permissions.fromPermissions(user.getPermissions())) {
+        if (group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) <= Permissions.fromPermissions(user.getPermissions())) {
             System.out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
             try {
                 userService.joinGroup(user, group);
@@ -132,7 +130,6 @@ public class ProcessCommands implements ProcessCommandsInterface {
                 out.println("ERRO: " + e.getMessage());
                 return;
             }
-            // Agora, permitir que o usuário entre no chat
             String connectionInfo = group.getAddress() + ":" + group.getPort();
             out.println("CHAT_GROUP:" + connectionInfo);
         } else {
@@ -141,7 +138,7 @@ public class ProcessCommands implements ProcessCommandsInterface {
     }
 
     public void processChangePermissionCommand(String username, String name, Permissions permission, PrintWriter out) {
-        User userWithPermissions = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
+        User userWithPermissions = userService.getUserByName(username);
         if (userWithPermissions == null) {
             out.println("ERRO: Usuário não encontrado");
             return;

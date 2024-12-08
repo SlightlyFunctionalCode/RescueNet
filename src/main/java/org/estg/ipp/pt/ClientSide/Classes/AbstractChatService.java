@@ -11,12 +11,16 @@ public abstract class AbstractChatService implements ChatService {
     protected InetAddress group;
     protected MulticastSocket socket;
     protected String name;
+    protected String host;
+    protected int port;
 
-    public AbstractChatService(String groupAddress, int port, String name) throws IOException {
+    public AbstractChatService(String groupAddress, int port, String host, String name) throws IOException {
         this.group = InetAddress.getByName(groupAddress);
         this.socket = new MulticastSocket(port);
         this.socket.joinGroup(group);
         this.name = name;
+        this.host = host;
+        this.port = port;
     }
 
     @Override

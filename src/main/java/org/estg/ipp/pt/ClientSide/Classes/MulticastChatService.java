@@ -1,33 +1,25 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
-import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
-import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
-import org.estg.ipp.pt.ServerSide.Managers.MulticastManager;
-import org.estg.ipp.pt.ServerSide.Services.MulticastManagerService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MulticastChatService extends AbstractChatService {
-    private final MulticastManagerService multicastManagerService;
     private final CommandHandler commandHandler;
     private final Socket serverSocket;
 
-    public MulticastChatService(String groupAddress, int port, String name,
-                                MulticastManagerService multicastManagerService,
-                                CommandHandler commandHandler, Socket serverSocket) throws IOException {
-        super(groupAddress, port, name);
-        this.multicastManagerService = multicastManagerService;
-        this.commandHandler = commandHandler;
+    public MulticastChatService(String groupAddress, int port, String name, Socket serverSocket, String host) throws IOException {
+        super(groupAddress, port, host, name);
+        this.commandHandler = new DefaultCommandHandler(host);
         this.serverSocket = serverSocket;
     }
-
 
     @Override
     public void startChat(String groupAddress, int port, String name) throws IOException {
@@ -37,9 +29,8 @@ public class MulticastChatService extends AbstractChatService {
             out.println("READY:" + name);
             System.out.println("READY sent to server");
 
-            MulticastManager multicastManager = multicastManagerService.getOrCreateMulticastManager(groupAddress, port);
 
-            multicastManager.sendMessage(name + " entrou no chat!");
+            sendMessage(name + " entrou no chat!");
 
             Scanner serverInput = new Scanner(serverSocket.getInputStream());
             new Thread(() -> {
@@ -51,7 +42,7 @@ public class MulticastChatService extends AbstractChatService {
                 }
             }).start();
 
-            multicastManager.receiveMessages();
+            receiveMessages();
 
             Scanner scanner = new Scanner(System.in);
             System.out.println("Digite a mensagem (/logout para sair): ");
@@ -60,14 +51,12 @@ public class MulticastChatService extends AbstractChatService {
             while (!shouldExit) {
                 String msg = scanner.nextLine();
                 if (msg.equalsIgnoreCase("/logout")) {
-                    commandHandler.handleCommand("/logout", name);
                     shouldExit = true;
-                    multicastManager.close();
-
+                    this.stopChat();
                 } else if (msg.startsWith("/")) {
-                    commandHandler.handleCommand(msg, name);
+                    commandHandler.handleCommand(msg, name, this);
                 } else {
-                    multicastManager.sendMessage(name + ":" + msg);
+                    sendMessage(name + ":" + msg);
                 }
             }
 
@@ -82,7 +71,6 @@ public class MulticastChatService extends AbstractChatService {
             String messageId = messageMatcher.group("id");
 
             if (messageId != null) {
-                // Send an isRead confirmation to the server
                 messageId = messageId.replace("/", "");
                 sendIsReadConfirmation(messageId, out);
 
@@ -97,5 +85,28 @@ public class MulticastChatService extends AbstractChatService {
     private void sendIsReadConfirmation(String messageId, PrintWriter out) {
         String confirmationMessage = "CONFIRM_READ:" + messageId;
         out.println(confirmationMessage);
+    }
+
+    public void sendMessage(String message) throws IOException {
+        byte[] buffer = message.getBytes();
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
+        socket.send(packet);
+    }
+
+    public void receiveMessages() {
+        new Thread(() -> {
+            byte[] buffer = new byte[1024];
+            while (true) {
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                try {
+                    socket.receive(packet);
+                    String receivedMessage = new String(packet.getData(), 0, packet.getLength());
+                    System.out.println(receivedMessage);
+                } catch (IOException e) {
+                    System.out.println("Erro ao receber mensagem");
+                    return;
+                }
+            }
+        }).start();
     }
 }

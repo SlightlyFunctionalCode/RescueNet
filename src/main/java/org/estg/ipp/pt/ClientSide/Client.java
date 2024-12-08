@@ -36,8 +36,17 @@ public class Client {
                 System.out.println("2. Login");
                 System.out.println("3. Sair");
                 System.out.print("Escolha uma opção: ");
-                int choice = scanner.nextInt();
-                scanner.nextLine(); // Consumir quebra de linha
+
+                int choice = 0;
+                try {
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
+                } catch (Exception e) {
+                    System.out.println("Por favor, insira uma opção válido.");
+                    scanner.nextLine();
+                    continue;
+                }
+
 
                 switch (choice) {
                     case 1 -> {
@@ -49,7 +58,7 @@ public class Client {
                             email = scanner.nextLine();
 
                             if (RegexPatterns.EMAIL.matches(email)) {
-                                break; // Email válido, sai do loop
+                                break;
                             } else {
                                 System.out.println("Email inválido. Certifique-se de que contém '@' e '.' após o '@'. Tente novamente.");
                             }
@@ -75,16 +84,14 @@ public class Client {
                                 String groupAddress = matcher.group(1);
                                 int port = Integer.parseInt(matcher.group(2));
 
-                                CommandHandler commandHandler = new DefaultCommandHandler(null, serverAddress);
-                                MulticastManagerService multicastManager = MulticastManagerService.getInstance();
-                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, multicastManager, commandHandler, socket);
+                                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, socket, serverAddress);
 
                                 chatService.startChat(groupAddress, port, usernameOrEmail);
                             }
                         } else if (RegexPatterns.LOGIN_FAILED.matches(response)) {
                             System.out.println("Falha ao iniciar sessão. Verifique suas credenciais.");
                         } else if (!RegexPatterns.GENERIC_RESPONSE.matches(response)) {
-                            System.out.println("ERROR: Something went wrong");
+                            System.out.println("ERRO: Ocorreu um erro");
                         }
                     }
                     case 3 -> {

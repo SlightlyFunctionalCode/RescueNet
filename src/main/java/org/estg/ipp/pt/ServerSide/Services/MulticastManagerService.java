@@ -11,7 +11,6 @@ public class MulticastManagerService {
     private static MulticastManagerService instance;
     private final Map<String, MulticastManager> multicastManagers = new HashMap<>();
 
-    // Construtor privado para evitar instância direta
     private MulticastManagerService() {}
 
     // Método para obter a única instância
