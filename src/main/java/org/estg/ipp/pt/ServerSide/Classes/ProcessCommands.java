@@ -16,11 +16,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
-import static org.estg.ipp.pt.Classes.Interfaces.HelpMessageInterface.EXPORT_HELP;
+import static org.estg.ipp.pt.ServerSide.Classes.HelpMessages.EXPORT_HELP;
 import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGroup;
 
 @Component

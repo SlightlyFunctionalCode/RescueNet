@@ -1,6 +1,7 @@
 package org.estg.ipp.pt.ClientSide;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
+import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
 import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -26,18 +27,14 @@ public class Client {
             Scanner scanner = new Scanner(System.in);
             boolean keepRunning = true;
             while (keepRunning) {
-                System.out.println("\nMENU");
-                System.out.println("1. Registar");
-                System.out.println("2. Login");
-                System.out.println("3. Sair");
-                System.out.print("Escolha uma opção: ");
+                System.out.print(Constants.MENU);
 
                 int choice;
                 try {
                     choice = scanner.nextInt();
                     scanner.nextLine();
                 } catch (Exception e) {
-                    System.out.println("Por favor, insira uma opção válido.");
+                    System.out.println(Constants.ERROR_INVALID_MENU_OPTION);
                     scanner.nextLine();
                     continue;
                 }
@@ -46,45 +43,45 @@ public class Client {
                     case 1 -> handleSignUp(scanner, out, in);
                     case 2 -> handleLogin(scanner, out, in, socket, serverAddress);
                     case 3 -> {
-                        System.out.println("Encerrando cliente...");
+                        System.out.println(Constants.EXITING_APP);
                         keepRunning = false;
                     }
-                    default -> System.out.println("Opção inválida. Tente novamente.");
+                    default -> System.out.println(Constants.ERROR_INVALID_MENU_OPTION);
                 }
             }
         }
     }
 
     private static void handleSignUp(Scanner scanner, PrintWriter out, BufferedReader in) {
-        System.out.print("Digite o nome de utilizador: ");
+        System.out.print(Constants.INPUT_USER_NAME);
         String username = scanner.nextLine();
         String email;
         while (true) {
-            System.out.print("Digite um email: ");
+            System.out.print(Constants.INPUT_USER_EMAIL);
             email = scanner.nextLine();
 
             if (RegexPatterns.EMAIL.matches(email)) {
                 break;
             } else {
-                System.out.println("Email inválido. Certifique-se de que contém '@' e '.' após o '@'. Tente novamente.");
+                System.out.println(Constants.ERROR_INVALID_EMAIL);
             }
         }
 
-        System.out.print("Digite a palavra-passe: ");
+        System.out.print(Constants.INPUT_USER_PASSWORD);
         String password = scanner.nextLine();
         out.println("REGISTER:" + username + "," + email + "," + password);
 
         try {
             System.out.println(in.readLine());
         } catch (IOException e) {
-            System.out.println("Ocorreu um erro ao efetuar o Registo");
+            System.out.println(Constants.ERROR_SIGN_UP);
         }
     }
 
     private static void handleLogin(Scanner scanner, PrintWriter out, BufferedReader in, Socket socket, String serverAddress) {
-        System.out.print("Digite o nome de utilizador/email: ");
+        System.out.print(Constants.INPUT_USER_NAME_EMAIL);
         String usernameOrEmail = scanner.nextLine();
-        System.out.print("Digite a senha: ");
+        System.out.print(Constants.INPUT_USER_PASSWORD);
         String password = scanner.nextLine();
         out.println("LOGIN:" + usernameOrEmail + "," + password);
 
@@ -92,7 +89,7 @@ public class Client {
         try {
             response = in.readLine();
         } catch (IOException e) {
-            System.out.println("Ocorreu um erro ao efetuar o Login");
+            System.out.println(Constants.ERROR_LOGIN);
             return;
         }
         System.out.println(response);
@@ -109,13 +106,13 @@ public class Client {
 
                     chatService.startChat(groupAddress, port, usernameOrEmail);
                 } catch (IOException e) {
-                    System.out.println("Ocorreu um erro ao iniciar o chat");
+                    System.out.println(Constants.ERROR_STARTING_CHAT_SESSION);
                 }
             }
         } else if (RegexPatterns.LOGIN_FAILED.matches(response)) {
-            System.out.println("Falha ao iniciar sessão. Verifique suas credenciais.");
+            System.out.println(Constants.ERROR_INVALID_CREDENTIALS);
         } else if (!RegexPatterns.GENERIC_RESPONSE.matches(response)) {
-            System.out.println("ERRO: Ocorreu um erro");
+            System.out.println(Constants.ERROR_GENERIC);
         }
     }
 }

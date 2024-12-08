@@ -1,6 +1,7 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
+import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
 import org.estg.ipp.pt.ClientSide.Interfaces.ChatService;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 
@@ -27,19 +28,19 @@ public class DefaultCommandHandler implements CommandHandler {
             String serverResponse = in.readLine();
 
             if (RegexPatterns.SERVER_PENDING.matches(serverResponse)) {
-                System.out.println("Aguardando aprovação...");
+                System.out.println(Constants.SERVER_PENDING);
             } else if (RegexPatterns.SERVER_SUCCESS.matches(serverResponse)) {
-                System.out.println("Comando aprovado e executado.");
+                System.out.println(Constants.SERVER_SUCCESS);
             } else if (RegexPatterns.SERVER_ERROR.matcher(serverResponse).matches()) {
                 System.out.println("Erro: " + RegexPatterns.SERVER_ERROR.matcher(serverResponse).replaceFirst("$1"));
             } else if (RegexPatterns.SERVER_APPROVE.matches(serverResponse)) {
-                System.out.println("Aprovado e executado.");
+                System.out.println(Constants.SERVER_APPROVE);
             } else if (RegexPatterns.SERVER_REJECT.matches(serverResponse)) {
-                System.out.println("Rejeitado.");
-            } else if (serverResponse.startsWith("--HELP--")) {
+                System.out.println(Constants.SERVER_REJECT);
+            } else if (serverResponse.startsWith(Constants.SERVER_START_HELP)) {
                 String line;
                 while ((line = in.readLine()) != null) {
-                    if (line.equals("--END HELP--")) break;
+                    if (line.equals(Constants.SERVER_END_HELP)) break;
                     System.out.println(line);
                 }
             } else if (serverResponse.startsWith("CHAT_GROUP")) {
@@ -51,13 +52,13 @@ public class DefaultCommandHandler implements CommandHandler {
                     chatService = new MulticastChatService(newAddress, Integer.parseInt(newPort), name, serverSocket, host);
                     chatService.startChat(newAddress, Integer.parseInt(newPort), name);
                 } catch (IOException e) {
-                    out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
+                    out.println(Constants.ERROR_JOINING_CHAT);
                 }
             } else {
                 System.out.println(serverResponse);
             }
         } catch (NullPointerException | IOException e) {
-            System.err.println("Erro ao comunicar com o servidor: " + e.getMessage());
+            System.err.println(Constants.ERROR_SERVER_CONNECTION);
         }
     }
 }

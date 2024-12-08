@@ -1,5 +1,6 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
+import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
 import org.estg.ipp.pt.ClientSide.Interfaces.InputHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageReceiver;
@@ -44,7 +45,7 @@ public class MulticastChatService extends AbstractChatService implements Message
 
             inputHandler.handleInput(name);
         } catch (IOException e) {
-            System.err.println("Error during chat session: " + e.getMessage());
+            System.err.println(Constants.ERROR_CHAT_SESSION);
         }
     }
 

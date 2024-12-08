@@ -1,7 +1,7 @@
-package org.estg.ipp.pt.Classes.Interfaces;
+package org.estg.ipp.pt.ServerSide.Classes;
 
-public interface HelpMessageInterface {
-    String EXPORT_HELP = """
+public final class HelpMessages {
+    public static final String EXPORT_HELP = """
             --HELP--
             - Os parâmetros que podem ser executados por /export são:
             -
@@ -18,7 +18,7 @@ public interface HelpMessageInterface {
             --END HELP--
             """;
 
-    String APPROVE_HELP = """
+    public static final String APPROVE_HELP = """
             --HELP--
             - Os parâmetros que podem ser executados por /approve são:
             -
@@ -29,7 +29,7 @@ public interface HelpMessageInterface {
             --END HELP--
             """;
 
-    String REJECT_HELP = """
+    public static final String REJECT_HELP = """
             --HELP--
             - Os parâmetros que podem ser executados por /reject são:
             -
@@ -40,7 +40,7 @@ public interface HelpMessageInterface {
             --END HELP--
             """;
 
-    String CHANGE_PERMISSION_HELP = """
+    public static final String CHANGE_PERMISSION_HELP = """
             --HELP--
             - Os parâmetros que podem ser executados por /change_permission são:
             -
@@ -53,7 +53,7 @@ public interface HelpMessageInterface {
             --END HELP--
             """;
 
-    String JOIN_HELP = """
+    public static final String JOIN_HELP = """
             --HELP--
             - Os parâmetros que podem ser executados por /join são:
             -
@@ -64,7 +64,7 @@ public interface HelpMessageInterface {
             --END HELP--
             """;
 
-    String CREATE_GROUP_HELP = """
+    public static final String CREATE_GROUP_HELP = """
             --HELP--
             - Os parâmetros que podem ser executados por /create_group são:
             -
@@ -78,4 +78,8 @@ public interface HelpMessageInterface {
             - /create_group LOW_LEVEL
             --END HELP--
             """;
+
+    private HelpMessages() {
+        throw new UnsupportedOperationException("Não se pode instanciar uma classe de constantes");
+    }
 }

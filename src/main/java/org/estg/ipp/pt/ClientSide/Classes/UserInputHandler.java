@@ -1,5 +1,6 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
+import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
 import org.estg.ipp.pt.ClientSide.Interfaces.ChatService;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.InputHandler;
@@ -33,13 +34,13 @@ public class UserInputHandler implements InputHandler {
                 try {
                     commandHandler.handleCommand(msg, name, chatService);
                 } catch (IOException e) {
-                    System.out.println("Erro ao executar comando");
+                    System.out.println(Constants.ERROR_EXECUTING_COMMAND);
                 }
             } else {
                 try {
                     messageHandler.sendMessage(name + ":" + msg);
                 } catch (IOException e) {
-                    System.out.println("Erro ao mandar mensagem");
+                    System.out.println(Constants.ERROR_SENDING_MESSAGE);
                 }
             }
         }

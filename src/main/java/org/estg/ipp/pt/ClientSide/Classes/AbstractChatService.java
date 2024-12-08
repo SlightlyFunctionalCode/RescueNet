@@ -1,5 +1,6 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
+import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
 import org.estg.ipp.pt.ClientSide.Interfaces.ChatService;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public abstract class AbstractChatService implements ChatService {
                 SocketAddress groupSocketAddress = new InetSocketAddress(group, port);
                 socket.leaveGroup(groupSocketAddress, networkInterface);
             } catch (IOException e) {
-                System.err.println("Error while leaving multicast group: " + e.getMessage());
+                System.err.println(Constants.ERROR_LEAVING_CHAT);
             } finally {
                 socket.close();
             }
