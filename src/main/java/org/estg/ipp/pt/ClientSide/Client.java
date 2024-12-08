@@ -1,11 +1,7 @@
 package org.estg.ipp.pt.ClientSide;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
-import org.estg.ipp.pt.ClientSide.Classes.DefaultCommandHandler;
 import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
-import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
-import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
-import org.estg.ipp.pt.ServerSide.Services.MulticastManagerService;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.BufferedReader;
