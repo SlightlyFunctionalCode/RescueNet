@@ -1,5 +1,6 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
+import org.estg.ipp.pt.ClientSide.Interfaces.MessageHandler;
 import org.estg.ipp.pt.ClientSide.Interfaces.MessageReceiver;
 
 import java.io.IOException;
@@ -7,12 +8,12 @@ import java.net.DatagramPacket;
 import java.net.MulticastSocket;
 import java.net.InetAddress;
 
-public class ChatNetworkManager {
+public class MulticastChatManager implements MessageHandler {
     private final InetAddress group;
     private final int port;
     private final MulticastSocket socket;
 
-    public ChatNetworkManager(String groupAddress, int port, MulticastSocket socket) throws IOException {
+    public MulticastChatManager(String groupAddress, int port, MulticastSocket socket) throws IOException {
         this.group = InetAddress.getByName(groupAddress);
         this.port = port;
         this.socket = socket;

@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MessageProcessor {
+public class ServerMessageProcessor {
     public String processIncomingMessage(String message, PrintWriter out) {
         Matcher messageMatcher = RegexPatterns.MESSAGE.matcher(message);
         if (messageMatcher.matches()) {

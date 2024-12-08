@@ -1,8 +1,8 @@
 package org.estg.ipp.pt.ClientSide.Classes;
 
 import org.estg.ipp.pt.Classes.Enum.RegexPatterns;
+import org.estg.ipp.pt.ClientSide.Interfaces.ChatService;
 import org.estg.ipp.pt.ClientSide.Interfaces.CommandHandler;
-import org.estg.ipp.pt.ServerSide.Services.MulticastManagerService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class DefaultCommandHandler implements CommandHandler {
     }
 
     @Override
-    public void handleCommand(String command, String name, AbstractChatService multicastChatService) throws IOException {
+    public void handleCommand(String command, String name, ChatService chatService) throws IOException {
         try (Socket serverSocket = new Socket(host, 5000);
              PrintWriter out = new PrintWriter(serverSocket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()))) {
@@ -47,9 +47,9 @@ public class DefaultCommandHandler implements CommandHandler {
                 String newAddress = parts[1];
                 String newPort = parts[2];
                 try {
-                    multicastChatService.stopChat();
-                    multicastChatService = new MulticastChatService(newAddress, Integer.parseInt(newPort), name, serverSocket, host);
-                    multicastChatService.startChat(newAddress, Integer.parseInt(newPort), name);
+                    chatService.stopChat();
+                    chatService = new MulticastChatService(newAddress, Integer.parseInt(newPort), name, serverSocket, host);
+                    chatService.startChat(newAddress, Integer.parseInt(newPort), name);
                 } catch (IOException e) {
                     out.println("ERRO: Falha ao tentar entrar no chat: " + e.getMessage());
                 }
