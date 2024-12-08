@@ -19,6 +19,4 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     boolean existsByIdAndUsersId(Long id, Long usersId);
 
     List<Group> findByisPublic(boolean isPublic);
-
-
 }

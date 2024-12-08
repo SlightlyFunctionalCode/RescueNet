@@ -33,4 +33,6 @@ public interface ProcessCommandsInterface {
     void handleCommandHelper(String username);
 
     void handleAddToGroup(String username, String requester, String group, PrintWriter out);
+
+    void handleListGroups(String username, PrintWriter out);
 }

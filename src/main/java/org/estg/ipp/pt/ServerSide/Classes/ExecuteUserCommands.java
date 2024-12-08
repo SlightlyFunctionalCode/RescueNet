@@ -211,13 +211,22 @@ public class ExecuteUserCommands {
             }
             case "/addToGroup" ->{
                 System.out.println(request);
-                Matcher addToGroup = RegexPatternsCommands.ADDTOGROUP.matcher(request);
+                Matcher addToGroup = RegexPatternsCommands.ADD_TO_GROUP.matcher(request);
                 if (addToGroup.matches()) {
                     out.println("ADDTOGROUP START");
                     String user_request = addToGroup.group("username");
                     String userToAdd = addToGroup.group("userToAdd");
                     String group = addToGroup.group("group");
                     processCommands.handleAddToGroup(user_request, userToAdd, group, out);
+                }else{
+                    out.println("ERRO: Formato inválido para /addToGroup");
+                }
+            }
+            case "/groups"->{
+                Matcher listGroups = RegexPatternsCommands.LIST_GROUPS.matcher(request);
+                if (listGroups.matches()) {
+                    String username = listGroups.group("username");
+                    processCommands.handleListGroups(username, out);
                 }else{
                     out.println("ERRO: Formato inválido para /addToGroup");
                 }

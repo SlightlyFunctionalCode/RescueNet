@@ -128,7 +128,7 @@ public class ProcessCommands implements ProcessCommandsInterface {
             return;
         }
         if (group.isPublic() && Permissions.fromPermissions(group.getRequiredPermissions()) <= Permissions.fromPermissions(user.getPermissions())
-        || !group.isPublic() && group.getUsers().contains(user)) {
+                || !group.isPublic() && group.getUsers().contains(user)) {
             System.out.println("SUCESSO: Usuário " + username + " entrou no grupo " + name);
             try {
                 userService.joinGroup(user, group);
@@ -216,11 +216,11 @@ public class ProcessCommands implements ProcessCommandsInterface {
             return;
         }
 
-        if(command.equals("/evac")) {
-            if(Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(Permissions.MEDIUM_LEVEL) ) {
+        if (command.equals("/evac")) {
+            if (Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(Permissions.MEDIUM_LEVEL)) {
                 out.println("Não tem permissões para usar este comando!");
             }
-        }else if(command.equals("/emerg")) {
+        } else if (command.equals("/emerg")) {
             if (Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(Permissions.LOW_LEVEL)) {
                 out.println("Não tem permissões para usar este comando!");
             }
@@ -335,16 +335,48 @@ public class ProcessCommands implements ProcessCommandsInterface {
         }
     }
 
-    public void handleAddToGroup(String username, String requester, String group, PrintWriter out){
+    public void handleAddToGroup(String username, String requester, String group, PrintWriter out) {
         User user = userService.getUserByName(username);
         User userToAdd = userService.getUserByName(requester);
         Group groupToAdd = groupService.getGroupByName(group);
 
-        if(!Objects.equals(user.getId(), groupToAdd.getId())){
+        if (!Objects.equals(user.getId(), groupToAdd.getId())) {
             out.println("Este group não foi criado por si!");
         }
 
         groupService.addUserToGroup(groupToAdd.getName(), userToAdd);
 
+    }
+
+    public void handleListGroups(String username, PrintWriter out) {
+        User user = userService.getUserByName(username);
+
+        if (user == null) {
+            out.println("Erro: Erro ao mostrar grupos");
+            return;
+        }
+
+        List<Group> allGroups = groupService.getAllGroups();
+
+        StringBuilder result = new StringBuilder("--HELP--\nLista de Grupos Disponíveis:\n");
+
+        int counter = 0;
+        for (Group group : allGroups) {
+            if (Permissions.fromPermissions(group.getRequiredPermissions()) <= Permissions.fromPermissions(user.getPermissions())) {
+                if (group.getName().equals("HIGH_LEVEL") || group.getName().equals("MEDIUM_LEVEL") ||
+                        group.getName().equals("LOW_LEVEL") || group.getName().equals("GERAL")
+                        || groupService.isUserInGroup(group.getName(), user.getId())
+                        || group.isPublic()) {
+                    result.append("- ").append(group.getName()).append("\n");
+                    counter++;
+                }
+            }
+        }
+
+        if (counter == 0) {
+            result.append("Não existem grupos disponíveis\n");
+        }
+        result.append("--END HELP--");
+        out.println(result);
     }
 }

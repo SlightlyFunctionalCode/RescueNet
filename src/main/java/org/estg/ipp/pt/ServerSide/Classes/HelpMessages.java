@@ -70,12 +70,10 @@ public final class HelpMessages {
             -
             - <name> nome do grupo
             -
-            - <address> endereço do grupo
-            -
-            - <port> porta do grupo
+            - <privacy> 'public' ou 'private'
             -
             - Exemplos:
-            - /create_group LOW_LEVEL
+            - /create_group example public
             --END HELP--
             """;
 
