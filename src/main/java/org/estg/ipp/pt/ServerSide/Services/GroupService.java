@@ -32,28 +32,28 @@ public class GroupService {
             groupGeral.setName("GERAL");
             groupGeral.setAddress("230.0.0.0");
             groupGeral.setPort(4446);
-            groupGeral.setPublic(false);
+            groupGeral.setPublic(true);
             groupGeral.setRequiredPermissions(Permissions.NO_LEVEL);
 
             Group groupLowLevel = new Group();
             groupLowLevel.setName("LOW_LEVEL");
             groupLowLevel.setAddress("230.0.0.1");
             groupLowLevel.setPort(4447);
-            groupLowLevel.setPublic(false);
+            groupLowLevel.setPublic(true);
             groupLowLevel.setRequiredPermissions(Permissions.LOW_LEVEL);
 
             Group groupMidiumLevel = new Group();
-            groupMidiumLevel.setName("MIDIUM_LEVEL");
+            groupMidiumLevel.setName("MEDIUM_LEVEL");
             groupMidiumLevel.setAddress("230.0.0.2");
             groupMidiumLevel.setPort(4448);
-            groupMidiumLevel.setPublic(false);
+            groupMidiumLevel.setPublic(true);
             groupMidiumLevel.setRequiredPermissions(Permissions.MEDIUM_LEVEL);
 
             Group groupHighLevel = new Group();
             groupHighLevel.setName("HIGH_LEVEL");
             groupHighLevel.setAddress("230.0.0.3");
             groupHighLevel.setPort(4449);
-            groupHighLevel.setPublic(false);
+            groupHighLevel.setPublic(true);
             groupHighLevel.setRequiredPermissions(Permissions.HIGH_LEVEL);
 
             // Salvando os grupos no repositório

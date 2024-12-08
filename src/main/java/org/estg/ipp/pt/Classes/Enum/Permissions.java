@@ -1,10 +1,10 @@
 package org.estg.ipp.pt.Classes.Enum;
 
 public enum Permissions {
+    NO_LEVEL,
     LOW_LEVEL,
     MEDIUM_LEVEL,
-    HIGH_LEVEL,
-    NO_LEVEL;
+    HIGH_LEVEL;
 
 
     // Método para converter um enum Permissions para o valor correspondente

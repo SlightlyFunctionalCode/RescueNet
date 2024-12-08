@@ -16,10 +16,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
-import static org.estg.ipp.pt.ServerSide.Classes.HelpMessages.EXPORT_HELP;
+import static org.estg.ipp.pt.ServerSide.Classes.HelpMessages.*;
 import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGroup;
 
 @Component
@@ -111,12 +112,14 @@ public class ProcessCommands implements ProcessCommandsInterface {
     }
 
     public void processJoinCommand(String username, String name, PrintWriter out) {
-        User user = userService.getUserByName(username);
+        // Buscar o usuário com o nome fornecido
+        User user = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
         if (user == null) {
             out.println("ERRO: Usuário não encontrado");
             return;
         }
-        Group group = groupService.getGroupByName(name);
+        // Buscar o grupo com os parâmetros fornecidos
+        Group group = groupService.getGroupByName(name);// Método para buscar o grupo
         if (group == null) {
             out.println("ERRO: Grupo não encontrado");
             return;
@@ -129,6 +132,7 @@ public class ProcessCommands implements ProcessCommandsInterface {
                 out.println("ERRO: " + e.getMessage());
                 return;
             }
+            // Agora, permitir que o usuário entre no chat
             String connectionInfo = group.getAddress() + ":" + group.getPort();
             out.println("CHAT_GROUP:" + connectionInfo);
         } else {
@@ -137,7 +141,7 @@ public class ProcessCommands implements ProcessCommandsInterface {
     }
 
     public void processChangePermissionCommand(String username, String name, Permissions permission, PrintWriter out) {
-        User userWithPermissions = userService.getUserByName(username);
+        User userWithPermissions = userService.getUserByName(username); // Método para encontrar o usuário pelo nome de usuário
         if (userWithPermissions == null) {
             out.println("ERRO: Usuário não encontrado");
             return;
@@ -203,10 +207,20 @@ public class ProcessCommands implements ProcessCommandsInterface {
 
         if (operation == null) {
             System.out.println("ERRO: Operação desconhecida.");
+            out.println("Erro: " + command);
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Operação desconhecida."));
             return;
         }
 
+        if(command.equals("/evac")) {
+            if(Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(Permissions.MEDIUM_LEVEL) ) {
+                out.println("Não tem permissões para usar este comando!");
+            }
+        }else if(command.equals("/emerg")) {
+            if (Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(Permissions.LOW_LEVEL)) {
+                out.println("Não tem permissões para usar este comando!");
+            }
+        }
 
         Message message = new Message(username, "null", operation.getName(), true);
 
