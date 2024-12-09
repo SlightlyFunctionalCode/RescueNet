@@ -275,64 +275,26 @@ public class ProcessCommands implements ProcessCommandsInterface {
     }
 
 
-    public void handleCommandHelper(String username) {
+    public void handleCommandHelper(String username, PrintWriter out) {
         User user = userService.getUserByName(username);
-        System.out.println(user.getName() + user.getPermissions());
-        List<String> commandsHighLevel = new ArrayList<>();
-        List<String> commandsMediumLevel = new ArrayList<>();
-        List<String> commandsLowLevel = new ArrayList<>();
-        List<String> commandsNoLevel = new ArrayList<>();
 
-
-        if (user.getPermissions() == Permissions.HIGH_LEVEL) {
-            // Obter a lista de comandos disponíveis para HIGH_LEVEL
-            for (HighLevelCommands command : HighLevelCommands.values()) {
-                commandsHighLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (MediumLevelCommands command : MediumLevelCommands.values()) {
-                commandsHighLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (LowLevelCommands command : LowLevelCommands.values()) {
-                commandsHighLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (NoLevelCommands command : NoLevelCommands.values()) {
-                commandsHighLevel.add(command.name() + " - " + command.getDescription());
-            }
-            // Exibir os comandos (exemplo simples)
-            for (String temp : commandsHighLevel) {
-                NotificationHandler.notify(username, temp);
-            }
-        } else if (user.getPermissions() == Permissions.MEDIUM_LEVEL) {
-            for (MediumLevelCommands command : MediumLevelCommands.values()) {
-                commandsMediumLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (LowLevelCommands command : LowLevelCommands.values()) {
-                commandsMediumLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (NoLevelCommands command : NoLevelCommands.values()) {
-                commandsMediumLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (String temp : commandsMediumLevel) {
-                NotificationHandler.notify(username, temp);
-            }
-        } else if (user.getPermissions() == Permissions.LOW_LEVEL) {
-            for (LowLevelCommands command : LowLevelCommands.values()) {
-                commandsLowLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (NoLevelCommands command : NoLevelCommands.values()) {
-                commandsLowLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (String temp : commandsLowLevel) {
-                NotificationHandler.notify(username, temp);
-            }
-        } else if (user.getPermissions() == Permissions.NO_LEVEL) {
-            for (NoLevelCommands command : NoLevelCommands.values()) {
-                commandsNoLevel.add(command.name() + " - " + command.getDescription());
-            }
-            for (String temp : commandsNoLevel) {
-                NotificationHandler.notify(username, temp);
-            }
+        switch (user.getPermissions()) {
+            case HIGH_LEVEL:
+                out.println(COMMANDS_HIGH);
+                break;
+            case MEDIUM_LEVEL:
+                out.println(COMMANDS_MEDIUM);
+                break;
+            case LOW_LEVEL:
+                out.println(COMMANDS_LOW);
+                break;
+            case NO_LEVEL:
+                out.println(COMMANDS_DEFAULT);
+                break;
+            default:
+                out.println("Permissão desconhecida.");
         }
+
     }
 
     public void handleAddToGroup(String username, String requester, String group, PrintWriter out) {

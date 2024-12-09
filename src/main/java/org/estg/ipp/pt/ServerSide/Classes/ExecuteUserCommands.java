@@ -29,9 +29,8 @@ public class ExecuteUserCommands {
 
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
                                   ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) throws IOException {
-        /*TODO: Adicionar comando para listar todos os comandos disponíveis */
+
         /*TODO: Adicionar comando para alertar utilizadores */
-        /*TODO: Adicionar comando para user poder sair de um grupo*/
         switch (command) {
             case "/evac", "/resdist", "/emerg" ->
                     processCommands.processOperationCommand(payload, command, out, usersWithPermissionsOnline);
@@ -200,9 +199,8 @@ public class ExecuteUserCommands {
                 System.out.println(request);
                 Matcher commandsHelper = RegexPatternsCommands.COMMANDS.matcher(request);
                 if (commandsHelper.matches()) {
-                    out.println("COMMANDS START");
                     String name = commandsHelper.group("name");
-                    processCommands.handleCommandHelper(name);
+                    processCommands.handleCommandHelper(name, out);
                 } else {
                     out.println("ERRO: Formato inválido para /commands. Use -h para descobrir os parâmetros");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));

@@ -101,6 +101,77 @@ public final class HelpMessages {
             --END HELP--
             """;
 
+    public static final String COMMANDS_HIGH = """
+            --HELP--
+            - Comandos que podem ser executados no sistema são:
+            -
+            - /evac: permite criar pedido de evacução
+            - /resdist: permite distribuir recursos de emergência
+            - /emerg: permite ativar comunicações de emergência
+            - /approve: permite aprovar um comando utilizado por outros utilizadores
+            - /reject: permite rejeitar um comando utilizado por outros utilizadores
+            - /join: permite entrar num grupo existente
+            - /create_group: permite criar um novo grupo
+            - /chat: permite enviar uma menssagem privada para um utilizador
+            - /addToGroup: permite adicionar utilizadores a grupos privados se for owner do grupo
+            - /groups: lista os grupos a que pertence
+            - /leave: permite sair de um grupo para sempre
+            - /export: permite exportar logs
+            - /change_permission: permite alterar pemissões de utilizadores
+            -
+            --END HELP--
+            """;
+
+    public static final String COMMANDS_MEDIUM = """
+            --HELP--
+            - Comandos que podem ser executados no sistema são:
+            -
+            - /evac: permite criar pedido de evacução
+            - /resdist: permite distribuir recursos de emergência
+            - /emerg: permite ativar comunicações de emergência
+            - /approve: permite aprovar um comando utilizado por outros utilizadores
+            - /reject: permite rejeitar um comando utilizado por outros utilizadores
+            - /join: permite entrar num grupo existente
+            - /create_group: permite criar um novo grupo
+            - /chat: permite enviar uma menssagem privada para um utilizador
+            - /addToGroup: permite adicionar utilizadores a grupos privados se for owner do grupo
+            - /groups: lista os grupos a que pertence
+            - /leave: permite sair de um grupo para sempre
+            --END HELP--
+            """;
+
+    public static final String COMMANDS_LOW = """
+            --HELP--
+            - Comandos que podem ser executados no sistema são:
+            -
+            - /resdist: permite distribuir recursos de emergência
+            - /emerg: permite ativar comunicações de emergência
+            - /approve: permite aprovar um comando utilizado por outros utilizadores
+            - /reject: permite rejeitar um comando utilizado por outros utilizadores
+            - /join: permite entrar num grupo existente
+            - /create_group: permite criar um novo grupo
+            - /chat: permite enviar uma menssagem privada para um utilizador
+            - /addToGroup: permite adicionar utilizadores a grupos privados se for owner do grupo
+            - /groups: lista os grupos a que pertence
+            - /leave: permite sair de um grupo para sempre
+            --END HELP--
+            """;
+    public static final String COMMANDS_DEFAULT = """
+            --HELP--
+            - Comandos que podem ser executados no sistema são:
+            -
+            - /resdist: permite distribuir recursos de emergência
+            - /approve: permite aprovar um comando utilizado por outros utilizadores
+            - /reject: permite rejeitar um comando utilizado por outros utilizadores
+            - /join: permite entrar num grupo existente
+            - /create_group: permite criar um novo grupo
+            - /chat: permite enviar uma menssagem privada para um utilizador
+            - /addToGroup: permite adicionar utilizadores a grupos privados se for owner do grupo
+            - /groups: lista os grupos a que pertence
+            - /leave: permite sair de um grupo para sempre
+            --END HELP--
+            """;
+
     private HelpMessages() {
         throw new UnsupportedOperationException("Não se pode instanciar uma classe de constantes");
     }
