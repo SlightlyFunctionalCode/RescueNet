@@ -206,16 +206,6 @@ public class GroupService {
         }
     }
 
-
-    @Transactional
-    public void removeUserFromRestrictedGroups(User user, Group group) {
-        // Remover o usuário do grupo
-        group.getUsers().remove(user);
-        groupRepository.save(group);
-        System.out.println("Utilizador removido do grupo: " + group.getName());
-    }
-
-
     @Transactional
     public void removeUserFromGroup(User user, Permissions newPermissions) {
         // Buscar todos os grupos privados

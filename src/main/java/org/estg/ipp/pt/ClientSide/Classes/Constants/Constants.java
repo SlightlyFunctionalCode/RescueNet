@@ -2,10 +2,12 @@ package org.estg.ipp.pt.ClientSide.Classes.Constants;
 
 public final class Constants {
     public static final String MENU = """
-            MENU
+            ============================
+                        MENU
             1. Registar
             2. Login
             3. Sair
+            ============================
             Escolha uma opção:\s""";
     public static final String EXITING_APP = "Encerrando o cliente...";
     public static final String INPUT_USER_NAME = "Digite o seu nome de utilizador: ";

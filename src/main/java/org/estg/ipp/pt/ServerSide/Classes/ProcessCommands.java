@@ -219,10 +219,12 @@ public class ProcessCommands implements ProcessCommandsInterface {
         if (command.equals("/evac")) {
             if (Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(Permissions.MEDIUM_LEVEL)) {
                 out.println("Não tem permissões para usar este comando!");
+                return;
             }
         } else if (command.equals("/emerg")) {
             if (Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(Permissions.LOW_LEVEL)) {
                 out.println("Não tem permissões para usar este comando!");
+                return;
             }
         }
 
@@ -243,7 +245,6 @@ public class ProcessCommands implements ProcessCommandsInterface {
         if (!messageService.isSameMessage(id)) {
             out.println("ERRO: Não há solicitações pendentes para este utilizador.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "ERRO: Não há solicitações pendentes para este utilizador."));
-
             return;
         }
 
