@@ -4,9 +4,13 @@ import jakarta.persistence.EntityNotFoundException;
 import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.ServerSide.Repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +63,10 @@ public class MessageService {
         return messageRepository.findMessageByIsReadIsFalseAndReceiver(receiver);
     }
 
+    public List<Message> getLastestGroupMessages(String groupName) {
+        return messageRepository.findLatestChatMessagesByGroup(groupName);
+    }
+
     public void markAsRead(Long messageId) {
         Optional<Message> messageOptional = messageRepository.findById(messageId);
         if (messageOptional.isPresent()) {
@@ -69,5 +77,4 @@ public class MessageService {
             throw new IllegalArgumentException("Message not found with ID: " + messageId);
         }
     }
-
 }

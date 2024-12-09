@@ -15,15 +15,13 @@ import static org.estg.ipp.pt.Server.getUserSocket;
 public class NotificationHandler {
 
     public static void notify(String username, String message) {
-
-        // Obter o socket associado ao utilizador
         Socket socket = getUserSocket(username);
 
         if (socket == null || socket.isClosed()) {
             System.out.println("Socket indisponível para " + username );
             return;
         }
-        // Tentar enviar a mensagem via socket
+
         try {
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             writer.println(message);
@@ -51,18 +49,14 @@ public class NotificationHandler {
 
     public static void notifyGroup(Group notifyGroup, String message) {
         try {
-            // Obtém a instância do MulticastManagerService
             MulticastManagerService service = MulticastManagerService.getInstance();
 
-            // Obtém ou cria o MulticastManager associado ao grupo
             MulticastManager manager = service.getOrCreateMulticastManager(
                     notifyGroup.getAddress(),
                     notifyGroup.getPort()
             );
 
-            // Envia a mensagem usando o MulticastManager
             manager.sendMessage(message);
-
         } catch (IOException e) {
             System.out.println("Erro ao enviar mensagem multicast: " + e.getMessage());
         }

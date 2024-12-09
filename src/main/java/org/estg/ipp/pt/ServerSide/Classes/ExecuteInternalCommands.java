@@ -151,6 +151,21 @@ public class ExecuteInternalCommands {
         }
     }
 
+    private void sendLatestMulticastMessages(String username) {
+        User user = userService.getUserByName(username);
+
+        if (user == null) {
+            System.out.println("ERRO: Ocorrer um erro ao repor as mensagens");
+            return;
+        }
+
+        List<Message> unreadMessages = messageService.getLastestGroupMessages(user.getCurrentGroup().getName());
+
+        for (Message unreadMessage : unreadMessages) {
+            NotificationHandler.sendMessage(user.getName(), unreadMessage);
+        }
+    }
+
     private String loginUser(String usernameOrEmail, String password, Socket clientSocket) {
 
         User user = userService.authenticate(usernameOrEmail, password);
@@ -186,6 +201,7 @@ public class ExecuteInternalCommands {
             String username = registerMatcher.group("username");
 
             sendUnreadChatMessage(username);
+            sendLatestMulticastMessages(username);
 
             User user = userService.getUserByName(username);
             if (user.getPermissions() == Permissions.HIGH_LEVEL || user.getPermissions() == Permissions.MEDIUM_LEVEL) {

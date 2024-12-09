@@ -5,8 +5,7 @@ import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
-import org.estg.ipp.pt.ServerSide.Classes.HandleMulticastMessages;
-import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
+import org.estg.ipp.pt.ServerSide.Classes.MulticastListener;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
 import org.estg.ipp.pt.ServerSide.Services.*;
@@ -23,9 +22,6 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
@@ -69,8 +65,8 @@ public class Server {
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.INFO, "Servidor iniciado na porta " + serverPort));
 
                 for (Group g : groupService.getAllGroups()) {
-                    HandleMulticastMessages handleMulticastMessages = new HandleMulticastMessages();
-                    new Thread(() -> handleMulticastMessages.handleMulticastMessages(g.getPort(), g.getAddress(), g.getName(), "localhost", messageService)).start();
+                    MulticastListener handleMulticastMessages = new MulticastListener();
+                    new Thread(() -> handleMulticastMessages.handleMulticastMessages(g, "localhost", messageService)).start();
                 }
 
                 while (true) {

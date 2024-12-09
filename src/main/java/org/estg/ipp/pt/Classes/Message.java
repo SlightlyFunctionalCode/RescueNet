@@ -106,4 +106,17 @@ public class Message {
     public void setApprovalRequest(boolean approvalRequest) {
         isApprovalRequest = approvalRequest;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
+                ", isRead=" + isRead +
+                ", content='" + content + '\'' +
+                ", timestamp=" + timestamp +
+                ", isApprovalRequest=" + isApprovalRequest +
+                '}';
+    }
 }
