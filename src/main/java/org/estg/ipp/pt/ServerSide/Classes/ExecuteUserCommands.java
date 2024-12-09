@@ -228,6 +228,16 @@ public class ExecuteUserCommands {
                     out.println("ERRO: Formato inválido para /addToGroup");
                 }
             }
+            case "/alert" ->{
+                Matcher alert = RegexPatternsCommands.ALERT.matcher(request);
+                if (alert.matches()) {
+                    String username = alert.group("username");
+                    String message = alert.group("message");
+                    System.out.println(username);
+                    System.out.println(message);
+                    processCommands.handleAlertMessage(username, message, out);
+                }
+            }
             case "/leave" -> {
                 Matcher listGroups = RegexPatternsCommands.LEAVE_GROUP.matcher(request);
                 if (listGroups.matches()) {

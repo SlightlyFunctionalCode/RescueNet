@@ -105,6 +105,7 @@ public final class HelpMessages {
             --HELP--
             - Comandos que podem ser executados no sistema são:
             -
+            - /alert: permite alertar todos os utilizadores
             - /evac: permite criar pedido de evacução
             - /resdist: permite distribuir recursos de emergência
             - /emerg: permite ativar comunicações de emergência

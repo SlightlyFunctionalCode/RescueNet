@@ -21,7 +21,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 
     List<Message> findChatMessageByIsApprovalRequestIsTrue();
 
-    @Query("SELECT m FROM Message m WHERE m.receiver = :groupName ORDER BY m.timestamp ASC LIMIT 10")
+    @Query("SELECT m FROM Message m WHERE m.receiver = :groupName ORDER BY m.timestamp ASC LIMIT 30")
     List<Message> findLatestChatMessagesByGroup(
            String groupName
     );

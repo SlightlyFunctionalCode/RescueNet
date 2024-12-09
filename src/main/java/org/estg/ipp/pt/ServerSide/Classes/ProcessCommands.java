@@ -362,6 +362,21 @@ public class ProcessCommands implements ProcessCommandsInterface {
         out.println(result);
     }
 
+    public void handleAlertMessage(String username, String message, PrintWriter out) {
+        User user = userService.getUserByName(username);
+
+        if(Permissions.fromPermissions(user.getPermissions()) != Permissions.fromPermissions(Permissions.HIGH_LEVEL)) {
+            out.println("Não tens permissão para usar este comando!");
+            return;
+        }
+
+        List<Group> groups = groupService.getAllGroups();
+        for (Group group : groups) {
+            notifyGroup(group, "ALERTA: " + message);
+        }
+        out.println("EXECUTADO COM SUCESSO");
+    }
+
     public void handleLeaveGroup(String username, String groupName, PrintWriter out) {
         User user = userService.getUserByName(username);
         Group group;
