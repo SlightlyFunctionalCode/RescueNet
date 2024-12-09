@@ -31,6 +31,10 @@ public class MessageService {
         }
     }
 
+    public String getContent(Long id) {
+        return messageRepository.findById(id).get().getContent();
+    }
+
     public Message updateContent(String content, Long messageId) {
         Optional<Message> messageOptional = messageRepository.findById(messageId);
         if (messageOptional.isPresent()) {

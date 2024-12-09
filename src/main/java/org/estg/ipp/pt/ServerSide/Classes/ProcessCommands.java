@@ -7,6 +7,7 @@ import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.ServerSide.Interfaces.ProcessCommandsInterface;
+import org.estg.ipp.pt.ServerSide.Repositories.MessageRepository;
 import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,8 @@ public class ProcessCommands implements ProcessCommandsInterface {
 
     @Autowired
     private LogService logService;
+    @Autowired
+    private MessageRepository messageRepository;
 
     public void processExport(String request, PrintWriter out) {
         Matcher exportMatcher = RegexPatternsCommands.EXPORT.matcher(request);
@@ -245,6 +248,22 @@ public class ProcessCommands implements ProcessCommandsInterface {
         if (!messageService.isSameMessage(id)) {
             out.println("ERRO: Não há solicitações pendentes para este utilizador.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "ERRO: Não há solicitações pendentes para este utilizador."));
+            return;
+        }
+
+        User user = userService.getUserByName(username);
+        Permissions permissions = Permissions.NO_LEVEL;
+
+        if(messageService.getContent(id).equals("Operação de evacuação em massa")){
+            permissions = Permissions.HIGH_LEVEL;
+        }else if(messageService.getContent(id).equals("Ativação de comunicações de Emergência")){
+            permissions = Permissions.MEDIUM_LEVEL;
+        }else if(messageService.getContent(id).equals("Distribuição de Recursos de Emergência")){
+            permissions = Permissions.LOW_LEVEL;
+        }
+
+        if(Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(permissions)) {
+            out.println("Não tens as permissões necessárias para aprovar ou rejeitas este pedido!");
             return;
         }
 
