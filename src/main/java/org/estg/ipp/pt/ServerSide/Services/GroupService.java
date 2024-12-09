@@ -199,7 +199,7 @@ public class GroupService {
             group.setUsers(initial);
 
             if (user.getId().equals(group.getCreatedBy())) {
-                group.setCreatedBy(group.getUsers().getFirst().getId());
+                group.setCreatedBy(group.getUsers().get(1).getId());
             }
             groupRepository.save(group);
             System.out.println("Utilizador removido do grupo: " + group.getName());

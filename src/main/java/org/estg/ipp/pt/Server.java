@@ -5,6 +5,7 @@ import org.estg.ipp.pt.Classes.Enum.RegexPatternsCommands;
 import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
+import org.estg.ipp.pt.ServerSide.Classes.HandleMulticastMessages;
 import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
@@ -45,6 +46,9 @@ public class Server {
     @Autowired
     private LogService logService;
 
+    @Autowired
+    private MessageService messageService;
+
     private ServerSocket serverSocket;
 
     public static void main(String[] args) {
@@ -53,7 +57,7 @@ public class Server {
 
     @Bean
     public CommandLineRunner startServer(ExecuteInternalCommands executeInternalCommands) {
-        return _ -> {
+        return args -> {
             int serverPort = 5000;
 
             executeInternalCommands.groupService.initializeDefaultGroups();
@@ -63,6 +67,11 @@ public class Server {
                 serverSocket = new ServerSocket(serverPort);
                 System.out.println("Servidor iniciado na porta " + serverPort);
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.INFO, "Servidor iniciado na porta " + serverPort));
+
+                for (Group g : groupService.getAllGroups()) {
+                    HandleMulticastMessages handleMulticastMessages = new HandleMulticastMessages();
+                    new Thread(() -> handleMulticastMessages.handleMulticastMessages(g.getPort(), g.getAddress(), g.getName(), "localhost", messageService)).start();
+                }
 
                 while (true) {
                     Socket clientSocket = serverSocket.accept();
