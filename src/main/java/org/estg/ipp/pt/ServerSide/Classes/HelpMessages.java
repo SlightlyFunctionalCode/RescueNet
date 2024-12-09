@@ -161,8 +161,6 @@ public final class HelpMessages {
             - Comandos que podem ser executados no sistema são:
             -
             - /resdist: permite distribuir recursos de emergência
-            - /approve: permite aprovar um comando utilizado por outros utilizadores
-            - /reject: permite rejeitar um comando utilizado por outros utilizadores
             - /join: permite entrar num grupo existente
             - /create_group: permite criar um novo grupo
             - /chat: permite enviar uma menssagem privada para um utilizador
