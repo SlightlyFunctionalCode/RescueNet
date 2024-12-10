@@ -92,16 +92,17 @@ public class Client {
             System.out.println(Constants.ERROR_LOGIN);
             return;
         }
-        System.out.println(response);
+        System.out.println(response + "teste");
 
         Matcher matcher = ServerResponseRegex.LOGIN_SUCCESS.matcher(response);
         if (matcher.matches()) {
                 String groupAddress = matcher.group("address");
+            System.out.println(groupAddress);
                 int port = Integer.parseInt(matcher.group("port"));
-
+            System.out.println(port);
                 try {
                     MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, socket, serverAddress);
-
+                    System.out.println(chatService);
                     chatService.startChat(groupAddress, port, usernameOrEmail);
                 } catch (IOException e) {
                     System.out.println(Constants.ERROR_STARTING_CHAT_SESSION);

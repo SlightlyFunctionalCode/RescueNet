@@ -30,7 +30,6 @@ public class ExecuteUserCommands {
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
                                   ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) throws IOException {
 
-        /*TODO: Adicionar comando para alertar utilizadores */
         switch (command) {
             case "/evac", "/resdist", "/emerg" ->
                     processCommands.processOperationCommand(payload, command, out, usersWithPermissionsOnline);
@@ -252,6 +251,15 @@ public class ExecuteUserCommands {
                     }
                 } else {
                     out.println("ERRO: Formato inválido para /addToGroup");
+                }
+            }
+            case "/logout" -> {
+                Matcher logout = RegexPatternsCommands.LOGOUT.matcher(request);
+                if (logout.matches()) {
+                    String username = logout.group("username");
+                    processCommands.handleLogout(username, out);
+                } else {
+                    out.println("ERRO: Formato inválido para /logout");
                 }
             }
             default -> {

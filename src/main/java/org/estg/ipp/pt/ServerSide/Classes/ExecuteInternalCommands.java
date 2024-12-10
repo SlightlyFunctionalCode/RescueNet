@@ -129,7 +129,8 @@ public class ExecuteInternalCommands {
             String response = loginUser(usernameOrEmail, password, clientSocket);
             System.out.println(response);
 
-            if (user.getPermissions() == Permissions.HIGH_LEVEL
+
+            if (response.startsWith("SUCESSO:")  && user.getPermissions() == Permissions.HIGH_LEVEL
                     || user.getPermissions() == Permissions.MEDIUM_LEVEL
                     || user.getPermissions() == Permissions.LOW_LEVEL) {
                 usersWithPermissionsOnline.put(user.getName(), user.getPermissions());
@@ -174,6 +175,11 @@ public class ExecuteInternalCommands {
             return "FAILED: Usuário inválido!";
         }
         String username = user.getName();
+
+        if (Server.getUserSocket(username) != null) {
+            return "FAILED: Usuário já está logado!";
+        }
+
         // Após login bem-sucedido, armazenar o socket e verificar permissões
         Server.addUserSocket(username, clientSocket);
 

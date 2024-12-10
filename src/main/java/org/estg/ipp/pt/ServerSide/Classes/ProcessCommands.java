@@ -6,6 +6,7 @@ import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
+import org.estg.ipp.pt.Server;
 import org.estg.ipp.pt.ServerSide.Interfaces.ProcessCommandsInterface;
 import org.estg.ipp.pt.ServerSide.Repositories.MessageRepository;
 import org.estg.ipp.pt.ServerSide.Services.*;
@@ -394,6 +395,16 @@ public class ProcessCommands implements ProcessCommandsInterface {
             groupService.leaveGroup(user, group);
 
             out.println("Você saiu do grupo");
+        } catch (Exception e) {
+            out.println("Erro: Erro ao sair do Grupo");
+        }
+    }
+
+    public void handleLogout(String username, PrintWriter out) {
+        try {
+            Server.removeUserSocket(username);
+
+            out.println("Você saiu do programa");
         } catch (Exception e) {
             out.println("Erro: Erro ao sair do Grupo");
         }

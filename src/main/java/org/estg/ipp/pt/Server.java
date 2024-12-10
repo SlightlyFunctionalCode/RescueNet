@@ -102,6 +102,7 @@ public class Server {
     }
 
     private void handleClient(Socket clientSocket) {
+        String user = null;
         try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
@@ -116,6 +117,8 @@ public class Server {
                     String command = requestMatcher.group("command");
                     String requester = requestMatcher.group("requester");
                     String payload = requestMatcher.group("payload") != null ? requestMatcher.group("payload") : "";
+                    user = payload;
+                    System.out.println(user);
                     // Delegar o comando à classe correta
                     if (internalCommands.isInternalCommand(command)) {
                         internalCommands.handleInternalCommand(command, payload, out, clientSocket, groupService.getAllGroups(), usersWithPermissionsOnline);
@@ -135,6 +138,15 @@ public class Server {
             }
         } catch (IOException e) {
             System.err.println("Erro ao comunicar com o cliente: " + e.getMessage());
+            System.out.println("teste");
+            if (user != null) {
+                removeUserSocket(user); // Remove o usuário do mapa de conexões
+            }
+            try {
+                clientSocket.close(); // Fecha o socket
+            } catch (IOException ex) {
+                System.err.println("Erro ao fechar o socket: " + ex.getMessage());
+            }
             logService.saveLog(new Log(LocalDateTime.now(), TagType.FAILURE, "Erro ao comunicar com o cliente: " + e.getMessage()));
         }
     }

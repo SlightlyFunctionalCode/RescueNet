@@ -16,7 +16,8 @@ public enum RegexPatternsCommands {
     ADD_TO_GROUP("^/addToGroup(?:\\s(?<userToAdd>.+))\\s(?<group>[^\\s:]+)?:(?<username>.+)"),
     LIST_GROUPS("^/groups:(?<username>.+)$"),
     LEAVE_GROUP("^/leave(?:\\s(?<help>-h))?(?:\\s(?<groupName>\\S+))?:(?<username>.+)$"),
-    ALERT("^/alert\\s+(?<message>.+):(?<username>\\S+)$");
+    ALERT("^/alert\\s+(?<message>.+):(?<username>\\S+)$"),
+    LOGOUT("^/logout:(?<username>\\S+)$");
 
 
     private final Pattern pattern;

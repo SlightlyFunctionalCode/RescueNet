@@ -29,6 +29,7 @@ public class UserInputHandler implements InputHandler {
             String msg = scanner.nextLine();
             if (msg.equalsIgnoreCase("/logout")) {
                 shouldExit = true;
+                commandHandler.handleCommand("/logout", name, chatService);
                 chatService.stopChat();
             } else if (msg.startsWith("/")) {
                     commandHandler.handleCommand(msg, name, chatService);

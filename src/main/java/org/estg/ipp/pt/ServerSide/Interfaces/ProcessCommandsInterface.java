@@ -39,4 +39,6 @@ public interface ProcessCommandsInterface {
     void handleAlertMessage(String username, String message, PrintWriter out);
 
     void handleLeaveGroup(String username, String group, PrintWriter out);
+
+    void handleLogout(String username, PrintWriter out);
 }
