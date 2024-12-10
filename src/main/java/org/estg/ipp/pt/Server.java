@@ -8,6 +8,7 @@ import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.ServerSide.Classes.MulticastListener;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
 import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
+import org.estg.ipp.pt.ServerSide.Classes.ServerStats;
 import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -45,6 +46,9 @@ public class Server {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private ServerStats serverStats;
+
     private ServerSocket serverSocket;
 
     public static void main(String[] args) {
@@ -68,6 +72,8 @@ public class Server {
                     MulticastListener handleMulticastMessages = new MulticastListener();
                     new Thread(() -> handleMulticastMessages.handleMulticastMessages(g, "localhost", messageService)).start();
                 }
+
+                printReport(serverStats);
 
                 while (true) {
                     Socket clientSocket = serverSocket.accept();
@@ -97,6 +103,10 @@ public class Server {
         }
     }
 
+    public static int getNumberOfClients() {
+        return clients.size();
+    }
+
     public static void addUserSocket(String username, Socket socket) {
         clients.put(username, socket);
     }
@@ -122,11 +132,13 @@ public class Server {
                     // Delegar o comando à classe correta
                     if (internalCommands.isInternalCommand(command)) {
                         internalCommands.handleInternalCommand(command, payload, out, clientSocket, groupService.getAllGroups(), usersWithPermissionsOnline);
+                        serverStats.incrementCommandsExecuted();
                     } else {
                         try {
                             userCommands.handleUserCommand(
                                     command, request, requester, payload, out,
                                     usersWithPermissionsOnline);
+                            serverStats.incrementCommandsExecuted();
                         } catch (IOException e) {
                             throw new IOException(e.getMessage());
                         }
@@ -149,5 +161,27 @@ public class Server {
             }
             logService.saveLog(new Log(LocalDateTime.now(), TagType.FAILURE, "Erro ao comunicar com o cliente: " + e.getMessage()));
         }
+    }
+
+    private void printReport(ServerStats serverStats) {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    int connectedUsers = serverStats.getConnectedUsers();
+                    int commandsExecuted = serverStats.getTotalCommandsExecuted();
+
+                    System.out.println("===== Estatísticas do Servidor =====");
+                    System.out.println("Utilizadores Conectados: " + connectedUsers);
+                    System.out.println("Comandos Executados: " + commandsExecuted);
+                    System.out.println("====================================");
+
+                    // Aguarda 10 segundos antes de executar novamente
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    System.err.println("Thread de estatísticas foi interrompida: " + e.getMessage());
+                    break;
+                }
+            }
+        }).start();
     }
 }

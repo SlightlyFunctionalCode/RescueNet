@@ -172,12 +172,12 @@ public class ExecuteInternalCommands {
         User user = userService.authenticate(usernameOrEmail, password);
 
         if (user == null) {
-            return "FAILED: Usuário inválido!";
+            return "FAILED: Utilizador inválido!";
         }
         String username = user.getName();
 
         if (Server.getUserSocket(username) != null) {
-            return "FAILED: Usuário já está logado!";
+            return "FAILED: Utilizador já está logado!";
         }
 
         // Após login bem-sucedido, armazenar o socket e verificar permissões
@@ -197,7 +197,7 @@ public class ExecuteInternalCommands {
             Server.removeUserSocket(username);
             out.println("SUCESSO: Logout realizado");
         } else {
-            out.println("ERRO: Usuário não está logado");
+            out.println("ERRO: Utilizador não está logado");
         }
     }
 
