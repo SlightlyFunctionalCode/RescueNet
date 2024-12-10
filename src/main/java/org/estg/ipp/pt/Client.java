@@ -1,4 +1,4 @@
-package org.estg.ipp.pt.ClientSide;
+package org.estg.ipp.pt;
 
 import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
 import org.estg.ipp.pt.ClientSide.Classes.Enums.ServerResponseRegex;

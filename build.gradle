@@ -8,6 +8,22 @@ plugins {
 group = 'org.estg.ipp.pt'
 version = '1.0-SNAPSHOT'
 
+application {
+    // Define uma classe principal padrão (opcional, se precisar de uma execução direta)
+    mainClass = 'org.estg.ipp.pt.Server'
+}
+
+bootJar {
+    archiveBaseName.set('server')  // Nome base para o arquivo JAR
+    version = '1.0-SNAPSHOT'  // Versão do JAR
+    mainClass.set('org.estg.ipp.pt.Server')  // Classe principal do Spring Boot para o Server
+}
+
+jar {
+    enabled = false  // Desabilitar a criação de JAR "normal" (não com Spring Boot)
+}
+
+
 repositories {
     mavenCentral()
 }
@@ -37,6 +53,34 @@ dependencies {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+tasks.register('runClient', JavaExec) {
+    group = 'application'
+    description = 'Run the Client main class'
+    mainClass.set('org.estg.ipp.pt.Client')
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+}
+
+tasks.register('runServer', JavaExec) {
+    group = 'application'
+    description = 'Run the Server main class'
+    mainClass.set('org.estg.ipp.pt.Server')
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
+// Configuração do JAR para o cliente
+task clientJar(type: Jar) {
+    archiveBaseName = 'client'
+    from sourceSets.main.output
+    manifest {
+        attributes 'Main-Class': 'org.estg.ipp.pt.Client'
+    }
+}
+
+
+build.dependsOn clientJar
 
 test {
     useJUnitPlatform()
