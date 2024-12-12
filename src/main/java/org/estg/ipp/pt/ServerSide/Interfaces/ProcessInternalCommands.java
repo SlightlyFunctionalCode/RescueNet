@@ -20,7 +20,4 @@ public interface ProcessInternalCommands {
 
     void handlePendingRequest(String payload);
 
-    GroupService getGroupService();
-
-    UserService getUserService();
 }

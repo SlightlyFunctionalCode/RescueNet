@@ -13,6 +13,4 @@ public interface ExecuteInternalCommands {
 
     void handleInternalCommand(String command, String payload, PrintWriter out,
                                Socket clientSocket, List<Group> groupList, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline);
-
-    ProcessInternalCommands getProcessInternalCommands();
 }

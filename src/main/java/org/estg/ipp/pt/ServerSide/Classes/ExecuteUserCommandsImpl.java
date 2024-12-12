@@ -18,6 +18,14 @@ import java.util.regex.Matcher;
 
 import static org.estg.ipp.pt.ServerSide.Classes.HelpMessages.*;
 
+/**
+ * Classe responsável por executar os comandos dos utilizadores. Essa implementação processa comandos fornecidos pelos utilizadores
+ * e executa as operações associadas, interagindo com serviços como LogService, MessageService e ProcessUserCommands.
+ *
+ * @see LogService Para mais informações sobre o serviço de log.
+ * @see MessageService Para mais informações sobre o serviço de mensagens.
+ * @see ProcessUserCommands Para mais informações sobre o processamento de comandos do utilizador.
+ */
 @Component
 public class ExecuteUserCommandsImpl implements ExecuteUserCommands {
     @Autowired
@@ -29,6 +37,17 @@ public class ExecuteUserCommandsImpl implements ExecuteUserCommands {
     @Autowired
     private ProcessUserCommands processCommands;
 
+    /**
+     * Processa os comandos fornecidos pelo utilizador e executa a operação correspondente.
+     *
+     * @param command O comando fornecido pelo utilizador.
+     * @param request A solicitação completa contendo detalhes do comando.
+     * @param requester O nome do utilizador que está a solicitar a execução do comando.
+     * @param payload Os dados adicionais para o comando, se necessário.
+     * @param out O escritor para enviar a resposta ao usuário.
+     * @param usersWithPermissionsOnline O mapa de utilizadores com permissões online.
+     * @throws IOException Se ocorrer um erro ao escrever a resposta no `out`.
+     */
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
                                   ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) throws IOException {
 

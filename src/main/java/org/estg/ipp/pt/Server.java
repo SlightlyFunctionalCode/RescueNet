@@ -58,6 +58,12 @@ public class Server {
     private GroupService groupService;
 
     /**
+     * Serviço responsável pela gestão de users.
+     */
+    @Autowired
+    private UserService userService;
+
+    /**
      * Mapa para armazenar os utilizadores online e as suas permissões.
      */
     public final ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline = new ConcurrentHashMap<>();
@@ -106,8 +112,8 @@ public class Server {
 
             ServerStats serverStats = new ServerStats();
 
-            executeInternalCommands.getProcessInternalCommands().getGroupService().initializeDefaultGroups();
-            executeInternalCommands.getProcessInternalCommands().getUserService().initializeUser();
+            groupService.initializeDefaultGroups();
+            userService.initializeUser();
 
             try {
                 serverSocket = new ServerSocket(serverPort);

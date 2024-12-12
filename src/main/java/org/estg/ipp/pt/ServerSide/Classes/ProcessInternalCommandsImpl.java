@@ -208,12 +208,4 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
             }
         }
     }
-
-    public GroupService getGroupService() {
-        return groupService;
-    }
-
-    public UserService getUserService() {
-        return userService;
-    }
 }
