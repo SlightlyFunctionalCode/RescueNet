@@ -24,6 +24,11 @@ import java.util.regex.Matcher;
 import static org.estg.ipp.pt.ServerSide.Classes.HelpMessages.*;
 import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGroup;
 
+/**
+ * Implementação da interface {@link ProcessUserCommands} para processar comandos relacionados ao utilizador,
+ * como exportação de relatórios, entrada em grupos, alteração de permissões e criação de grupos.
+ * Além disso, lida com operações específicas que requerem permissões e comunica o status das ações.
+ */
 @Component
 public class ProcessUserCommandsImpl implements ProcessUserCommands {
     @Autowired
@@ -38,6 +43,13 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
     @Autowired
     private LogService logService;
 
+    /**
+     * Processa o comando de exportação baseado no request do utilizador. Dependendo dos parâmetros fornecidos,
+     * pode gerar um relatório PDF conforme o intervalo de datas, tag ou ambos.
+     *
+     * @param request A ‘string’ que contém o comando e parâmetros para o processo de exportação.
+     * @param out     O escritor para o qual a resposta será impressa.
+     */
     public void processExport(String request, PrintWriter out) {
         Matcher exportMatcher = RegexPatternsCommands.EXPORT.matcher(request);
 
@@ -80,26 +92,60 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
-    private void processExportByDateRangeCommand(LocalDateTime startDate, LocalDateTime endDate, String username, PrintWriter out) {
-        // Generate the endpoint URL
+    /**
+     * Processa a exportação baseada no intervalo de datas fornecido.
+     * Gera um link para o download do relatório em PDF.
+     *
+     * @param startDate A data de início do intervalo.
+     * @param endDate   A data de fim do intervalo.
+     * @param username  O nome do usuário que solicita o relatório.
+     * @param out       O escritor para o qual a resposta será impressa.
+     */
+    private void processExportByDateRangeCommand(LocalDateTime startDate, LocalDateTime endDate, String
+            username, PrintWriter out) {
         String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate;
 
         processExportURL(url, username, out);
     }
 
-    private void processExportByDateRangeAndTagCommand(LocalDateTime startDate, LocalDateTime endDate, TagType tagType, String username, PrintWriter out) {
-        // Generate the endpoint URL
+    /**
+     * Processa a exportação com base no intervalo de datas e na tag fornecida.
+     * Gera um link para o download do relatório em PDF.
+     *
+     * @param startDate A data de início do intervalo.
+     * @param endDate   A data de fim do intervalo.
+     * @param tagType   O tipo de tag associado ao relatório.
+     * @param username  O nome do utilizador que solicita o relatório.
+     * @param out       O escritor para o qual a resposta será impressa.
+     */
+    private void processExportByDateRangeAndTagCommand(LocalDateTime startDate, LocalDateTime endDate, TagType
+            tagType, String username, PrintWriter out) {
         String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate + "&tag=" + tagType.name();
 
         processExportURL(url, username, out);
     }
 
+    /**
+     * Processa a exportação com base apenas na tag fornecida.
+     * Gera um link para o download do relatório em PDF.
+     *
+     * @param tagType  O tipo de tag associado ao relatório.
+     * @param username O nome do utilizador que solicita o relatório.
+     * @param out      O escritor para o qual a resposta será impressa.
+     */
     private void processExportByTagCommand(TagType tagType, String username, PrintWriter out) {
         String url = "http://localhost:8080/download-pdf-report?tag=" + tagType.name();
 
         processExportURL(url, username, out);
     }
 
+    /**
+     * Processa a exportação utilizando um URL gerado para download de PDF.
+     *
+     * @param url      O URL para o download do relatório.
+     * @param username O nome do utilizador que solicita o relatório.
+     * @param out      O escritor para o qual a resposta será impressa.
+     */
     private void processExportURL(String url, String username, PrintWriter out) {
         System.out.println("Generated URL for download: " + url);
 
@@ -108,6 +154,14 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "O pdf gerado por " + username + " foi gerado com sucesso"));
     }
 
+    /**
+     * Processa o comando para que um utilizador entre num grupo.
+     * Verifica se o utilizador tem permissões adequadas e se o grupo é público ou privado.
+     *
+     * @param username O nome do utilizador que deseja entrar no grupo.
+     * @param name     O nome do grupo.
+     * @param out      O escritor para o qual a resposta será impressa.
+     */
     @Transactional
     public void processJoinCommand(String username, String name, PrintWriter out) {
         User user = userService.getUserByName(username);
@@ -146,7 +200,17 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
-    public void processChangePermissionCommand(String username, String name, Permissions permission, PrintWriter out) {
+    /**
+     * Processa o comando para alterar as permissões de um utilizador dentro do sistema.
+     * O utilizador que executa o comando deve ter permissões suficientes para alterar permissões de outro utilizador.
+     *
+     * @param username   O nome do utilizador que executa o comando.
+     * @param name       O nome do utilizador cujas permissões serão alteradas.
+     * @param permission A nova permissão a ser atribuída ao utilizador.
+     * @param out        O escritor para o qual a resposta será impressa.
+     */
+    public void processChangePermissionCommand(String username, String name, Permissions
+            permission, PrintWriter out) {
         User userWithPermissions = userService.getUserByName(username);
         if (userWithPermissions == null) {
             out.println("ERRO: Utilizador não encontrado");
@@ -171,7 +235,17 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, username + " promovido para " + permission.name()));
     }
 
-    public void processCreateGroupCommand(String username, String name, String publicOrPrivate, PrintWriter out) {
+    /**
+     * Processa o comando para criar um grupo. O grupo pode ser público ou privado, dependendo do parâmetro fornecido.
+     * O utilizador que executa o comando deve ter permissões para criar um grupo.
+     *
+     * @param username        O nome do utilizador que executa o comando.
+     * @param name            O nome do novo grupo a ser criado.
+     * @param publicOrPrivate O tipo de privacidade do grupo: "public" ou "private".
+     * @param out             O escritor para o qual a resposta será impressa.
+     */
+    public void processCreateGroupCommand(String username, String name, String
+            publicOrPrivate, PrintWriter out) {
         User userWithPermissions = userService.getUserByName(username);
         if (userWithPermissions == null) {
             out.println("ERRO: Utilizador não encontrado");
@@ -203,6 +277,15 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
+    /**
+     * Processa comandos de operação específicos, como evacuação, distribuição de recursos ou ativação de comunicações de emergência.
+     * O comando só será executado se o utilizador tiver permissões suficientes.
+     *
+     * @param username                   O nome do utilizador que executa o comando.
+     * @param command                    O comando de operação a ser executado.
+     * @param out                        O escritor para o qual a resposta será impressa.
+     * @param usersWithPermissionsOnline Mapa de utilizador online com as suas permissões.
+     */
     public void processOperationCommand(String username, String command, PrintWriter out,
                                         ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
         User user = userService.getUserByName(username);
@@ -256,7 +339,18 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
-    public void handleApprovalCommand(String action, long id, String username, String requester, PrintWriter out) {
+    /**
+     * Método que processa o comando de aprovação ou rejeição de uma solicitação.
+     * Verifica as permissões do utilizador e executa a ação correspondente.
+     *
+     * @param action    A ação a ser executada, pode ser "/approve" ou "/reject".
+     * @param id        O ID da solicitação de mensagem a ser processada.
+     * @param username  O nome do utilizador que executa a ação.
+     * @param requester O nome do utilizador que fez a solicitação.
+     * @param out       O objeto PrintWriter para enviar respostas ao cliente.
+     */
+    public void handleApprovalCommand(String action, long id, String username, String
+            requester, PrintWriter out) {
         if (!messageService.isSameMessage(id)) {
             out.println("ERRO: Não há solicitações pendentes para este utilizador.");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "ERRO: Não há solicitações pendentes para este utilizador."));
@@ -307,6 +401,12 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
+    /**
+     * Método que exibe os comandos disponíveis com base no nível de permissões do utilizador.
+     *
+     * @param username O nome do utilizador que solicita os comandos.
+     * @param out      O objeto PrintWriter para enviar a lista de comandos ao cliente.
+     */
     public void handleCommandHelper(String username, PrintWriter out) {
         User user = userService.getUserByName(username);
 
@@ -329,6 +429,15 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
+    /**
+     * Método que adiciona um utilizador a um grupo, desde que o utilizador tenha permissões adequadas.
+     * Verifica se o grupo foi criado pelo utilizador e se o utilizador existe.
+     *
+     * @param username      O nome do utilizador que está a tentar adicionar outro utilizador ao grupo.
+     * @param userToAddName O nome do utilizador a ser adicionado ao grupo.
+     * @param group         O nome do grupo ao qual o utilizador será adicionado.
+     * @param out           O objeto PrintWriter para enviar respostas ao cliente.
+     */
     public void handleAddToGroup(String username, String userToAddName, String group, PrintWriter out) {
         User user = userService.getUserByName(username);
         User userToAdd = userService.getUserByName(userToAddName);
@@ -358,6 +467,12 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
+    /**
+     * Método que lista todos os grupos disponíveis para um utilizador, considerando o seu nível de permissões.
+     *
+     * @param username O nome do utilizador que solicita a lista de grupos.
+     * @param out      O objeto PrintWriter para enviar a lista de grupos ao cliente.
+     */
     public void handleListGroups(String username, PrintWriter out) {
         User user = userService.getUserByName(username);
 
@@ -394,6 +509,13 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
 
     }
 
+    /**
+     * Método que envia um alerta para todos os grupos, sendo permitido apenas a utilizadores com permissões elevadas.
+     *
+     * @param username O nome do utilizador que executa o comando de alerta.
+     * @param message  A mensagem de alerta a ser enviada.
+     * @param out      O objeto PrintWriter para enviar a confirmação de execução ao cliente.
+     */
     public void handleAlertMessage(String username, String message, PrintWriter out) {
         User user = userService.getUserByName(username);
 
@@ -412,6 +534,14 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, username + " executou o comando alerta"));
     }
 
+    /**
+     * Método que permite a um utilizador sair de um grupo, desde que o grupo não seja um dos grupos base (GERAL, HIGH_LEVEL, MEDIUM_LEVEL, LOW_LEVEL).
+     * Verifica se o utilizador é membro do grupo antes de permitir a saída.
+     *
+     * @param username  O nome do utilizador que deseja sair do grupo.
+     * @param groupName O nome do grupo do qual o utilizador deseja sair.
+     * @param out       O objeto PrintWriter para enviar a confirmação de saída ao cliente.
+     */
     public void handleLeaveGroup(String username, String groupName, PrintWriter out) {
         User user = userService.getUserByName(username);
         Group group;
@@ -442,7 +572,15 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
-    public void handleLogout(String username, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline, PrintWriter out) {
+    /**
+     * Método que processa o logout de um utilizador, removendo-o da lista de utilizadores online e desconectando-o.
+     *
+     * @param username                   O nome do utilizador que está a fazer logout.
+     * @param usersWithPermissionsOnline A lista de utilizadores com permissões atualmente online.
+     * @param out                        O objeto PrintWriter para enviar a confirmação de logout ao cliente.
+     */
+    public void handleLogout(String
+                                     username, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline, PrintWriter out) {
         try {
             Server.removeUserSocket(username);
 
@@ -460,5 +598,4 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, username + " teve um erro ao fazer logout"));
         }
     }
-
 }

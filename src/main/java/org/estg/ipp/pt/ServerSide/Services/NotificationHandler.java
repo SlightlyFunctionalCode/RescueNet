@@ -20,19 +20,19 @@ import static org.estg.ipp.pt.Server.getUserSocket;
  *
  * <p><b>Funcionalidades principais:</b></p>
  * <ol>
- *   <li>Envio de notificações para um utilizador, verificando se o socket está disponível.</li>
+ *   <li>Envio de notificações para um utilizador, verificando se o ‘socket’ está disponível.</li>
  *   <li>Envio de mensagens diretas para um utilizador, verificando a disponibilidade do utilizador.</li>
  *   <li>Envio de mensagens para grupos usando multicast, gerir a criação e comunicação com o gestor de multicast.</li>
  * </ol>
  *
  * <p><b>Comportamento:</b></p>
  * <ul>
- *   <li>Se o socket de um utilizador não estiver disponível ou estiver fechado, será exibida uma mensagem de erro.</li>
+ *   <li>Se o ‘socket’ de um utilizador não estiver disponível ou estiver fechado, será exibida uma mensagem de erro.</li>
  *   <li>Se um utilizador estiver offline, a mensagem será guardada para ser enviada quando o utilizador se conectar.</li>
  *   <li>O envio de mensagens para grupos envolve a criação de um gestor de multicast se necessário.</li>
  * </ul>
  *
- * <p>Em caso de falha ao enviar a mensagem ou notificação, exceções de I/O serão tratadas com mensagens descritivas no console.</p>
+ * <p>Em caso de falha ao enviar a mensagem ou notificação, exceções de I/O serão tratadas com mensagens descritivas na consola.</p>
  */
 public class NotificationHandler {
 

@@ -53,13 +53,13 @@ public class UserService {
     }
 
     /**
-     * Registra um novo utilizador no sistema.
+     * Regista um novo utilizador no sistema.
      *
      * <p>Este método valida se o nome de utilizador ou o email já existem. Se não, ele
      * cria o utilizador com a senha criptografada e o salva no banco de dados.</p>
      *
-     * @param user O utilizador a ser registrado.
-     * @return 1 se o utilizador foi registrado com sucesso, 0 se o nome de utilizador ou email
+     * @param user O utilizador a ser registado.
+     * @return 1 se o utilizador foi registado com sucesso, 0 se o nome de utilizador ou email
      * já existirem no sistema.
      */
     public int register(User user) {
@@ -90,7 +90,7 @@ public class UserService {
      * utilizador, caso contrário, retorna null.</p>
      *
      * @param user O utilizador que se pretende autenticar.
-     * @param password        A senha fornecida pelo utilizador.
+     * @param password A senha fornecida pelo utilizador.
      * @return O utilizador autenticado, ou null se a autenticação falhar.
      */
     public boolean authenticate(User user, String password) {
@@ -103,6 +103,15 @@ public class UserService {
         return false;
     }
 
+    /**
+     * Recupera um utilizador pelo nome de utilizador ou email.
+     *
+     * <p>Este método retorna o utilizador associado ao nome ou email fornecido, ou null se o utilizador
+     * não for encontrado.</p>
+     *
+     * @param usernameOrEmail O nome ou email do utilizador a ser recuperado.
+     * @return O utilizador correspondente ao nome ou email, ou null se não encontrado.
+     */
     public User getUserByNameOrEmail(String usernameOrEmail) {
         Optional<User> userOptional = userRepository.findByEmailOrName(usernameOrEmail);
 

@@ -22,6 +22,12 @@ import java.util.regex.Matcher;
 
 import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGroup;
 
+/**
+ * Implementação do processamento de comandos internos no sistema.
+ *
+ * Esta classe lida com os comandos internos do sistema, como confirmar a leitura de mensagens,
+ * registrar, fazer login, logout e lidar com solicitações pendentes.
+ */
 @Component
 public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
     @Autowired
@@ -33,6 +39,11 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
     @Autowired
     private MessageService messageService;
 
+    /**
+     * Processa a confirmação de leitura de uma mensagem.
+     *
+     * @param payload O conteúdo da mensagem de confirmação.
+     */
     public void handleIsReadConfirmation(String payload) {
         try {
             Matcher confirmMatcher = RegexPatterns.CONFIRM_READ.matcher(payload.trim());
@@ -56,7 +67,12 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
         }
     }
 
-
+    /**
+     * Processa o comando de registo de um novo utilizador.
+     *
+     * @param payload O conteúdo da mensagem de registo.
+     * @param out O fluxo de saída para responder ao cliente.
+     */
     public void handleRegister(String payload, PrintWriter out) {
         Matcher registerMatcher = RegexPatterns.REGISTER.matcher(payload);
         if (registerMatcher.matches()) {
@@ -94,6 +110,14 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
         }
     }
 
+    /**
+     * Processa o comando de login de um utilizador.
+     *
+     * @param payload O conteúdo da mensagem de login.
+     * @param out O fluxo de saída para responder ao cliente.
+     * @param clientSocket O ‘socket’ do cliente que está a fazer login.
+     * @param usersWithPermissionsOnline O mapa de utilizador com permissões online.
+     */
     public void handleLogin(String payload, PrintWriter out, Socket clientSocket, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
         if (payload == null || payload.isEmpty()) {
             out.println("Erro: Dados de login inválidos.");
@@ -129,6 +153,11 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
         }
     }
 
+    /**
+     * Envia as mensagens não lidas para o utilizador especificado.
+     *
+     * @param username O nome do utilizador que receberá as mensagens não lidas.
+     */
     private void sendUnreadChatMessage(String username) {
         List<Message> unreadMessages = messageService.getUnreadMessages(username);
 
@@ -138,6 +167,11 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
         }
     }
 
+    /**
+     * Envia as últimas mensagens do grupo para o utilizador especificado.
+     *
+     * @param username O nome do utilizador que receberá as mensagens do grupo.
+     */
     private void sendLatestMulticastMessages(String username) {
         User user = userService.getUserByName(username);
 
@@ -154,6 +188,14 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
         }
     }
 
+    /**
+     * Realiza o login do utilizador, verificando a autenticação e a disponibilidade.
+     *
+     * @param user O utilizador que está a tentar fazer login.
+     * @param password A senha fornecida pelo utilizador.
+     * @param clientSocket O ‘socket’ do cliente que está a fazer login.
+     * @return A resposta do login.
+     */
     private String loginUser(User user, String password, Socket clientSocket) {
 
         boolean isValid = userService.authenticate(user, password);
@@ -178,6 +220,12 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
         return "SUCESSO: Login realizado. Grupo: " + group.getAddress() + ":" + group.getPort() + ":" + username;
     }
 
+    /**
+     * Processa o comando de logout de um utilizador.
+     *
+     * @param username O nome do utilizador que está a fazer logout.
+     * @param out O fluxo de saída para responder ao cliente.
+     */
     public void handleLogout(String username, PrintWriter out) {
         if (Server.getUserSocket(username) != null) {
             Server.removeUserSocket(username);
@@ -187,6 +235,11 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
         }
     }
 
+    /**
+     * Processa o comando de solicitações pendentes de aprovação.
+     *
+     * @param payload O conteúdo da mensagem com a solicitação pendente.
+     */
     public void handlePendingRequest(String payload) {
         Matcher registerMatcher = RegexPatterns.READY.matcher(payload);
         if (registerMatcher.matches()) {

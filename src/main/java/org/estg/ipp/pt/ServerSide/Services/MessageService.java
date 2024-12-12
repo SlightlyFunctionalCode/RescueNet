@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * <p><strong>Serviço responsável por gerenciar operações relacionadas a mensagens.</strong></p>
+ * <p><strong>Serviço responsável por gerir operações relacionadas a mensagens.</strong></p>
  *
  * <p>Esta classe fornece funcionalidades para manipular mensagens, incluindo operações
  * de criação, leitura, atualização e exclusão (CRUD). Além disso, oferece métodos
@@ -54,7 +54,7 @@ public class MessageService {
      * Exclui uma mensagem com base no ID fornecido.
      *
      * @param id O ID da mensagem a ser excluída.
-     * @return A mensagem que foi excluída.
+     * @return A mensagem excluída.
      * @throws EntityNotFoundException Se nenhuma mensagem for encontrada com o ID fornecido.
      */
     @Transactional
@@ -120,10 +120,10 @@ public class MessageService {
     }
 
     /**
-     * Recupera uma lista de mensagens não lidas para um receptor específico.
+     * Recupera uma lista de mensagens não lidas para um recetor específico.
      *
-     * @param receiver O receptor das mensagens.
-     * @return Uma lista de mensagens não lidas para o receptor especificado.
+     * @param receiver O recetor das mensagens.
+     * @return Uma lista de mensagens não lidas para o recetor especificado.
      */
     public List<Message> getUnreadMessages(String receiver) {
         return messageRepository.findMessageByIsReadIsFalseAndReceiver(receiver);
