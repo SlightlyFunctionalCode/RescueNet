@@ -270,7 +270,7 @@ public class ExecuteUserCommands {
                 Matcher logout = RegexPatternsCommands.LOGOUT.matcher(request);
                 if (logout.matches()) {
                     String username = logout.group("username");
-                    processCommands.handleLogout(username, out);
+                    processCommands.handleLogout(username, usersWithPermissionsOnline, out);
                 } else {
                     out.println("ERRO: Formato inválido para /logout");
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /logout"));

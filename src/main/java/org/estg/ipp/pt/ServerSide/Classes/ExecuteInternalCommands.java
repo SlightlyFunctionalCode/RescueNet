@@ -111,6 +111,11 @@ public class ExecuteInternalCommands {
     }
 
     private void handleLogin(String payload, PrintWriter out, Socket clientSocket, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
+        if (payload == null || payload.isEmpty()) {
+            out.println("Erro: Dados de login inválidos.");
+            return;
+        }
+
         Matcher loginMatcher = RegexPatterns.LOGIN.matcher(payload);
         if (loginMatcher.matches()) {
             String usernameOrEmail = loginMatcher.group("username");

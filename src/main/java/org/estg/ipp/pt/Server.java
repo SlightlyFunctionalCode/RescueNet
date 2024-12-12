@@ -94,7 +94,10 @@ public class Server {
 
     public static void removeUserSocket(String username) {
         try {
-            clients.remove(username);
+            Socket socket = clients.remove(username);
+            if (socket != null) {
+                socket.close(); // Fechar a conexão
+            }
         } catch (Exception e) {
             System.err.println("Erro ao efetuar logout: " + e.getMessage());
         }
@@ -147,7 +150,6 @@ public class Server {
             }
         } catch (IOException e) {
             System.err.println("Erro ao comunicar com o cliente: " + e.getMessage());
-            System.out.println("teste");
             if (user != null) {
                 removeUserSocket(user);
             }

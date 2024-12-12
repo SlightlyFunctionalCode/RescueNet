@@ -1,5 +1,6 @@
 package org.estg.ipp.pt;
 
+import org.estg.ipp.pt.ClientSide.Classes.Connection;
 import org.estg.ipp.pt.ClientSide.Classes.Constants.Constants;
 import org.estg.ipp.pt.ClientSide.Classes.Enums.ServerResponseRegex;
 import org.estg.ipp.pt.ClientSide.Classes.MulticastChatService;
@@ -16,43 +17,38 @@ import java.util.regex.Matcher;
 @SpringBootApplication
 public class Client {
 
+    private static Connection connection;
+
     public static void main(String[] args) throws IOException {
-        String serverAddress = "localhost";
-        int serverPort = 5000;
+        connection = new Connection("localhost", 5000);
+        Scanner scanner = new Scanner(System.in);
+        boolean keepRunning = true;
+        while (keepRunning) {
+            System.out.print(Constants.MENU);
 
-        try (Socket socket = new Socket(serverAddress, serverPort);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+            int choice;
+            try {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+            } catch (Exception e) {
+                System.out.println(Constants.ERROR_INVALID_MENU_OPTION);
+                scanner.nextLine();
+                continue;
+            }
 
-            Scanner scanner = new Scanner(System.in);
-            boolean keepRunning = true;
-            while (keepRunning) {
-                System.out.print(Constants.MENU);
-
-                int choice;
-                try {
-                    choice = scanner.nextInt();
-                    scanner.nextLine();
-                } catch (Exception e) {
-                    System.out.println(Constants.ERROR_INVALID_MENU_OPTION);
-                    scanner.nextLine();
-                    continue;
+            switch (choice) {
+                case 1 -> handleSignUp(scanner);
+                case 2 -> handleLogin(scanner);
+                case 3 -> {
+                    System.out.println(Constants.EXITING_APP);
+                    keepRunning = false;
                 }
-
-                switch (choice) {
-                    case 1 -> handleSignUp(scanner, out, in);
-                    case 2 -> handleLogin(scanner, out, in, socket, serverAddress);
-                    case 3 -> {
-                        System.out.println(Constants.EXITING_APP);
-                        keepRunning = false;
-                    }
-                    default -> System.out.println(Constants.ERROR_INVALID_MENU_OPTION);
-                }
+                default -> System.out.println(Constants.ERROR_INVALID_MENU_OPTION);
             }
         }
     }
 
-    private static void handleSignUp(Scanner scanner, PrintWriter out, BufferedReader in) {
+    private static void handleSignUp(Scanner scanner) {
         System.out.print(Constants.INPUT_USER_NAME);
         String username = scanner.nextLine();
         String email;
@@ -69,48 +65,52 @@ public class Client {
 
         System.out.print(Constants.INPUT_USER_PASSWORD);
         String password = scanner.nextLine();
-        out.println("REGISTER:" + username + "," + email + "," + password);
+        connection.getOut().println("REGISTER:" + username + "," + email + "," + password);
 
         try {
-            System.out.println(in.readLine());
+            System.out.println(connection.getIn().readLine());
         } catch (IOException e) {
             System.out.println(Constants.ERROR_SIGN_UP);
         }
     }
 
-    private static void handleLogin(Scanner scanner, PrintWriter out, BufferedReader in, Socket socket, String serverAddress) {
+    private static void handleLogin(Scanner scanner) {
+        connection.reconnect();
+
         System.out.print(Constants.INPUT_USER_NAME_EMAIL);
         String usernameOrEmail = scanner.nextLine();
         System.out.print(Constants.INPUT_USER_PASSWORD);
         String password = scanner.nextLine();
-        out.println("LOGIN:" + usernameOrEmail + "," + password);
+        connection.getOut().println("LOGIN:" + usernameOrEmail + "," + password);
 
         String response;
         try {
-            response = in.readLine();
+            response = connection.getIn().readLine();
         } catch (IOException e) {
             System.out.println(Constants.ERROR_LOGIN);
             return;
         }
-        System.out.println(response + "teste");
+        System.out.println(response);
 
         Matcher matcher = ServerResponseRegex.LOGIN_SUCCESS.matcher(response);
         if (matcher.matches()) {
-                String groupAddress = matcher.group("address");
+            String groupAddress = matcher.group("address");
             System.out.println(groupAddress);
-                int port = Integer.parseInt(matcher.group("port"));
+            int port = Integer.parseInt(matcher.group("port"));
             System.out.println(port);
-                try {
-                    MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, socket, serverAddress);
-                    System.out.println(chatService);
-                    chatService.startChat(groupAddress, port, usernameOrEmail);
-                } catch (IOException e) {
-                    System.out.println(Constants.ERROR_STARTING_CHAT_SESSION);
-                }
+            try {
+                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, connection.getSocket(), "localhost");
+                System.out.println(chatService);
+                chatService.startChat(groupAddress, port, usernameOrEmail);
+            } catch (IOException e) {
+                System.out.println(Constants.ERROR_STARTING_CHAT_SESSION);
+            }
         } else if (ServerResponseRegex.LOGIN_FAILED.matches(response)) {
             System.out.println(Constants.ERROR_INVALID_CREDENTIALS);
         } else if (!ServerResponseRegex.GENERIC_RESPONSE.matches(response)) {
             System.out.println(Constants.ERROR_GENERIC);
         }
     }
+
+
 }

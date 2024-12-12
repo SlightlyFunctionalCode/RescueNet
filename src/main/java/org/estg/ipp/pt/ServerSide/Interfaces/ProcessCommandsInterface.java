@@ -40,5 +40,5 @@ public interface ProcessCommandsInterface {
 
     void handleLeaveGroup(String username, String group, PrintWriter out);
 
-    void handleLogout(String username, PrintWriter out);
+    void handleLogout(String username, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline, PrintWriter out);
 }

@@ -23,7 +23,6 @@ jar {
     enabled = false  // Desabilitar a criação de JAR "normal" (não com Spring Boot)
 }
 
-
 repositories {
     mavenCentral()
 }

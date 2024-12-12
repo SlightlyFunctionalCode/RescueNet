@@ -445,15 +445,23 @@ public class ProcessCommands implements ProcessCommandsInterface {
         }
     }
 
-    public void handleLogout(String username, PrintWriter out) {
+    public void handleLogout(String username, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline, PrintWriter out) {
         try {
             Server.removeUserSocket(username);
 
             out.println("Você saiu do programa");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, username + " fez logout"));
+
+            User user = userService.getUserByName(username);
+
+            if (Permissions.fromPermissions(user.getPermissions()) >= Permissions.fromPermissions(Permissions.LOW_LEVEL)) {
+                usersWithPermissionsOnline.remove(username);
+            }
+
         } catch (Exception e) {
             out.println("Erro: Erro ao sair do Grupo");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, username + " teve um erro ao fazer logout"));
         }
     }
+
 }
