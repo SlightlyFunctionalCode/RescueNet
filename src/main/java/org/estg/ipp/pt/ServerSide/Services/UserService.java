@@ -95,46 +95,30 @@ public class UserService {
     }
 
     public void joinGroup(User user, Group group) {
-        // Verifica se o usuário já pertence ao grupo
         if (user.getCurrentGroup() != null && user.getCurrentGroup().getId().equals(group.getId())) {
-            throw new IllegalArgumentException("Usuário já pertence ao grupo " + group.getName());
+            throw new IllegalArgumentException("Utilizador já pertence ao grupo " + group.getName());
         }
 
-        // Atualiza o grupo atual do usuário
         user.setCurrentGroup(group);
 
-        // Adiciona qualquer outra lógica ou ajuste que você precise fazer quando o usuário entrar no grupo
-        // Exemplo: Atribuir permissões, inicializar configurações, etc.
-
-        // O usuário precisa ser salvo, então chama-se o método de persistência aqui
-        userRepository.save(user);  // O save do repositório será chamado no final para persistir as mudanças
+        userRepository.save(user);
     }
 
-    /**
-     * Updates the permissions of a user.
-     *
-     * @param username The username of the user whose permissions need to be updated.
-     * @param newPermissions The new permissions to assign.
-     * @return true if the update was successful, false if the user was not found.
-     */
     public boolean updateUserPermissions(String username, Permissions newPermissions) {
-        // Busca o utilizador pelo nome
         Optional<User> userOptional = userRepository.findByName(username);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
             Permissions previousPermission = user.getPermissions();
-            // Atualizar as permissões
             user.setPermissions(newPermissions);
 
-            // Salvar as alterações no banco de dados
             userRepository.save(user);
 
-            System.out.println("Permissões do usuário atualizadas com sucesso.");
+            System.out.println("Permissões do utilizador atualizadas com sucesso.");
             return true;
         } else {
-            System.out.println("Usuário não encontrado.");
+            System.out.println("Utilizador não encontrado.");
             return false;
         }
     }

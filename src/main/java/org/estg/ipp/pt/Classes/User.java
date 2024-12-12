@@ -21,7 +21,7 @@ public class User {
     private String password;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "current_group_id")  // Define o nome da coluna da FK na tabela de usuários
+    @JoinColumn(name = "current_group_id")
     private Group currentGroup;
 
 

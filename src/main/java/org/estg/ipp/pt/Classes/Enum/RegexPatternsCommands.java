@@ -13,10 +13,10 @@ public enum RegexPatternsCommands {
     CREATE_GROUP("^/create_group(?:\\s(?<help>-h))?(?:\\s(?<name>.+)\\s(?<publicOrPrivate>.+))?:(?<requester>.+)$"),
     CHAT("^/chat(?:\\s(?<help>-h))?(?:\\s(?<targetUsername>\\S+)\\s(?<message>.+))?:(?<username>.+)$"),
     COMMANDS("^/commands:(?<name>.+)$"),
-    ADD_TO_GROUP("^/addToGroup(?:\\s(?<userToAdd>.+))\\s(?<group>[^\\s:]+)?:(?<username>.+)"),
+    ADD_TO_GROUP("^/add_to_group(?:\\s(?<help>-h))?(?:\\s(?<userToAdd>.+)\\s(?<group>[^\\s:]+))?:(?<username>.+)"),
     LIST_GROUPS("^/groups:(?<username>.+)$"),
     LEAVE_GROUP("^/leave(?:\\s(?<help>-h))?(?:\\s(?<groupName>\\S+))?:(?<username>.+)$"),
-    ALERT("^/alert\\s+(?<message>.+):(?<username>\\S+)$"),
+    ALERT("^/alert(?:\\s(?<help>-h))?(?:\\s+(?<message>.+))?:(?<username>\\S+)$"),
     LOGOUT("^/logout:(?<username>\\S+)$");
 
 

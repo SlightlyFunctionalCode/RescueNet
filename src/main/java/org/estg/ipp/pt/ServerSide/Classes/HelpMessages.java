@@ -22,10 +22,12 @@ public final class HelpMessages {
             --HELP--
             - Os parâmetros que podem ser executados por /approve são:
             -
+            - <id> id do pedido de Aprovação
+            -
             - <username> username da pessoa que fez o request
             -
             - Exemplos:
-            - /approve pessoa1
+            - /approve 1 user1
             --END HELP--
             """;
 
@@ -33,10 +35,12 @@ public final class HelpMessages {
             --HELP--
             - Os parâmetros que podem ser executados por /reject são:
             -
+            - <id> id do pedido de Aprovação
+            -
             - <username> username da pessoa que fez o request
             -
             - Exemplos:
-            - /reject pessoa1
+            - /reject 1 user1
             --END HELP--
             """;
 
@@ -86,7 +90,7 @@ public final class HelpMessages {
             - <message> mensagem que se pretende enviar
             -
             - Exemplos:
-            - /chat user hey como estás?
+            - /chat user Hey, como estás?
             --END HELP--
             """;
 
@@ -98,6 +102,30 @@ public final class HelpMessages {
             -
             - Exemplos:
             - /leave GROUP
+            --END HELP--
+            """;
+
+    public static final String ADD_TO_GROUP_HELP = """
+            --HELP--
+            - Os parâmetros que podem ser executados por /add_to_group são:
+            -
+            - <userToAdd> o nome do user que se pretende adicionar
+            -
+            - <group> nome do grupo
+            -
+            - Exemplos:
+            - /add_to_group user1 MY_GROUP
+            --END HELP--
+            """;
+
+    public static final String ALERT_HELP = """
+            --HELP--
+            - Os parâmetros que podem ser executados por /alert são:
+            -
+            - <message> mensagem que se pretende enviar
+            -
+            - Exemplos:
+            - /alert PERIGO PERIGO PERIGO
             --END HELP--
             """;
 

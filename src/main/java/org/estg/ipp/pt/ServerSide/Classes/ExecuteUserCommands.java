@@ -195,27 +195,31 @@ public class ExecuteUserCommands {
                 }
             }
             case "/commands" -> {
-                System.out.println(request);
                 Matcher commandsHelper = RegexPatternsCommands.COMMANDS.matcher(request);
                 if (commandsHelper.matches()) {
                     String name = commandsHelper.group("name");
                     processCommands.handleCommandHelper(name, out);
                 } else {
-                    out.println("ERRO: Formato inválido para /commands. Use -h para descobrir os parâmetros");
-                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /create_group"));
+                    out.println("ERRO: Formato inválido para /commands.");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /commands"));
                 }
             }
-            case "/addToGroup" -> {
-                System.out.println(request);
+            case "/add_to_group" -> {
                 Matcher addToGroup = RegexPatternsCommands.ADD_TO_GROUP.matcher(request);
                 if (addToGroup.matches()) {
-                    out.println("ADDTOGROUP START");
+                    String help = addToGroup.group("help");
                     String user_request = addToGroup.group("username");
                     String userToAdd = addToGroup.group("userToAdd");
                     String group = addToGroup.group("group");
-                    processCommands.handleAddToGroup(user_request, userToAdd, group, out);
+
+                    if (help != null) {
+                        out.println(ADD_TO_GROUP_HELP);
+                    } else {
+                        processCommands.handleAddToGroup(user_request, userToAdd, group, out);
+                    }
                 } else {
-                    out.println("ERRO: Formato inválido para /addToGroup");
+                    out.println("ERRO: Formato inválido para /add_to_group. Use -h para ajuda.");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /add_to_group"));
                 }
             }
             case "/groups" -> {
@@ -224,17 +228,25 @@ public class ExecuteUserCommands {
                     String username = listGroups.group("username");
                     processCommands.handleListGroups(username, out);
                 } else {
-                    out.println("ERRO: Formato inválido para /addToGroup");
+                    out.println("ERRO: Formato inválido para /groups");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /groups"));
                 }
             }
-            case "/alert" ->{
+            case "/alert" -> {
                 Matcher alert = RegexPatternsCommands.ALERT.matcher(request);
                 if (alert.matches()) {
+                    String help = alert.group("help");
                     String username = alert.group("username");
                     String message = alert.group("message");
-                    System.out.println(username);
-                    System.out.println(message);
-                    processCommands.handleAlertMessage(username, message, out);
+
+                    if (help != null) {
+                        out.println(ALERT_HELP);
+                    } else {
+                        processCommands.handleAlertMessage(username, message, out);
+                    }
+                } else {
+                    out.println("ERRO: Formato inválido para /alert. Use -h para descobrir os parâmetros");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /alert"));
                 }
             }
             case "/leave" -> {
@@ -250,7 +262,8 @@ public class ExecuteUserCommands {
                         processCommands.handleLeaveGroup(username, groupName, out);
                     }
                 } else {
-                    out.println("ERRO: Formato inválido para /addToGroup");
+                    out.println("ERRO: Formato inválido para /leave");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /leave"));
                 }
             }
             case "/logout" -> {
@@ -260,6 +273,7 @@ public class ExecuteUserCommands {
                     processCommands.handleLogout(username, out);
                 } else {
                     out.println("ERRO: Formato inválido para /logout");
+                    logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /logout"));
                 }
             }
             default -> {

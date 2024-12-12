@@ -70,44 +70,36 @@ public class GroupService {
     }
 
     @Transactional
-    public void addUserToGroup(String groupName, User user) {
+    public void addUserToGroup(String groupName, User user) throws IllegalArgumentException {
 
-        // Carregar o grupo e verificar se ele existe
         Group group = groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo não encontrado"));
 
         user = userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Utilizador não encontrado"));
 
-        // Verificar se o usuário já está no grupo usando uma consulta ao banco
         if (groupRepository.existsByIdAndUsersId(group.getId(), user.getId())) {
-            System.out.println("O usuário já está no grupo.");
-            return;
+            throw new IllegalArgumentException("Utilizador já está no grupo");
         }
 
-        // Adicionar o usuário ao grupo
         group.getUsers().add(user);
         user.setCurrentGroup(group);
 
-        // Salvar apenas o grupo (o relacionamento bidirecional será tratado automaticamente)
         groupRepository.save(group);
-        System.out.println("Usuário adicionado ao grupo com sucesso!");
+        System.out.println("Utilizador adicionado ao grupo com sucesso!");
     }
 
     @Transactional
     public Group getUserGroupByNameAndVerify(Long userId, String groupName) {
-        // Buscar o grupo pelo nome
         Group group = groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo com nome " + groupName + " não encontrado"));
 
-        // Verificar se o usuário pertence ao grupo
         boolean userInGroup = group.getUsers().stream().anyMatch(user -> user.getId().equals(userId));
 
         if (!userInGroup) {
-            throw new IllegalArgumentException("Usuário com ID " + userId + " não pertence ao grupo " + groupName);
+            throw new IllegalArgumentException("Utilizador com ID " + userId + " não pertence ao grupo " + groupName);
         }
 
-        // Retornar o grupo se a verificação passar
         return group;
     }
 
@@ -116,32 +108,27 @@ public class GroupService {
     }
 
     public List<User> getUsersByGroupName(String groupName) {
-        // Verifica se o grupo existe
         Group group = groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo não encontrado"));
 
-        // Retorna a lista de usuários associados ao grupo
         return new ArrayList<>(group.getUsers());
     }
 
     @Transactional
     public boolean isUserInGroup(String groupName, Long userId) {
-        // Buscar o grupo pelo nome
         Group group = groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo com nome " + groupName + " não encontrado"));
 
-        // Verificar se o usuário pertence ao grupo
         return group.getUsers().stream().anyMatch(user -> user.getId().equals(userId));
     }
 
-    public Group getGroupByName(String groupName) {
+    public Group getGroupByName(String groupName) throws IllegalArgumentException {
 
         return groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo com nome " + groupName + " não encontrado"));
     }
 
     public Group addCustomGroup(Long id, String name, String publicOrPrivate) {
-        // Verifica se já existe um grupo com o mesmo nome, endereço ou porta
         boolean groupExists = groupRepository.findAll().stream().anyMatch(group ->
                 group.getName().equalsIgnoreCase(name)
         );
@@ -153,7 +140,6 @@ public class GroupService {
         String multicastBaseAddress = "230.0.0.";
         int multicastStartPort = 4446;
 
-        // Obter endereços e portas existentes
         Set<String> usedAddresses = groupRepository.findAll().stream()
                 .map(Group::getAddress)
                 .collect(Collectors.toSet());
@@ -162,13 +148,11 @@ public class GroupService {
                 .map(Group::getPort)
                 .collect(Collectors.toSet());
 
-        // Gerar próximo endereço e porta disponíveis
         String newAddress = generateNextAddress(multicastBaseAddress, usedAddresses);
         int newPort = generateNextPort(multicastStartPort, usedPorts);
 
         boolean isPublic = publicOrPrivate.equalsIgnoreCase("public");
 
-        // Criação do novo grupo
         Group newGroup = new Group();
         newGroup.setName(name);
         newGroup.setAddress(newAddress);
@@ -177,12 +161,10 @@ public class GroupService {
         newGroup.setPublic(isPublic);
         newGroup.setRequiredPermissions(Permissions.NO_LEVEL);
 
-        // Salvar o grupo no repositório
         Group savedGroup = groupRepository.save(newGroup);
 
         System.out.println("Grupo personalizado '" + name + "' criado com sucesso!");
 
-        // Retorna o grupo criado
         return savedGroup;
     }
 
@@ -208,15 +190,12 @@ public class GroupService {
 
     @Transactional
     public void removeUserFromGroup(User user, Permissions newPermissions) {
-        // Buscar todos os grupos privados
         List<Group> publicGroups = groupRepository.findByisPublic(true);
-        // Iterar pelos grupos e verificar permissões
         for (Group group : publicGroups) {
             if (Permissions.fromPermissions(group.getRequiredPermissions()) > Permissions.fromPermissions(newPermissions) && group.getUsers().contains(user)) {
-                // Remover o usuário do grupo
                 group.getUsers().remove(user);
                 groupRepository.save(group);
-                System.out.println("Usuário removido do grupo: " + group.getName());
+                System.out.println("Utilizador removido do grupo: " + group.getName());
             }
         }
     }

@@ -87,12 +87,11 @@ public class ExecuteInternalCommands {
             user.setPermissions(Permissions.NO_LEVEL);
 
             try {
-                // Registra o usuário no banco de dados
                 int result = userService.register(user);
 
                 if (result == 0) {
                     out.println("FAILED: Utilizador com nome ou email já existente");
-                    return; // Retorna sem associar ao grupo se o registro falhar
+                    return;
                 }
                 System.out.println("Adicionando user ao grupo default");
                 List<Group> groups = groupService.getAllGroups();
@@ -120,7 +119,6 @@ public class ExecuteInternalCommands {
 
             User user = userService.getUserByName(usernameOrEmail);
 
-            // Após salvar o usuário, associa-o a um grupo padrão
             if (user == null) {
                 out.println("User inválido");
                 return;

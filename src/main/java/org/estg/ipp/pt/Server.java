@@ -46,9 +46,6 @@ public class Server {
     @Autowired
     private MessageService messageService;
 
-    @Autowired
-    private ServerStats serverStats;
-
     private ServerSocket serverSocket;
 
     public static void main(String[] args) {
@@ -59,6 +56,8 @@ public class Server {
     public CommandLineRunner startServer(ExecuteInternalCommands executeInternalCommands) {
         return args -> {
             int serverPort = 5000;
+
+            ServerStats serverStats = new ServerStats();
 
             executeInternalCommands.groupService.initializeDefaultGroups();
             executeInternalCommands.userService.initializeUser();
@@ -80,8 +79,7 @@ public class Server {
                     System.out.println("Cliente conectado: " + clientSocket.getInetAddress());
                     logService.saveLog(new Log(LocalDateTime.now(), TagType.ACCESS, "Cliente conectado: " + clientSocket.getInetAddress()));
 
-                    // Usar threads para lidar com clientes
-                    new Thread(() -> handleClient(clientSocket)).start();
+                    new Thread(() -> handleClient(clientSocket, serverStats)).start();
                 }
             } catch (IOException e) {
                 System.err.println("Erro ao iniciar o servidor: " + e.getMessage());
@@ -90,7 +88,6 @@ public class Server {
         };
     }
 
-    // Method to retrieve user socket by username
     public static Socket getUserSocket(String username) {
         return clients.get(username);
     }
@@ -111,7 +108,7 @@ public class Server {
         clients.put(username, socket);
     }
 
-    private void handleClient(Socket clientSocket) {
+    private void handleClient(Socket clientSocket, ServerStats serverStats) {
         String user = null;
         try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -129,7 +126,7 @@ public class Server {
                     String payload = requestMatcher.group("payload") != null ? requestMatcher.group("payload") : "";
                     user = payload;
                     System.out.println(user);
-                    // Delegar o comando à classe correta
+
                     if (internalCommands.isInternalCommand(command)) {
                         internalCommands.handleInternalCommand(command, payload, out, clientSocket, groupService.getAllGroups(), usersWithPermissionsOnline);
                         serverStats.incrementCommandsExecuted();
@@ -152,10 +149,10 @@ public class Server {
             System.err.println("Erro ao comunicar com o cliente: " + e.getMessage());
             System.out.println("teste");
             if (user != null) {
-                removeUserSocket(user); // Remove o usuário do mapa de conexões
+                removeUserSocket(user);
             }
             try {
-                clientSocket.close(); // Fecha o socket
+                clientSocket.close();
             } catch (IOException ex) {
                 System.err.println("Erro ao fechar o socket: " + ex.getMessage());
             }
@@ -175,8 +172,7 @@ public class Server {
                     System.out.println("Comandos Executados: " + commandsExecuted);
                     System.out.println("====================================");
 
-                    // Aguarda 10 segundos antes de executar novamente
-                    Thread.sleep(10000);
+                    Thread.sleep(60 * 1000);
                 } catch (InterruptedException e) {
                     System.err.println("Thread de estatísticas foi interrompida: " + e.getMessage());
                     break;
