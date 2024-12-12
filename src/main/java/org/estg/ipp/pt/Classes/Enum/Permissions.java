@@ -14,24 +14,9 @@ package org.estg.ipp.pt.Classes.Enum;
  * </ul>
  */
 public enum Permissions {
-    /**
-     * Nenhum nível de permissão.
-     */
     NO_LEVEL,
-
-    /**
-     * Nível baixo de permissão.
-     */
     LOW_LEVEL,
-
-    /**
-     * Nível médio de permissão.
-     */
     MEDIUM_LEVEL,
-
-    /**
-     * Nível alto de permissão.
-     */
     HIGH_LEVEL;
 
 

@@ -9,24 +9,24 @@ import java.util.regex.Pattern;
  * rejeições, exportações, criação de grupos, entre outros.
  *
  * Cada comando tem um padrão específico que pode ser utilizado para validar ou extrair
- * parâmetros de comandos fornecidos em formato de string.
+ * parâmetros de comandos fornecidos em formato de ‘string’.
  *
  * <p>Os comandos disponíveis incluem:</p>
  * <ul>
  *     <li>{@code APPROVE} - Comando para aprovar uma solicitação com um ID e solicitante.</li>
  *     <li>{@code REJECT} - Comando para rejeitar uma solicitação com um ID e solicitante.</li>
- *     <li>{@code EXPORT} - Comando para exportar dados em um intervalo de datas e com um tag específico.</li>
+ *     <li>{@code EXPORT} - Comando para exportar dados num intervalo de datas e com uma tag específico.</li>
  *     <li>{@code REQUEST} - Comando genérico de solicitação, permitindo payload e solicitante.</li>
- *     <li>{@code JOIN} - Comando para um usuário se juntar a um grupo.</li>
- *     <li>{@code CHANGE_PERMISSIONS} - Comando para alterar permissões de um usuário.</li>
+ *     <li>{@code JOIN} - Comando para um utilizador se juntar a um grupo.</li>
+ *     <li>{@code CHANGE_PERMISSIONS} - Comando para alterar permissões de um utilizador.</li>
  *     <li>{@code CREATE_GROUP} - Comando para criar um grupo, com opções públicas ou privadas.</li>
- *     <li>{@code CHAT} - Comando para enviar uma mensagem de chat para outro usuário.</li>
+ *     <li>{@code CHAT} - Comando para enviar uma mensagem de chat para outro utilizador.</li>
  *     <li>{@code COMMANDS} - Comando para listar todos os comandos disponíveis.</li>
- *     <li>{@code ADD_TO_GROUP} - Comando para adicionar um usuário a um grupo.</li>
- *     <li>{@code LIST_GROUPS} - Comando para listar todos os grupos de um usuário.</li>
+ *     <li>{@code ADD_TO_GROUP} - Comando para adicionar um utilizador a um grupo.</li>
+ *     <li>{@code LIST_GROUPS} - Comando para listar todos os grupos de um utilizador.</li>
  *     <li>{@code LEAVE_GROUP} - Comando para sair de um grupo.</li>
  *     <li>{@code ALERT} - Comando para enviar um alerta.</li>
- *     <li>{@code LOGOUT} - Comando para fazer logout de um usuário.</li>
+ *     <li>{@code LOGOUT} - Comando para fazer logout de um utilizador.</li>
  * </ul>
  */
 public enum RegexPatternsCommands {

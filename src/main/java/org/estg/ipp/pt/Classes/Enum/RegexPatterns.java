@@ -5,43 +5,25 @@ import java.util.regex.Pattern;
 
 /**
  * Enum {@code RegexPatterns} contém padrões de expressões regulares para validação de entradas
- * de texto em diferentes contextos de autenticação e ações do usuário, como registro, login,
+ * de texto em diferentes contextos de autenticação e ações do utilizador, como registo, login,
  * confirmação de leitura, etc.
  *
  * Cada padrão corresponde a uma operação específica e pode ser usado para validar ou extrair
- * dados de uma string de entrada.
+ * dados de uma ‘string’ de entrada.
  *
  * <p>Os padrões de expressão regular disponíveis são:</p>
  * <ul>
- *     <li>{@code REGISTER} - Padrão para o registro de um usuário (username, email, password).</li>
- *     <li>{@code LOGIN} - Padrão para o login de um usuário (username, password).</li>
- *     <li>{@code READY} - Padrão para uma solicitação simples com o nome de usuário.</li>
+ *     <li>{@code REGISTER} - Padrão para o registro de um utilizador (username, email, password).</li>
+ *     <li>{@code LOGIN} - Padrão para o login de um utilizador (username, password).</li>
+ *     <li>{@code READY} - Padrão para uma solicitação simples com o nome de utilizador.</li>
  *     <li>{@code CONFIRM_READ} - Padrão para a confirmação de leitura (com id).</li>
  * </ul>
  */
 public enum RegexPatterns {
-    /**
-     * Padrão para o registro de um usuário, que captura o nome de usuário, o email e a senha.
-     * A entrada esperada é uma string com três partes separadas por vírgula.
-     */
+
     REGISTER("^(?<username>.+),(?<email>.+),(?<password>.+)$"),
-
-    /**
-     * Padrão para o login de um usuário, que captura o nome de usuário e a senha.
-     * A entrada esperada é uma string com duas partes separadas por vírgula.
-     */
     LOGIN("^(?<username>.+),(?<password>.+)$"),
-
-    /**
-     * Padrão para uma solicitação de prontidão, que captura apenas o nome de usuário.
-     * A entrada esperada é uma string com o nome de usuário.
-     */
     READY("^(?<username>.+)$"),
-
-    /**
-     * Padrão para a confirmação de leitura, que captura um ID numérico.
-     * A entrada esperada é uma string no formato "CONFIRM_READ:{id}", onde {id} é um número.
-     */
     CONFIRM_READ("^CONFIRM_READ:(?<id>\\d+)$");
 
     private final Pattern pattern;
