@@ -18,49 +18,119 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Serviço para gerir os logs do sistema.
+ *
+ * <p>O serviço fornece funcionalidades para salvar logs, buscar logs por
+ * diferentes critérios (tag, intervalo de datas ou combinação de ambos) e
+ * gerar relatórios em PDF. O objetivo é centralizar a gestão de logs e
+ * facilitar o rastreamento de eventos importantes no sistema.</p>
+ */
 @Service
 public class LogService {
     @Autowired
     private LogRepository logRepository;
 
+    /**
+     * Salva um log no repositório.
+     *
+     * @param log Objeto de log a ser salvo.
+     */
     public void saveLog(Log log) {
         logRepository.save(log);
     }
 
+    /**
+     * Retorna todos os logs registados.
+     *
+     * @return Lista de todos os logs.
+     */
     public List<Log> findAllLogs() {
         return logRepository.findAll();
     }
 
+    /**
+     * Retorna logs filtrados por uma tag específica.
+     *
+     * @param tag Tag para filtrar os logs.
+     * @return Lista de logs filtrados pela tag.
+     */
     public List<Log> findLogsByTag(TagType tag) {
         return logRepository.findByTag(tag);
     }
 
+    /**
+     * Retorna logs em um intervalo de datas especificado.
+     *
+     * @param startDate Data inicial do intervalo.
+     * @param endDate Data final do intervalo.
+     * @return Lista de logs no intervalo especificado.
+     */
     public List<Log> findLogsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return logRepository.findByDateRange(startDate, endDate);
     }
 
+    /**
+     * Retorna logs filtrados por tag e intervalo de datas.
+     *
+     * @param tag Tag para filtrar os logs.
+     * @param startDate Data inicial do intervalo.
+     * @param endDate Data final do intervalo.
+     * @return Lista de logs que atendem aos critérios.
+     */
     public List<Log> findLogsByTagAndDateRange(TagType tag, LocalDateTime startDate, LocalDateTime endDate) {
         return logRepository.findByTagAndDateRange(tag, startDate, endDate);
     }
 
+    /**
+     * Gera um relatório em PDF de logs com base em tag e intervalo de datas.
+     *
+     * @param startDate Data inicial do intervalo.
+     * @param endDate Data final do intervalo.
+     * @param tag Tag para filtrar os logs.
+     * @param byteArrayOutputStream Fluxo de saída onde o PDF será gerado.
+     * @throws DocumentException Se houver erro durante a geração do PDF.
+     */
     public void generatePdfReportByDateRangeAndTag(LocalDateTime startDate, LocalDateTime endDate, TagType tag, ByteArrayOutputStream byteArrayOutputStream) throws DocumentException {
         List<Log> logs = logRepository.findByTagAndDateRange(tag, startDate, endDate);
 
         generatePdf(logs, byteArrayOutputStream);
     }
 
+    /**
+     * Gera um relatório em PDF de logs com base em uma tag específica.
+     *
+     * @param tag Tag para filtrar os logs.
+     * @param byteArrayOutputStream Fluxo de saída onde o PDF será gerado.
+     * @throws DocumentException Se houver erro durante a geração do PDF.
+     */
     public void generatePdfReportByTag(TagType tag, ByteArrayOutputStream byteArrayOutputStream) throws DocumentException {
         List<Log> logs = logRepository.findByTag(tag);
 
         generatePdf(logs, byteArrayOutputStream);
     }
 
+    /**
+     * Gera um relatório em PDF de logs com base em um intervalo de datas.
+     *
+     * @param startDate Data inicial do intervalo.
+     * @param endDate Data final do intervalo.
+     * @param byteArrayOutputStream Fluxo de saída onde o PDF será gerado.
+     * @throws DocumentException Se houver erro durante a geração do PDF.
+     */
     public void generatePdfReportByDateRange(LocalDateTime startDate, LocalDateTime endDate, ByteArrayOutputStream byteArrayOutputStream) throws DocumentException {
         List<Log> logs = logRepository.findByDateRange(startDate, endDate);
 
         generatePdf(logs, byteArrayOutputStream);
     }
 
+    /**
+     * Método auxiliar para gerar o conteúdo do PDF a partir de uma lista de logs.
+     *
+     * @param logs Lista de logs a ser incluída no PDF.
+     * @param byteArrayOutputStream Fluxo de saída onde o PDF será gerado.
+     * @throws DocumentException Se houver erro durante a geração do PDF.
+     */
     private void generatePdf(List<Log> logs, ByteArrayOutputStream byteArrayOutputStream) throws DocumentException {
         Document document = new Document();
         PdfWriter writer = PdfWriter.getInstance(document, byteArrayOutputStream);
@@ -91,6 +161,11 @@ public class LogService {
         document.close();
     }
 
+    /**
+     * Adiciona o cabeçalho à tabela do PDF.
+     *
+     * @param table Tabela onde o cabeçalho será adicionado.
+     */
     private void addTableHeader(PdfPTable table) {
         PdfPCell cell = new PdfPCell(new Phrase("Tag", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12)));
         cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
@@ -108,6 +183,14 @@ public class LogService {
         table.addCell(cell);
     }
 
+    /**
+     * Adiciona uma linha à tabela do PDF.
+     *
+     * @param table Tabela onde a linha será adicionada.
+     * @param date Data do log.
+     * @param tag Tag do log.
+     * @param message Mensagem do log.
+     */
     private void addTableRow(PdfPTable table, String date, TagType tag, String message) {
         Color tagColor = getTagColor(tag);
 
@@ -121,6 +204,12 @@ public class LogService {
         table.addCell(new PdfPCell(new Phrase(message, FontFactory.getFont(FontFactory.HELVETICA, 10))));
     }
 
+    /**
+     * Retorna a cor associada a uma tag.
+     *
+     * @param tag Tag do log.
+     * @return Cor associada à tag.
+     */
     private Color getTagColor(TagType tag) {
         Map<TagType, Color> tagColorMap = new HashMap<>();
         tagColorMap.put(TagType.INFO, Color.GRAY);

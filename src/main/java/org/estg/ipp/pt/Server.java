@@ -26,32 +26,79 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
+/**
+ * Classe principal do servidor que gerencia as conexões com os clientes e executa comandos internos e de usuários.
+ * A classe é responsável por gerenciar sockets, executar comandos, e manter as estatísticas do servidor.
+ * Além disso, a classe escuta e processa as solicitações recebidas dos clientes, e se comunica com diferentes
+ * serviços, como {@link ExecuteInternalCommands}, {@link ExecuteUserCommands}, {@link GroupService},
+ * {@link LogService}, e {@link MessageService}.
+ *
+ * @SpringBootApplication(scanBasePackages = {"org.estg.ipp.pt.ServerSide", "org.estg.ipp.pt.Security"})
+ * Esta classe é a aplicação principal do servidor e inicializa os componentes Spring necessários.
+ */
 @SpringBootApplication(scanBasePackages = {"org.estg.ipp.pt.ServerSide", "org.estg.ipp.pt.Security"})
 public class Server {
 
+    /**
+     * Componente responsável pela execução de comandos internos do servidor.
+     */
     @Autowired
     private ExecuteInternalCommands internalCommands;
 
+    /**
+     * Componente responsável pela execução de comandos relacionados aos usuários.
+     */
     @Autowired
     private ExecuteUserCommands userCommands;
 
+    /**
+     * Serviço responsável pela gestão de grupos.
+     */
     @Autowired
     private GroupService groupService;
 
+    /**
+     * Mapa para armazenar os utilizadores online e suas permissões.
+     */
     public final ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline = new ConcurrentHashMap<>();
+
+    /**
+     * Mapa para armazenar as conexões de clientes ativas.
+     */
     private static final ConcurrentHashMap<String, Socket> clients = new ConcurrentHashMap<>();
+
+    /**
+     * Serviço responsável pela gestão de logs no servidor.
+     */
     @Autowired
     private LogService logService;
 
+    /**
+     * Serviço responsável pela gestão de mensagens no servidor.
+     */
     @Autowired
     private MessageService messageService;
 
+    /**
+     * Socket do servidor para escutar conexões de clientes.
+     */
     private ServerSocket serverSocket;
 
+    /**
+     * Método principal que inicia a aplicação Spring Boot para o servidor.
+     *
+     * @param args Argumentos de linha de comando.
+     */
     public static void main(String[] args) {
         SpringApplication.run(Server.class, args);
     }
 
+    /**
+     * Bean que inicializa o servidor, configura o serviço multicast, e começa a escutar por conexões de clientes.
+     *
+     * @param executeInternalCommands Componente para executar comandos internos.
+     * @return CommandLineRunner para inicializar o servidor.
+     */
     @Bean
     public CommandLineRunner startServer(ExecuteInternalCommands executeInternalCommands) {
         return args -> {
@@ -88,10 +135,21 @@ public class Server {
         };
     }
 
+    /**
+     * Recupera o socket de um usuário conectado com base no nome de usuário.
+     *
+     * @param username Nome do usuário.
+     * @return Socket correspondente ao usuário.
+     */
     public static Socket getUserSocket(String username) {
         return clients.get(username);
     }
 
+    /**
+     * Remove um usuário da lista de conexões ativas e fecha sua conexão.
+     *
+     * @param username Nome do usuário.
+     */
     public static void removeUserSocket(String username) {
         try {
             Socket socket = clients.remove(username);
@@ -103,14 +161,32 @@ public class Server {
         }
     }
 
+    /**
+     * Retorna o número de clientes atualmente conectados ao servidor.
+     *
+     * @return Número de clientes conectados.
+     */
     public static int getNumberOfClients() {
         return clients.size();
     }
 
+    /**
+     * Adiciona um novo utilizador e sua conexão ao mapa de conexões.
+     *
+     * @param username Nome do utilizador.
+     * @param socket   Socket do utilizador.
+     */
     public static void addUserSocket(String username, Socket socket) {
         clients.put(username, socket);
     }
 
+    /**
+     * Método que lida com a comunicação de um cliente conectado ao servidor.
+     * Processa as solicitações recebidas, executando comandos internos ou de usuários conforme necessário.
+     *
+     * @param clientSocket Conexão com o cliente.
+     * @param serverStats Estatísticas do servidor.
+     */
     private void handleClient(Socket clientSocket, ServerStats serverStats) {
         String user = null;
         try (
@@ -162,6 +238,11 @@ public class Server {
         }
     }
 
+    /**
+     * Mostra as estatísticas do servidor a cada minuto.
+     *
+     * @param serverStats Estatísticas do servidor.
+     */
     private void printReport(ServerStats serverStats) {
         new Thread(() -> {
             while (true) {

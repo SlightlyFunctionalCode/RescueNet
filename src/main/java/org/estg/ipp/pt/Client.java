@@ -14,11 +14,28 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
+/**
+ * Classe principal do cliente, responsável pela interação com o utilizador e comunicação com o servidor.
+ *
+ * <p>Esta classe inicia a aplicação cliente, apresenta um menu interativo para o utilizador,
+ * e permite que ele faça o registo e o login no sistema. Após o login bem-sucedido, o cliente
+ * inicia uma sessão de chat multicast.</p>
+ */
 @SpringBootApplication
 public class Client {
 
     private static Connection connection;
 
+    /**
+     * Método principal que inicia o cliente e apresenta o menu de opções.
+     *
+     * <p>Este método cria uma conexão com o servidor e mostra um menu com opções para o utilizador.
+     * O utilizador pode escolher entre se registrar, fazer login ou sair da aplicação.
+     * Dependendo da escolha, o método chama o método apropriado para lidar com o registo ou login.</p>
+     *
+     * @param args Argumentos de linha de comando.
+     * @throws IOException Se ocorrer algum erro ao se conectar ao servidor.
+     */
     public static void main(String[] args) throws IOException {
         connection = new Connection("localhost", 5000);
         Scanner scanner = new Scanner(System.in);
@@ -48,6 +65,16 @@ public class Client {
         }
     }
 
+    /**
+     * Método para lidar com o registo de um novo utilizador.
+     *
+     * <p>Este método solicita ao utilizador o nome de utilizador, o email e a senha. O email é
+     * validado com uma expressão regular. Após a entrada dos dados, o cliente envia uma solicitação
+     * de registo para o servidor. Caso o registo seja bem-sucedido, o servidor envia uma resposta
+     * que é mostrada ao utilizador.</p>
+     *
+     * @param scanner O objeto Scanner utilizado para ler a entrada do utilizador.
+     */
     private static void handleSignUp(Scanner scanner) {
         System.out.print(Constants.INPUT_USER_NAME);
         String username = scanner.nextLine();
@@ -74,6 +101,16 @@ public class Client {
         }
     }
 
+    /**
+     * Método para lidar com o login de um utilizador.
+     *
+     * <p>Este método solicita ao utilizador o nome de utilizador ou email e a senha. A partir dessa
+     * informação, o cliente envia uma solicitação de login para o servidor. Se o login for bem-sucedido,
+     * o cliente irá tentar iniciar uma sessão de chat multicast. Caso contrário, será mostrada uma mensagem
+     * de erro.</p>
+     *
+     * @param scanner O objeto Scanner utilizado para ler a entrada do utilizador.
+     */
     private static void handleLogin(Scanner scanner) {
         connection.reconnect();
 

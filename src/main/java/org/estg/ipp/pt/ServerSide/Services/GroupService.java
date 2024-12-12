@@ -17,6 +17,25 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Serviço para gerir grupos no sistema.
+ *
+ * <p>O serviço oferece funcionalidades para inicializar grupos padrão,
+ * adicionar ou remover utilizadores de grupos, verificar a associação de utilizadores,
+ * e criar ou manipular grupos personalizados.</p>
+ *
+ * <p><b>Funcionalidades principais:</b></p>
+ * <ol>
+ *   <li>Inicialização de grupos padrão.</li>
+ *   <li>Adição de utilizadores a grupos existentes.</li>
+ *   <li>Verificação e recuperação de grupos com base em utilizadores e permissões.</li>
+ *   <li>Criação de grupos personalizados.</li>
+ *   <li>Remoção de utilizadores de grupos, com validações de permissões e regras de negócio.</li>
+ * </ol>
+ *
+ * <p>Se as operações falharem devido a dados inválidos ou inconsistentes,
+ * exceções serão lançadas com mensagens descritivas.</p>
+ */
 @Service
 public class GroupService {
 
@@ -26,6 +45,19 @@ public class GroupService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Inicializa os grupos padrão no sistema.
+     *
+     * <p>Os grupos padrão criados incluem:</p>
+     * <ul>
+     *   <li>GERAL: Grupo público sem restrição de permissões.</li>
+     *   <li>LOW_LEVEL: Grupo público com permissões de baixo nível.</li>
+     *   <li>MEDIUM_LEVEL: Grupo público com permissões de nível médio.</li>
+     *   <li>HIGH_LEVEL: Grupo público com permissões de alto nível.</li>
+     * </ul>
+     *
+     * <p>Se os grupos já existirem, nenhuma ação será realizada.</p>
+     */
     public void initializeDefaultGroups() {
         if (groupRepository.count() == 0) {
             // Criação dos grupos base
@@ -69,6 +101,14 @@ public class GroupService {
         }
     }
 
+    /**
+     * Adiciona um utilizador a um grupo específico.
+     *
+     * @param groupName Nome do grupo ao qual o utilizador será adicionado.
+     * @param user Utilizador que será adicionado ao grupo.
+     * @throws IllegalArgumentException Se o grupo ou o utilizador não forem encontrados,
+     *                                  ou se o utilizador já estiver no grupo.
+     */
     @Transactional
     public void addUserToGroup(String groupName, User user) throws IllegalArgumentException {
 
@@ -89,6 +129,14 @@ public class GroupService {
         System.out.println("Utilizador adicionado ao grupo com sucesso!");
     }
 
+    /**
+     * Obtém um grupo pelo nome e verifica a associação de um utilizador.
+     *
+     * @param userId ID do utilizador a ser verificado.
+     * @param groupName Nome do grupo a ser buscado.
+     * @return O grupo encontrado.
+     * @throws IllegalArgumentException Se o grupo ou a associação do utilizador não forem encontrados.
+     */
     @Transactional
     public Group getUserGroupByNameAndVerify(Long userId, String groupName) {
         Group group = groupRepository.findByName(groupName)
@@ -103,17 +151,23 @@ public class GroupService {
         return group;
     }
 
+    /**
+     * Obtém todos os grupos registados no sistema.
+     *
+     * @return Lista de todos os grupos.
+     */
     public List<Group> getAllGroups() {
         return groupRepository.findAll(); // Retorna todos os grupos no banco de dados
     }
 
-    public List<User> getUsersByGroupName(String groupName) {
-        Group group = groupRepository.findByName(groupName)
-                .orElseThrow(() -> new IllegalArgumentException("Grupo não encontrado"));
-
-        return new ArrayList<>(group.getUsers());
-    }
-
+    /**
+     * Verifica se um utilizador está associado a um grupo específico.
+     *
+     * @param groupName Nome do grupo.
+     * @param userId ID do utilizador.
+     * @return {@code true} se o utilizador pertence ao grupo, {@code false} caso contrário.
+     * @throws IllegalArgumentException Se o grupo não for encontrado.
+     */
     @Transactional
     public boolean isUserInGroup(String groupName, Long userId) {
         Group group = groupRepository.findByName(groupName)
@@ -122,12 +176,28 @@ public class GroupService {
         return group.getUsers().stream().anyMatch(user -> user.getId().equals(userId));
     }
 
+    /**
+     * Obtém um grupo pelo nome.
+     *
+     * @param groupName Nome do grupo.
+     * @return O grupo encontrado.
+     * @throws IllegalArgumentException Se o grupo não for encontrado.
+     */
     public Group getGroupByName(String groupName) throws IllegalArgumentException {
 
         return groupRepository.findByName(groupName)
                 .orElseThrow(() -> new IllegalArgumentException("Grupo com nome " + groupName + " não encontrado"));
     }
 
+    /**
+     * Cria um grupo personalizado com configurações específicas.
+     *
+     * @param id ID do utilizador que criou o grupo.
+     * @param name Nome do grupo.
+     * @param publicOrPrivate Indica se o grupo será público ou privado.
+     * @return O grupo criado.
+     * @throws IllegalArgumentException Se já existir um grupo com o mesmo nome.
+     */
     public Group addCustomGroup(Long id, String name, String publicOrPrivate) {
         boolean groupExists = groupRepository.findAll().stream().anyMatch(group ->
                 group.getName().equalsIgnoreCase(name)
@@ -168,6 +238,12 @@ public class GroupService {
         return savedGroup;
     }
 
+    /**
+     * Remove um utilizador de um grupo. Se o grupo tiver apenas um membro, ele será excluído.
+     *
+     * @param user Utilizador a ser removido.
+     * @param group Grupo do qual o utilizador será removido.
+     */
     @Transactional
     public void leaveGroup(User user, Group group) {
         group = groupRepository.findById(group.getId()).orElseThrow(() -> new RuntimeException("Group not found"));
@@ -188,6 +264,12 @@ public class GroupService {
         }
     }
 
+    /**
+     * Remove um utilizador de todos os grupos públicos onde suas permissões são insuficientes.
+     *
+     * @param user Utilizador a ser removido.
+     * @param newPermissions Novas permissões do utilizador.
+     */
     @Transactional
     public void removeUserFromGroup(User user, Permissions newPermissions) {
         List<Group> publicGroups = groupRepository.findByisPublic(true);
@@ -200,6 +282,14 @@ public class GroupService {
         }
     }
 
+    /**
+     * Gera o próximo endereço multicast disponível.
+     *
+     * @param baseAddress Endereço base.
+     * @param usedAddresses Conjunto de endereços já em uso.
+     * @return O próximo endereço disponível.
+     * @throws RuntimeException Se não houver endereços disponíveis.
+     */
     private String generateNextAddress(String baseAddress, Set<String> usedAddresses) {
         for (int i = 0; i < 256; i++) {
             String candidateAddress = baseAddress + i;
@@ -210,6 +300,14 @@ public class GroupService {
         throw new RuntimeException("Não há endereços multicast disponíveis.");
     }
 
+    /**
+     * Gera a próxima porta multicast disponível.
+     *
+     * @param startPort Porta inicial.
+     * @param usedPorts Conjunto de portas já em uso.
+     * @return A próxima porta disponível.
+     * @throws RuntimeException Se não houver portas disponíveis.
+     */
     private int generateNextPort(int startPort, Set<Integer> usedPorts) {
         for (int port = startPort; port <= 65535; port++) {
             if (!usedPorts.contains(port)) {

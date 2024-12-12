@@ -1,5 +1,24 @@
 package org.estg.ipp.pt.Classes.Enum;
 
+/**
+ * Enum {@code TagType} representa diferentes tipos de tags para categorizar logs de eventos, com cada tipo
+ * associado a uma descrição que explica o seu propósito.
+ *
+ * <p>Os tipos de tags disponíveis incluem:</p>
+ * <ul>
+ *     <li>{@code INFO} - Mensagens informativas gerais.</li>
+ *     <li>{@code ERROR} - Erros que requerem atenção.</li>
+ *     <li>{@code ALERT} - Alertas críticos que podem indicar um problema grave.</li>
+ *     <li>{@code CRITICAL} - Problemas graves que exigem atenção imediata.</li>
+ *     <li>{@code SUCCESS} - Indica operações bem-sucedidas.</li>
+ *     <li>{@code FAILURE} - Indica operações malsucedidas.</li>
+ *     <li>{@code ACCESS} - Logs relacionados ao controle de acesso ou tentativas.</li>
+ *     <li>{@code USER_ACTION} - Logs de ações ou entradas do utilizador.</li>
+ *     <li>{@code DATABASE} - Logs relacionados a operações de base de dados.</li>
+ *     <li>{@code NETWORK} - Logs relacionados à rede (e.g., problemas de conexão).</li>
+ *     <li>{@code SECURITY} - Logs relacionados à segurança (e.g., acesso não autorizado).</li>
+ * </ul>
+ */
 public enum TagType {
     INFO("General informational messages."),
     ERROR("Errors that require attention."),
@@ -15,20 +34,29 @@ public enum TagType {
 
     private final String description;
 
-    // Constructor to set the description for each tag
+    /**
+     * Construtor da enumeração {@code TagType}, que associa uma descrição a cada tipo de tag.
+     *
+     * @param description A descrição do tipo de tag.
+     */
     TagType(String description) {
         this.description = description;
     }
 
     /**
-     * Returns the description of the tag.
+     * Retorna a descrição do tipo de tag.
      *
-     * @return The tag's description.
+     * @return A descrição associada ao tipo de tag.
      */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Retorna o nome da tag como uma string.
+     *
+     * @return O nome da tag como string.
+     */
     @Override
     public String toString() {
         return name();

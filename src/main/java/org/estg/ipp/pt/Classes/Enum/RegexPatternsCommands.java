@@ -3,6 +3,32 @@ package org.estg.ipp.pt.Classes.Enum;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Enum {@code RegexPatternsCommands} contém padrões de expressões regulares para validar e
+ * processar comandos de texto específicos relacionados a ações no sistema, como aprovações,
+ * rejeições, exportações, criação de grupos, entre outros.
+ *
+ * Cada comando tem um padrão específico que pode ser utilizado para validar ou extrair
+ * parâmetros de comandos fornecidos em formato de string.
+ *
+ * <p>Os comandos disponíveis incluem:</p>
+ * <ul>
+ *     <li>{@code APPROVE} - Comando para aprovar uma solicitação com um ID e solicitante.</li>
+ *     <li>{@code REJECT} - Comando para rejeitar uma solicitação com um ID e solicitante.</li>
+ *     <li>{@code EXPORT} - Comando para exportar dados em um intervalo de datas e com um tag específico.</li>
+ *     <li>{@code REQUEST} - Comando genérico de solicitação, permitindo payload e solicitante.</li>
+ *     <li>{@code JOIN} - Comando para um usuário se juntar a um grupo.</li>
+ *     <li>{@code CHANGE_PERMISSIONS} - Comando para alterar permissões de um usuário.</li>
+ *     <li>{@code CREATE_GROUP} - Comando para criar um grupo, com opções públicas ou privadas.</li>
+ *     <li>{@code CHAT} - Comando para enviar uma mensagem de chat para outro usuário.</li>
+ *     <li>{@code COMMANDS} - Comando para listar todos os comandos disponíveis.</li>
+ *     <li>{@code ADD_TO_GROUP} - Comando para adicionar um usuário a um grupo.</li>
+ *     <li>{@code LIST_GROUPS} - Comando para listar todos os grupos de um usuário.</li>
+ *     <li>{@code LEAVE_GROUP} - Comando para sair de um grupo.</li>
+ *     <li>{@code ALERT} - Comando para enviar um alerta.</li>
+ *     <li>{@code LOGOUT} - Comando para fazer logout de um usuário.</li>
+ * </ul>
+ */
 public enum RegexPatternsCommands {
     APPROVE("^/approve(?:\\s(?<help>-h))?(?:\\s(?<id>\\d+)\\s(?<requester>[^\\s:]+))?:(?<username>.+)$"),                                 // Approve-specific regex
     REJECT("^/reject(?:\\s(?<help>-h))?(?:\\s(?<id>\\d+)\\s(?<requester>[^\\s:]+))?:(?<username>.+)$"),
@@ -22,10 +48,22 @@ public enum RegexPatternsCommands {
 
     private final Pattern pattern;
 
+    /**
+     * Construtor da enumeração {@code RegexPatternsCommands}, que compila a expressão regular fornecida para cada comando.
+     *
+     * @param regex A expressão regular a ser compilada e associada ao padrão do comando.
+     */
     RegexPatternsCommands(String regex) {
         this.pattern = Pattern.compile(regex);
     }
 
+    /**
+     * Retorna um {@link Matcher} que pode ser usado para verificar se a entrada corresponde
+     * ao padrão da expressão regular associada ao comando.
+     *
+     * @param input A string de entrada que será verificada contra a expressão regular.
+     * @return O {@link Matcher} que pode ser utilizado para encontrar ou verificar as correspondências da entrada.
+     */
     public Matcher matcher(String input) {
         return pattern.matcher(input);
     }
