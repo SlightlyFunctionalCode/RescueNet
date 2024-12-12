@@ -7,8 +7,7 @@ import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Server;
-import org.estg.ipp.pt.ServerSide.Interfaces.ProcessCommandsInterface;
-import org.estg.ipp.pt.ServerSide.Repositories.MessageRepository;
+import org.estg.ipp.pt.ServerSide.Interfaces.ProcessUserCommands;
 import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,10 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
@@ -28,7 +25,7 @@ import static org.estg.ipp.pt.ServerSide.Classes.HelpMessages.*;
 import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGroup;
 
 @Component
-public class ProcessCommands implements ProcessCommandsInterface {
+public class ProcessUserCommandsImpl implements ProcessUserCommands {
     @Autowired
     private UserService userService;
 
@@ -409,7 +406,7 @@ public class ProcessCommands implements ProcessCommandsInterface {
 
         List<Group> groups = groupService.getAllGroups();
         for (Group group : groups) {
-            notifyGroup(group, "ALERTA: " + message);
+            notifyGroup(group, "**ALERTA: " + message + "**");
         }
         out.println("EXECUTADO COM SUCESSO");
         logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, username + " executou o comando alerta"));

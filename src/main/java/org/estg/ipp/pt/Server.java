@@ -6,9 +6,10 @@ import org.estg.ipp.pt.Classes.Enum.TagType;
 import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.ServerSide.Classes.MulticastListener;
-import org.estg.ipp.pt.ServerSide.Classes.ExecuteInternalCommands;
-import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommands;
+import org.estg.ipp.pt.ServerSide.Classes.ExecuteUserCommandsImpl;
 import org.estg.ipp.pt.ServerSide.Classes.ServerStats;
+import org.estg.ipp.pt.ServerSide.Interfaces.ExecuteInternalCommands;
+import org.estg.ipp.pt.ServerSide.Interfaces.ExecuteUserCommands;
 import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -28,9 +29,9 @@ import java.util.regex.Matcher;
 
 /**
  * Classe principal do servidor que gere as conexões com os clientes e executa os comandos internos e de utilizadores.
- * A classe é responsável por gerir os sockets, executar comandos, e manter as estatísticas do servidor.
+ * A classe é responsável por gerir os ‘sockets’, executar comandos, e manter as estatísticas do servidor.
  * Além disso, a classe escuta e processa as solicitações recebidas dos clientes, e comunica-se com diferentes
- * serviços, como {@link ExecuteInternalCommands}, {@link ExecuteUserCommands}, {@link GroupService},
+ * serviços, como {@link ExecuteInternalCommands}, {@link ExecuteUserCommandsImpl}, {@link GroupService},
  * {@link LogService}, e {@link MessageService}.
  *
  * <p>Esta classe é a aplicação principal do servidor e inicializa os componentes Spring necessários.</p>
@@ -105,8 +106,8 @@ public class Server {
 
             ServerStats serverStats = new ServerStats();
 
-            executeInternalCommands.groupService.initializeDefaultGroups();
-            executeInternalCommands.userService.initializeUser();
+            executeInternalCommands.getProcessInternalCommands().getGroupService().initializeDefaultGroups();
+            executeInternalCommands.getProcessInternalCommands().getUserService().initializeUser();
 
             try {
                 serverSocket = new ServerSocket(serverPort);
@@ -135,19 +136,19 @@ public class Server {
     }
 
     /**
-     * Recupera o socket de um usuário conectado com base no nome de usuário.
+     * Recupera o ‘socket’ de um utilizador conectado com base no nome de utilizador.
      *
-     * @param username Nome do usuário.
-     * @return Socket correspondente ao usuário.
+     * @param username Nome do utilizador.
+     * @return ‘Socket’ correspondente ao utilizador.
      */
     public static Socket getUserSocket(String username) {
         return clients.get(username);
     }
 
     /**
-     * Remove um usuário da lista de conexões ativas e fecha sua conexão.
+     * Remove um utilizador da lista de conexões ativas e fecha a sua conexão.
      *
-     * @param username Nome do usuário.
+     * @param username Nome do utilizador.
      */
     public static void removeUserSocket(String username) {
         try {
@@ -181,7 +182,7 @@ public class Server {
 
     /**
      * Método que lida com a comunicação de um cliente conectado ao servidor.
-     * Processa as solicitações recebidas, executando comandos internos ou de usuários conforme necessário.
+     * Processa as solicitações recebidas, executando comandos internos ou de utilizador conforme necessário.
      *
      * @param clientSocket Conexão com o cliente.
      * @param serverStats  Estatísticas do servidor.

@@ -3,7 +3,8 @@ package org.estg.ipp.pt.ServerSide.Classes;
 import org.estg.ipp.pt.Classes.Enum.*;
 import org.estg.ipp.pt.Classes.Log;
 import org.estg.ipp.pt.Classes.Message;
-import org.estg.ipp.pt.ServerSide.Interfaces.ProcessCommandsInterface;
+import org.estg.ipp.pt.ServerSide.Interfaces.ExecuteUserCommands;
+import org.estg.ipp.pt.ServerSide.Interfaces.ProcessUserCommands;
 import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
 import org.estg.ipp.pt.ServerSide.Services.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,15 @@ import java.util.regex.Matcher;
 import static org.estg.ipp.pt.ServerSide.Classes.HelpMessages.*;
 
 @Component
-public class ExecuteUserCommands {
+public class ExecuteUserCommandsImpl implements ExecuteUserCommands {
     @Autowired
     private LogService logService;
+
     @Autowired
     private MessageService messageService;
 
     @Autowired
-    private ProcessCommandsInterface processCommands;
+    private ProcessUserCommands processCommands;
 
     public void handleUserCommand(String command, String request, String requester, String payload, PrintWriter out,
                                   ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) throws IOException {

@@ -12,13 +12,32 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.regex.Matcher;
 
+/**
+ * A classe {@code DefaultCommandHandler} implementa a ‘interface’ {@code CommandHandler} para processar comandos
+ * enviados para o servidor e lidar com respostas relacionadas ao serviço de chat.
+ *
+ * <p>Essa classe utiliza ‘sockets’ para se comunicar com o servidor e interpreta as respostas utilizando
+ * expressões regulares definidas em {@link ServerResponseRegex}.</p>
+ */
 public class DefaultCommandHandler implements CommandHandler {
     private final String host;
 
+    /**
+     * Construtor para inicializar um manipulador de comandos com o endereço do servidor.
+     *
+     * @param host o endereço do servidor para o qual os comandos serão enviados.
+     */
     public DefaultCommandHandler(String host) {
         this.host = host;
     }
 
+    /**
+     * Lida com um comando enviado ao servidor, processando a resposta e executando ações correspondentes.
+     *
+     * @param command o comando a ser enviado ao servidor.
+     * @param name o nome do usuário que envia o comando.
+     * @param chatService a instância do serviço de chat atualmente em execução.
+     */
     @Override
     public void handleCommand(String command, String name, ChatService chatService)  {
         try (Socket serverSocket = new Socket(host, 5000);

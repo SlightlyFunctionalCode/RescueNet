@@ -6,6 +6,7 @@ import org.estg.ipp.pt.Classes.Group;
 import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.Classes.User;
 import org.estg.ipp.pt.Server;
+import org.estg.ipp.pt.ServerSide.Interfaces.ProcessInternalCommands;
 import org.estg.ipp.pt.ServerSide.Services.GroupService;
 import org.estg.ipp.pt.ServerSide.Services.MessageService;
 import org.estg.ipp.pt.ServerSide.Services.NotificationHandler;
@@ -15,15 +16,14 @@ import org.springframework.stereotype.Component;
 
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGroup;
 
 @Component
-public class ExecuteInternalCommands {
-
+public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
     @Autowired
     public UserService userService;
 
@@ -33,23 +33,7 @@ public class ExecuteInternalCommands {
     @Autowired
     private MessageService messageService;
 
-    public boolean isInternalCommand(String command) {
-        return command.equals("REGISTER") || command.equals("LOGIN") || command.equals("LOGOUT") || command.equals("READY") || command.equals("CONFIRM_READ");
-    }
-
-    public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
-        switch (command) {
-            case "REGISTER" -> handleRegister(payload, out);
-            case "LOGIN" -> handleLogin(payload, out, clientSocket, usersWithPermissionsOnline);
-            case "LOGOUT" -> handleLogout(payload, out);
-            case "READY" -> handlePendingRequest(payload);
-            case "CONFIRM_READ" -> new Thread(() -> handleIsReadConfirmation(command + ":" + payload)).start();
-
-            default -> out.println("ERRO: Comando interno inválido");
-        }
-    }
-
-    private void handleIsReadConfirmation(String payload) {
+    public void handleIsReadConfirmation(String payload) {
         try {
             Matcher confirmMatcher = RegexPatterns.CONFIRM_READ.matcher(payload.trim());
             if (confirmMatcher.matches()) {
@@ -73,7 +57,7 @@ public class ExecuteInternalCommands {
     }
 
 
-    private void handleRegister(String payload, PrintWriter out) {
+    public void handleRegister(String payload, PrintWriter out) {
         Matcher registerMatcher = RegexPatterns.REGISTER.matcher(payload);
         if (registerMatcher.matches()) {
             String username = registerMatcher.group("username");
@@ -110,7 +94,7 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private void handleLogin(String payload, PrintWriter out, Socket clientSocket, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
+    public void handleLogin(String payload, PrintWriter out, Socket clientSocket, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
         if (payload == null || payload.isEmpty()) {
             out.println("Erro: Dados de login inválidos.");
             return;
@@ -194,7 +178,7 @@ public class ExecuteInternalCommands {
         return "SUCESSO: Login realizado. Grupo: " + group.getAddress() + ":" + group.getPort() + ":" + username;
     }
 
-    private void handleLogout(String username, PrintWriter out) {
+    public void handleLogout(String username, PrintWriter out) {
         if (Server.getUserSocket(username) != null) {
             Server.removeUserSocket(username);
             out.println("SUCESSO: Logout realizado");
@@ -203,7 +187,7 @@ public class ExecuteInternalCommands {
         }
     }
 
-    private void handlePendingRequest(String payload) {
+    public void handlePendingRequest(String payload) {
         Matcher registerMatcher = RegexPatterns.READY.matcher(payload);
         if (registerMatcher.matches()) {
             String username = registerMatcher.group("username");
@@ -224,6 +208,12 @@ public class ExecuteInternalCommands {
             }
         }
     }
+
+    public GroupService getGroupService() {
+        return groupService;
+    }
+
+    public UserService getUserService() {
+        return userService;
+    }
 }
-
-

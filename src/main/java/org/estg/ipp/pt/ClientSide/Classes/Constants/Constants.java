@@ -1,6 +1,14 @@
 package org.estg.ipp.pt.ClientSide.Classes.Constants;
 
+/**
+ * A classe {@code Constants} armazena todas as constantes usadas na aplicação.
+ *
+ * <p>Esta classe é final e não pode ser instanciada. Ela contém mensagens
+ * de texto e ‘strings’ formatadas utilizadas em diversas partes da
+ * aplicação, como menus, mensagens de erro e respostas de comandos.</p>
+ */
 public final class Constants {
+
     public static final String MENU = """
             ============================
                         MENU
@@ -9,6 +17,7 @@ public final class Constants {
             3. Sair
             ============================
             Escolha uma opção:\s""";
+
     public static final String EXITING_APP = "Encerrando o cliente...";
     public static final String INPUT_USER_NAME = "Digite o seu nome de utilizador: ";
     public static final String INPUT_USER_EMAIL = "Digite o seu email: ";
@@ -37,6 +46,11 @@ public final class Constants {
     public static final String SERVER_START_HELP = "--HELP--";
     public static final String SERVER_END_HELP = "--END HELP--";
 
+    /**
+     * Construtor privado para impedir a instância da classe.
+     *
+     * <p>Lança uma {@link UnsupportedOperationException} se for chamado.</p>
+     */
     private Constants() {
         throw new UnsupportedOperationException("Não se pode instanciar uma classe de constantes");
     }

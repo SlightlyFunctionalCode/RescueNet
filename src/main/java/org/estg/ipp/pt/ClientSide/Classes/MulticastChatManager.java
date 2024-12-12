@@ -9,23 +9,52 @@ import java.net.DatagramPacket;
 import java.net.MulticastSocket;
 import java.net.InetAddress;
 
+/**
+ * A classe {@code MulticastChatManager} gerencia o envio e o recebimento de mensagens
+ * num grupo de multicast para implementar a funcionalidade de chat.
+ *
+ * <p>Essa classe utiliza ‘sockets’ multicast para comunicação entre participantes do chat.
+ * As mensagens são enviadas como pacotes de dados e recebidas continuamente em uma thread separada.</p>
+ */
 public class MulticastChatManager implements MessageHandler {
     private final InetAddress group;
     private final int port;
     private final MulticastSocket socket;
 
+    /**
+     * Construtor para inicializar o gerenciador de chat multicast.
+     *
+     * @param groupAddress o endereço do grupo multicast.
+     * @param port a porta utilizada para comunicação.
+     * @param socket o socket multicast configurado para o grupo.
+     * @throws IOException se houver um erro ao resolver o endereço do grupo.
+     */
     public MulticastChatManager(String groupAddress, int port, MulticastSocket socket) throws IOException {
         this.group = InetAddress.getByName(groupAddress);
         this.port = port;
         this.socket = socket;
     }
 
+    /**
+     * Envia uma mensagem para todos os membros do grupo multicast.
+     *
+     * @param message a mensagem a ser enviada.
+     * @throws IOException se houver um erro durante o envio da mensagem.
+     */
     public void sendMessage(String message) throws IOException {
         byte[] buffer = message.getBytes();
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group, port);
         socket.send(packet);
     }
 
+    /**
+     * Inicia o recebimento contínuo de mensagens do grupo multicast.
+     *
+     * <p>As mensagens recebidas são encaminhadas para o método {@link MessageReceiver#onMessageReceived(String)}
+     * implementado pelo receptor fornecido.</p>
+     *
+     * @param receiver a instância de {@link MessageReceiver} para tratar mensagens recebidas.
+     */
     public void startReceivingMessages(MessageReceiver receiver) {
         new Thread(() -> {
             byte[] buffer = new byte[1024];

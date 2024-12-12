@@ -5,10 +5,9 @@ import org.estg.ipp.pt.Classes.Enum.TagType;
 
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public interface ProcessCommandsInterface {
+public interface ProcessUserCommands {
 
     void processExport(String request, PrintWriter out);
 
