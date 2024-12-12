@@ -82,8 +82,6 @@ public class UserService {
         return 1;
     }
 
-    /* TODO: Melhorar o método*/
-
     /**
      * Autentica um utilizador com base no nome de utilizador ou email e senha.
      *

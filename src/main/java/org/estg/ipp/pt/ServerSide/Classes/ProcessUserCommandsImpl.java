@@ -80,27 +80,27 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
-    public void processExportByDateRangeCommand(LocalDateTime startDate, LocalDateTime endDate, String username, PrintWriter out) {
+    private void processExportByDateRangeCommand(LocalDateTime startDate, LocalDateTime endDate, String username, PrintWriter out) {
         // Generate the endpoint URL
         String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate;
 
         processExportURL(url, username, out);
     }
 
-    public void processExportByDateRangeAndTagCommand(LocalDateTime startDate, LocalDateTime endDate, TagType tagType, String username, PrintWriter out) {
+    private void processExportByDateRangeAndTagCommand(LocalDateTime startDate, LocalDateTime endDate, TagType tagType, String username, PrintWriter out) {
         // Generate the endpoint URL
         String url = "http://localhost:8080/download-pdf-report?startDate=" + startDate + "&endDate=" + endDate + "&tag=" + tagType.name();
 
         processExportURL(url, username, out);
     }
 
-    public void processExportByTagCommand(TagType tagType, String username, PrintWriter out) {
+    private void processExportByTagCommand(TagType tagType, String username, PrintWriter out) {
         String url = "http://localhost:8080/download-pdf-report?tag=" + tagType.name();
 
         processExportURL(url, username, out);
     }
 
-    public void processExportURL(String url, String username, PrintWriter out) {
+    private void processExportURL(String url, String username, PrintWriter out) {
         System.out.println("Generated URL for download: " + url);
 
         out.println("SUCESSO: O pdf foi gerado com sucesso. Por favor, faça o download aqui: " + url);
@@ -329,9 +329,9 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         }
     }
 
-    public void handleAddToGroup(String username, String requester, String group, PrintWriter out) {
+    public void handleAddToGroup(String username, String userToAddName, String group, PrintWriter out) {
         User user = userService.getUserByName(username);
-        User userToAdd = userService.getUserByName(requester);
+        User userToAdd = userService.getUserByName(userToAddName);
 
         if (user == null || userToAdd == null) {
             out.println("O utilizador que pretende adicionar ao grupo não existe");
@@ -351,7 +351,7 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
             groupService.addUserToGroup(groupToAdd.getName(), userToAdd);
             out.println("SUCESSO: O utilizador foi adicionado ao grupo");
             NotificationHandler.notify(userToAdd.getName(), "Você foi adicionado ao grupo: " + group);
-            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, username + " adicionou " + requester + " ao grupo " + group));
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, username + " adicionou " + userToAddName + " ao grupo " + group));
 
         } catch (IllegalArgumentException e) {
             out.println("ERRO: " + e.getMessage());

@@ -40,11 +40,11 @@ public class ExecuteUserCommandsImpl implements ExecuteUserCommands {
     /**
      * Processa os comandos fornecidos pelo utilizador e executa a operação correspondente.
      *
-     * @param command O comando fornecido pelo utilizador.
-     * @param request A solicitação completa contendo detalhes do comando.
-     * @param requester O nome do utilizador que está a solicitar a execução do comando.
-     * @param payload Os dados adicionais para o comando, se necessário.
-     * @param out O escritor para enviar a resposta ao usuário.
+     * @param command                    O comando fornecido pelo utilizador.
+     * @param request                    A solicitação completa contendo detalhes do comando.
+     * @param requester                  O nome do utilizador que está a solicitar a execução do comando.
+     * @param payload                    Os dados adicionais para o comando, se necessário.
+     * @param out                        O escritor para enviar a resposta ao usuário.
      * @param usersWithPermissionsOnline O mapa de utilizadores com permissões online.
      * @throws IOException Se ocorrer um erro ao escrever a resposta no `out`.
      */
@@ -148,7 +148,7 @@ public class ExecuteUserCommandsImpl implements ExecuteUserCommands {
                             Permissions permissions = Permissions.fromValue(permission);
                             processCommands.processChangePermissionCommand(payload, name, permissions, out);
 
-                        }catch(IllegalArgumentException e) {
+                        } catch (IllegalArgumentException e) {
                             out.println("ERRO: Formato inválido para /change_permission. Use -h para descobrir os parâmetros");
                             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /join"));
                         }
@@ -230,14 +230,14 @@ public class ExecuteUserCommandsImpl implements ExecuteUserCommands {
                 Matcher addToGroup = RegexPatternsCommands.ADD_TO_GROUP.matcher(request);
                 if (addToGroup.matches()) {
                     String help = addToGroup.group("help");
-                    String user_request = addToGroup.group("username");
+                    String username = addToGroup.group("username");
                     String userToAdd = addToGroup.group("userToAdd");
                     String group = addToGroup.group("group");
 
                     if (help != null) {
                         out.println(ADD_TO_GROUP_HELP);
                     } else {
-                        processCommands.handleAddToGroup(user_request, userToAdd, group, out);
+                        processCommands.handleAddToGroup(username, userToAdd, group, out);
                     }
                 } else {
                     out.println("ERRO: Formato inválido para /add_to_group. Use -h para ajuda.");
