@@ -60,7 +60,7 @@ public class LogService {
     }
 
     /**
-     * Retorna logs em um intervalo de datas especificado.
+     * Retorna logs num intervalo de datas especificado.
      *
      * @param startDate Data inicial do intervalo.
      * @param endDate Data final do intervalo.
@@ -98,7 +98,7 @@ public class LogService {
     }
 
     /**
-     * Gera um relatório em PDF de logs com base em uma tag específica.
+     * Gera um relatório em PDF de logs com base numa tag específica.
      *
      * @param tag Tag para filtrar os logs.
      * @param byteArrayOutputStream Fluxo de saída onde o PDF será gerado.

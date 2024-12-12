@@ -46,7 +46,7 @@ public class MulticastManagerService {
     }
 
     /**
-     * Obtém um MulticastManager existente ou cria um novo para o endereço e porta especificados.
+     * Obtém um MulticastManager existente ou cria um para o endereço e porta especificados.
      *
      * @param groupAddress O endereço do grupo multicast.
      * @param port A porta do grupo multicast.

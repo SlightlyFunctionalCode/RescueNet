@@ -12,13 +12,13 @@ import java.util.Optional;
  *
  * Esta interface estende o {@link JpaRepository}, fornecendo métodos para realizar operações CRUD
  * básicas sobre o repositório de grupos. Além disso, fornece consultas personalizadas para encontrar
- * grupos com base em seus atributos.
+ * grupos com base nos seus atributos.
  *
  * <p>A interface {@link GroupRepository} permite:</p>
  * <ul>
  *     <li>Encontrar um grupo pelo nome.</li>
  *     <li>Verificar a existência de um grupo pelo nome.</li>
- *     <li>Verificar a associação de um grupo com um usuário pelo ID.</li>
+ *     <li>Verificar a associação de um grupo com um utilizador pelo ID.</li>
  *     <li>Buscar grupos com base na visibilidade pública.</li>
  * </ul>
  *
@@ -47,11 +47,11 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     boolean existsByName(String name);
 
     /**
-     * Verifica se existe um grupo com o ID fornecido que contenha o usuário com o ID fornecido.
+     * Verifica se existe um grupo com o ID fornecido que contenha o utilizador com o ID fornecido.
      *
      * @param id ID do grupo.
-     * @param usersId ID do usuário.
-     * @return {@code true} se o grupo com o ID fornecido contiver o usuário com o ID fornecido, caso contrário {@code false}.
+     * @param usersId ID do utilizador.
+     * @return {@code true} se o grupo com o ID fornecido contiver o utilizador com o ID fornecido, caso contrário {@code false}.
      */
     boolean existsByIdAndUsersId(Long id, Long usersId);
 

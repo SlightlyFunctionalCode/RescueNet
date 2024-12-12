@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.*;
 
 /**
- * A classe {@code MulticastManager} gerencia a comunicação via multicast usando um socket multicast.
+ * A classe {@code MulticastManager} gerencia a comunicação via multicast usando um ‘socket’ multicast.
  *
- * <p>Esta classe fornece os métodos necessários para enviar e receber mensagens em um grupo multicast
+ * <p>Esta classe fornece os métodos necessários para enviar e receber mensagens num grupo multicast
  * especificado por um endereço IP de grupo e uma porta. Ela utiliza a classe {@link MulticastSocket} para
- * estabelecer a comunicação com o grupo e gerenciar o envio e recebimento de pacotes.</p>
+ * estabelecer a comunicação com o grupo e gerir o envio e recebimento de pacotes.</p>
  *
  * <p>Principais funcionalidades:</p>
  * <ul>

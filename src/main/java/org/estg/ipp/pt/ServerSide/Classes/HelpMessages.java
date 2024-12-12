@@ -1,5 +1,16 @@
 package org.estg.ipp.pt.ServerSide.Classes;
 
+import org.estg.ipp.pt.ServerSide.Services.LogService;
+
+/**
+ * Classe contendo mensagens de ajuda para os comandos executados no sistema.
+ *
+ * Esta classe define mensagens de ajuda em formato de texto para vários comandos disponíveis no sistema, como
+ * comandos de exportação, aprovação, rejeição, alteração de permissões, e outros comandos relacionados à gestão de grupos
+ * e comunicação entre os utilizadores.
+ *
+ * A classe é **final** e não pode ser instanciada, já que apenas contém constantes estáticas de texto.
+ */
 public final class HelpMessages {
     public static final String EXPORT_HELP = """
             --HELP--
@@ -201,6 +212,11 @@ public final class HelpMessages {
             --END HELP--
             """;
 
+    /**
+     * Construtor privado para impedir a instância da classe.
+     *
+     * <p>Lança uma {@link UnsupportedOperationException} se for chamado.</p>
+     */
     private HelpMessages() {
         throw new UnsupportedOperationException("Não se pode instanciar uma classe de constantes");
     }

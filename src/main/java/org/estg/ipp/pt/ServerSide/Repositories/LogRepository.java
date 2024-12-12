@@ -20,7 +20,7 @@ import java.util.List;
  * <ul>
  *     <li>Buscar logs por uma tag específica.</li>
  *     <li>Buscar logs dentro de um intervalo de datas.</li>
- *     <li>Buscar logs por tag dentro de um intervalo de datas.</li>
+ *     <li>Buscar logs por tag num intervalo de datas.</li>
  * </ul>
  *
  * <p>O repositório utiliza o Spring Data JPA, facilitando o acesso ao banco de dados com consultas personalizadas.</p>
@@ -40,17 +40,17 @@ public interface LogRepository extends JpaRepository<Log, Long> {
     List<Log> findByTag(TagType tag);
 
     /**
-     * Encontra logs dentro de um intervalo de datas.
+     * Encontra logs num intervalo de datas.
      *
      * @param startDate A data de início do intervalo.
      * @param endDate A data de término do intervalo.
-     * @return Uma lista de logs que foram registrados dentro do intervalo de datas fornecido.
+     * @return Uma lista de logs registados dentro do intervalo de datas fornecido.
      */
     @Query("SELECT l FROM Log l WHERE l.dateTime BETWEEN :startDate AND :endDate")
     List<Log> findByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
     /**
-     * Encontra logs com uma tag específica dentro de um intervalo de datas.
+     * Encontra logs com uma tag específica num intervalo de datas.
      *
      * @param tag A tag com a qual os logs devem ser filtrados.
      * @param startDate A data de início do intervalo.
