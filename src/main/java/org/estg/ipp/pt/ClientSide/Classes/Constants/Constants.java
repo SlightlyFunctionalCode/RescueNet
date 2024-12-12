@@ -12,7 +12,7 @@ public final class Constants {
     public static final String EXITING_APP = "Encerrando o cliente...";
     public static final String INPUT_USER_NAME = "Digite o seu nome de utilizador: ";
     public static final String INPUT_USER_EMAIL = "Digite o seu email: ";
-    public static final String INPUT_USER_PASSWORD = "Digite o seu senha: ";
+    public static final String INPUT_USER_PASSWORD = "Digite a sua password: ";
     public static final String INPUT_USER_NAME_EMAIL = "Digite o seu nome/email: ";
 
     public static final String ERROR_GENERIC = "ERRO: Ocorreu um erro";

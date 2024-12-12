@@ -126,7 +126,8 @@ public class ExecuteUserCommands {
                             int permission = Integer.parseInt(perm);
                             Permissions permissions = Permissions.fromValue(permission);
                             processCommands.processChangePermissionCommand(payload, name, permissions, out);
-                        } catch (NumberFormatException e) {
+
+                        }catch(IllegalArgumentException e) {
                             out.println("ERRO: Formato inválido para /change_permission. Use -h para descobrir os parâmetros");
                             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, "Formato inválido para /join"));
                         }

@@ -23,6 +23,7 @@ public class UserInputHandler implements InputHandler {
     public void handleInput(String name) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Digite a mensagem (/logout para sair): ");
+        System.out.println("Digite /commands para visualizar os comandos disponíveis:");
         boolean shouldExit = false;
 
         while (!shouldExit) {

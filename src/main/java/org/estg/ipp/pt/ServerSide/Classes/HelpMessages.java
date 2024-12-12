@@ -48,6 +48,8 @@ public final class HelpMessages {
             --HELP--
             - Os parâmetros que podem ser executados por /change_permission são:
             -
+            - permissões disponiveis: (NO_LEVEL, LOW_LEVEL, MEDIUM_LEVEL, HIGH_LEVEL)
+            -
             - <username> username da pessoa que se pretende mudar as permissões
             -
             - <permission> novas permissões (número da permissão)

@@ -14,12 +14,11 @@ public enum Permissions {
             case LOW_LEVEL -> 1;
             case MEDIUM_LEVEL -> 2;
             case HIGH_LEVEL -> 3;
-            default -> throw new IllegalArgumentException("Valor inválido para Permissions: " + permissions);
         };
     }
 
     // Método para converter um valor inteiro para o enum correspondente
-    public static Permissions fromValue(int value) {
+    public static Permissions fromValue(int value) throws IllegalArgumentException {
         return switch (value) {
             case 0 -> NO_LEVEL;
             case 1 -> LOW_LEVEL;
