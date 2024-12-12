@@ -38,16 +38,6 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
     /**
-     * Encontra mensagens não lidas entre um remetente e um destinatário específicos,
-     * além de garantir que a mensagem não seja uma solicitação de aprovação.
-     *
-     * @param receiver O destinatário da mensagem.
-     * @param sender O remetente da mensagem.
-     * @return Uma lista de mensagens que não foram lidas e não são solicitações de aprovação.
-     */
-    List<Message> findMessageByIsReadIsFalseAndIsApprovalRequestIsFalseAndSenderAndReceiver(String receiver, String sender);
-
-    /**
      * Encontra mensagens não lidas para um destinatário específico.
      *
      * @param receiver O destinatário das mensagens.

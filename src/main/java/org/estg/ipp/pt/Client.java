@@ -132,13 +132,12 @@ public class Client {
         Matcher matcher = ServerResponseRegex.LOGIN_SUCCESS.matcher(response);
         if (matcher.matches()) {
             String groupAddress = matcher.group("address");
-            System.out.println(groupAddress);
             int port = Integer.parseInt(matcher.group("port"));
-            System.out.println(port);
+            String name = matcher.group("name");
+
             try {
-                MulticastChatService chatService = new MulticastChatService(groupAddress, port, usernameOrEmail, connection.getSocket(), "localhost");
-                System.out.println(chatService);
-                chatService.startChat(groupAddress, port, usernameOrEmail);
+                MulticastChatService chatService = new MulticastChatService(groupAddress, port, name, connection.getSocket(), "localhost");
+                chatService.startChat(groupAddress, port, name);
             } catch (IOException e) {
                 System.out.println(Constants.ERROR_STARTING_CHAT_SESSION);
             }

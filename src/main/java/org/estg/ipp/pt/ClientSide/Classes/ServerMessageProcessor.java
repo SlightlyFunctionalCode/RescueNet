@@ -16,7 +16,8 @@ public class ServerMessageProcessor {
                 sendIsReadConfirmation(messageId, out);
 
                 Pattern pattern = Pattern.compile("/.+?/");
-                return message.replaceAll(pattern.pattern(), "");
+                message = message.replaceAll(pattern.pattern(), "");
+                return "**" + message + "**";
             }
         }
         return message;

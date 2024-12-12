@@ -122,18 +122,17 @@ public class ExecuteInternalCommands {
             String password = loginMatcher.group("password");
             System.out.println("usernameOrEmail: " + usernameOrEmail + ", password: " + password);
 
-            User user = userService.getUserByName(usernameOrEmail);
+            User user = userService.getUserByNameOrEmail(usernameOrEmail);
 
             if (user == null) {
                 out.println("User inválido");
                 return;
             }
 
-            String response = loginUser(usernameOrEmail, password, clientSocket);
+            String response = loginUser(user, password, clientSocket);
             System.out.println(response);
 
-
-            if (response.startsWith("SUCESSO:")  && user.getPermissions() == Permissions.HIGH_LEVEL
+            if (response.startsWith("SUCESSO:") && user.getPermissions() == Permissions.HIGH_LEVEL
                     || user.getPermissions() == Permissions.MEDIUM_LEVEL
                     || user.getPermissions() == Permissions.LOW_LEVEL) {
                 usersWithPermissionsOnline.put(user.getName(), user.getPermissions());
@@ -166,15 +165,16 @@ public class ExecuteInternalCommands {
         List<Message> unreadMessages = messageService.getLastestGroupMessages(user.getCurrentGroup().getName());
 
         for (Message unreadMessage : unreadMessages) {
+            unreadMessage.setContent(unreadMessage.getSender() + ":" + unreadMessage.getContent());
             NotificationHandler.sendMessage(user.getName(), unreadMessage);
         }
     }
 
-    private String loginUser(String usernameOrEmail, String password, Socket clientSocket) {
+    private String loginUser(User user, String password, Socket clientSocket) {
 
-        User user = userService.authenticate(usernameOrEmail, password);
+        boolean isValid = userService.authenticate(user, password);
 
-        if (user == null) {
+        if (!isValid) {
             return "FAILED: Utilizador inválido!";
         }
         String username = user.getName();
@@ -183,7 +183,6 @@ public class ExecuteInternalCommands {
             return "FAILED: Utilizador já está logado!";
         }
 
-        // Após login bem-sucedido, armazenar o socket e verificar permissões
         Server.addUserSocket(username, clientSocket);
 
         Group group = groupService.getGroupByName("GERAL");
@@ -192,7 +191,7 @@ public class ExecuteInternalCommands {
             userService.joinGroup(user, group);
         } catch (IllegalArgumentException e) {
         }
-        return "SUCESSO: Login realizado. Grupo: " + group.getAddress() + ":" + group.getPort();
+        return "SUCESSO: Login realizado. Grupo: " + group.getAddress() + ":" + group.getPort() + ":" + username;
     }
 
     private void handleLogout(String username, PrintWriter out) {

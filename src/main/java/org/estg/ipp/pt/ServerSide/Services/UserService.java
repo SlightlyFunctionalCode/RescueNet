@@ -51,6 +51,7 @@ public class UserService {
             userRepository.save(user);
         }
     }
+
     /**
      * Registra um novo utilizador no sistema.
      *
@@ -59,17 +60,15 @@ public class UserService {
      *
      * @param user O utilizador a ser registrado.
      * @return 1 se o utilizador foi registrado com sucesso, 0 se o nome de utilizador ou email
-     *         já existirem no sistema.
+     * já existirem no sistema.
      */
     public int register(User user) {
-        // Check if the username already exists
         if (userRepository.existsByName(user.getName())) {
             System.out.println("Username already exists");
             return 0;
         }
 
-        // Check if email already exists (requires an additional repository method)
-        if (userRepository.existsByEmail(user.getEmail())) { // Make sure to define this method in the repository
+        if (userRepository.existsByEmail(user.getEmail())) {
             System.out.println("Email already exists");
             return 0;
         }
@@ -84,6 +83,7 @@ public class UserService {
     }
 
     /* TODO: Melhorar o método*/
+
     /**
      * Autentica um utilizador com base no nome de utilizador ou email e senha.
      *
@@ -91,33 +91,24 @@ public class UserService {
      * fornecida corresponde à senha armazenada. Se a autenticação for bem-sucedida, retorna o
      * utilizador, caso contrário, retorna null.</p>
      *
-     * @param usernameOrEmail O nome de utilizador ou email do utilizador.
-     * @param password A senha fornecida pelo utilizador.
+     * @param user O utilizador que se pretende autenticar.
+     * @param password        A senha fornecida pelo utilizador.
      * @return O utilizador autenticado, ou null se a autenticação falhar.
      */
-    public User authenticate(String usernameOrEmail, String password) {
-        // Find user by name
-        Optional<User> userOptional = userRepository.findByName(usernameOrEmail);
-
-        // If not found by name, check by email (requires an additional repository method)
-        if (userOptional.isEmpty()) {
-            userOptional = userRepository.findByEmail(usernameOrEmail); // Define findByEmail in the repository
-        }
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-
-            // Check if the provided password matches the stored password
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                System.out.println("Authentication successful");
-                return user;
-            } else {
-                System.out.println("Invalid password");
-            }
+    public boolean authenticate(User user, String password) {
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            System.out.println("Authentication successful");
+            return true;
         } else {
-            System.out.println("User not found");
+            System.out.println("Invalid password");
         }
-        return null;
+        return false;
+    }
+
+    public User getUserByNameOrEmail(String usernameOrEmail) {
+        Optional<User> userOptional = userRepository.findByEmailOrName(usernameOrEmail);
+
+        return userOptional.orElse(null);
     }
 
     /**
@@ -140,11 +131,11 @@ public class UserService {
      * <p>Este método verifica se o utilizador já pertence ao grupo fornecido. Caso contrário,
      * ele associa o utilizador ao grupo e salva as alterações.</p>
      *
-     * @param user O utilizador a ser associado ao grupo.
+     * @param user  O utilizador a ser associado ao grupo.
      * @param group O grupo ao qual o utilizador será associado.
      * @throws IllegalArgumentException Se o utilizador já pertence ao grupo.
      */
-    public void joinGroup(User user, Group group) {
+    public void joinGroup(User user, Group group) throws IllegalArgumentException {
         if (user.getCurrentGroup() != null && user.getCurrentGroup().getId().equals(group.getId())) {
             throw new IllegalArgumentException("Utilizador já pertence ao grupo " + group.getName());
         }
@@ -161,10 +152,10 @@ public class UserService {
      * com o valor fornecido. Retorna true se a atualização foi bem-sucedida e false se o
      * utilizador não foi encontrado.</p>
      *
-     * @param username O nome do utilizador cujas permissões serão atualizadas.
+     * @param username       O nome do utilizador cujas permissões serão atualizadas.
      * @param newPermissions As novas permissões a serem atribuídas ao utilizador.
      * @return true se as permissões foram atualizadas com sucesso, false se o utilizador não
-     *         foi encontrado.
+     * foi encontrado.
      */
     public boolean updateUserPermissions(String username, Permissions newPermissions) {
         Optional<User> userOptional = userRepository.findByName(username);

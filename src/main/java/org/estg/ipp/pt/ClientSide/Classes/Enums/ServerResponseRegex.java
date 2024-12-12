@@ -9,7 +9,7 @@ public enum ServerResponseRegex {
     SERVER_ERROR("^ERRO:(?<errorMessage>.*)$"),
     SERVER_APPROVE("^APPROVE$"),
     SERVER_REJECT("^REJECT$"),
-    LOGIN_SUCCESS("^SUCESSO:.*Grupo:\\s(?<address>[\\d\\.]+):(?<port>\\d+)$"),
+    LOGIN_SUCCESS("^SUCESSO:.*Grupo:\\s(?<address>[\\d\\.]+):(?<port>\\d+):(?<name>.+)$"),
     LOGIN_FAILED("^FAILED$"),
     GENERIC_RESPONSE("^(?<status>SUCESSO|FAILED|ERROR):.*$"),
     EMAIL("^(?<email>[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,})$"),

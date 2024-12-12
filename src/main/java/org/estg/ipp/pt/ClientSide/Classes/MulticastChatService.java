@@ -39,7 +39,7 @@ public class MulticastChatService extends AbstractChatService implements Message
                 while (serverInput.hasNextLine()) {
                     String serverMessage = serverInput.nextLine();
                     String processedMessage = messageProcessor.processIncomingMessage(serverMessage, out);
-                    System.out.println("**" + processedMessage + "**");
+                    System.out.println(processedMessage);
                 }
             }).start();
 

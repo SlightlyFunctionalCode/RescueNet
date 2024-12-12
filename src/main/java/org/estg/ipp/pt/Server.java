@@ -27,14 +27,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 /**
- * Classe principal do servidor que gerencia as conexões com os clientes e executa comandos internos e de usuários.
- * A classe é responsável por gerenciar sockets, executar comandos, e manter as estatísticas do servidor.
- * Além disso, a classe escuta e processa as solicitações recebidas dos clientes, e se comunica com diferentes
+ * Classe principal do servidor que gere as conexões com os clientes e executa os comandos internos e de utilizadores.
+ * A classe é responsável por gerir os sockets, executar comandos, e manter as estatísticas do servidor.
+ * Além disso, a classe escuta e processa as solicitações recebidas dos clientes, e comunica-se com diferentes
  * serviços, como {@link ExecuteInternalCommands}, {@link ExecuteUserCommands}, {@link GroupService},
  * {@link LogService}, e {@link MessageService}.
  *
- * @SpringBootApplication(scanBasePackages = {"org.estg.ipp.pt.ServerSide", "org.estg.ipp.pt.Security"})
- * Esta classe é a aplicação principal do servidor e inicializa os componentes Spring necessários.
+ * <p>Esta classe é a aplicação principal do servidor e inicializa os componentes Spring necessários.</p>
  */
 @SpringBootApplication(scanBasePackages = {"org.estg.ipp.pt.ServerSide", "org.estg.ipp.pt.Security"})
 public class Server {
@@ -46,7 +45,7 @@ public class Server {
     private ExecuteInternalCommands internalCommands;
 
     /**
-     * Componente responsável pela execução de comandos relacionados aos usuários.
+     * Componente responsável pela execução de comandos relacionados aos utilizadores.
      */
     @Autowired
     private ExecuteUserCommands userCommands;
@@ -58,7 +57,7 @@ public class Server {
     private GroupService groupService;
 
     /**
-     * Mapa para armazenar os utilizadores online e suas permissões.
+     * Mapa para armazenar os utilizadores online e as suas permissões.
      */
     public final ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline = new ConcurrentHashMap<>();
 
@@ -185,7 +184,7 @@ public class Server {
      * Processa as solicitações recebidas, executando comandos internos ou de usuários conforme necessário.
      *
      * @param clientSocket Conexão com o cliente.
-     * @param serverStats Estatísticas do servidor.
+     * @param serverStats  Estatísticas do servidor.
      */
     private void handleClient(Socket clientSocket, ServerStats serverStats) {
         String user = null;
@@ -204,7 +203,6 @@ public class Server {
                     String requester = requestMatcher.group("requester");
                     String payload = requestMatcher.group("payload") != null ? requestMatcher.group("payload") : "";
                     user = payload;
-                    System.out.println(user);
 
                     if (internalCommands.isInternalCommand(command)) {
                         internalCommands.handleInternalCommand(command, payload, out, clientSocket, groupService.getAllGroups(), usersWithPermissionsOnline);
