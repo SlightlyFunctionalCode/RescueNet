@@ -155,7 +155,7 @@ public final class HelpMessages {
             - /join: permite entrar num grupo existente
             - /create_group: permite criar um novo grupo
             - /chat: permite enviar uma menssagem privada para um utilizador
-            - /addToGroup: permite adicionar utilizadores a grupos privados se for owner do grupo
+            - /add_to_group: permite adicionar utilizadores a grupos privados se for owner do grupo
             - /groups: lista os grupos a que pertence
             - /leave: permite sair de um grupo para sempre
             - /export: permite exportar logs
@@ -176,7 +176,7 @@ public final class HelpMessages {
             - /join: permite entrar num grupo existente
             - /create_group: permite criar um novo grupo
             - /chat: permite enviar uma menssagem privada para um utilizador
-            - /addToGroup: permite adicionar utilizadores a grupos privados se for owner do grupo
+            - /add_to_group: permite adicionar utilizadores a grupos privados se for owner do grupo
             - /groups: lista os grupos a que pertence
             - /leave: permite sair de um grupo para sempre
             --END HELP--
@@ -193,7 +193,7 @@ public final class HelpMessages {
             - /join: permite entrar num grupo existente
             - /create_group: permite criar um novo grupo
             - /chat: permite enviar uma menssagem privada para um utilizador
-            - /addToGroup: permite adicionar utilizadores a grupos privados se for owner do grupo
+            - /add_to_group: permite adicionar utilizadores a grupos privados se for owner do grupo
             - /groups: lista os grupos a que pertence
             - /leave: permite sair de um grupo para sempre
             --END HELP--
@@ -206,7 +206,7 @@ public final class HelpMessages {
             - /join: permite entrar num grupo existente
             - /create_group: permite criar um novo grupo
             - /chat: permite enviar uma menssagem privada para um utilizador
-            - /addToGroup: permite adicionar utilizadores a grupos privados se for owner do grupo
+            - /add_to_group: permite adicionar utilizadores a grupos privados se for owner do grupo
             - /groups: lista os grupos a que pertence
             - /leave: permite sair de um grupo para sempre
             --END HELP--

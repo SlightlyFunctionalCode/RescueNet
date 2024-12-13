@@ -256,7 +256,7 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
                     String requestingUser = m.getSender();
                     String operationName = m.getContent();
 
-                    notifyGroup(groupService.getGroupByName("HIGH_LEVEL"), "Pedido pendente: O utilizador " + requestingUser + " solicitou a operação '" + operationName + "'" + " com o id " + m.getId() + ". Aprove ou rejeite.");
+                    notifyGroup(groupService.getGroupByName(m.getReceiver()), "Pedido pendente: O utilizador " + requestingUser + " solicitou a operação '" + operationName + "'" + " com o id " + m.getId() + ". Aprove ou rejeite.");
                 }
             }
         }

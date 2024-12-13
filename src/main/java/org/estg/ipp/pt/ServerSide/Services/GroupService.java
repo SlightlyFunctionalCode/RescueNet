@@ -103,7 +103,7 @@ public class GroupService {
      * Adiciona um utilizador a um grupo específico.
      *
      * @param groupName Nome do grupo ao qual o utilizador será adicionado.
-     * @param user Utilizador que será adicionado ao grupo.
+     * @param user      Utilizador que será adicionado ao grupo.
      * @throws IllegalArgumentException Se o grupo ou o utilizador não forem encontrados,
      *                                  ou se o utilizador já estiver no grupo.
      */
@@ -130,7 +130,7 @@ public class GroupService {
     /**
      * Obtém um grupo pelo nome e verifica a associação de um utilizador.
      *
-     * @param userId ID do utilizador a ser verificado.
+     * @param userId    ID do utilizador a ser verificado.
      * @param groupName Nome do grupo a ser buscado.
      * @return O grupo encontrado.
      * @throws IllegalArgumentException Se o grupo ou a associação do utilizador não forem encontrados.
@@ -162,7 +162,7 @@ public class GroupService {
      * Verifica se um utilizador está associado a um grupo específico.
      *
      * @param groupName Nome do grupo.
-     * @param userId ID do utilizador.
+     * @param userId    ID do utilizador.
      * @return {@code true} se o utilizador pertence ao grupo, {@code false} caso contrário.
      * @throws IllegalArgumentException Se o grupo não for encontrado.
      */
@@ -190,8 +190,8 @@ public class GroupService {
     /**
      * Cria um grupo personalizado com configurações específicas.
      *
-     * @param id ID do utilizador que criou o grupo.
-     * @param name Nome do grupo.
+     * @param id              ID do utilizador que criou o grupo.
+     * @param name            Nome do grupo.
      * @param publicOrPrivate Indica se o grupo será público ou privado.
      * @return O grupo criado.
      * @throws IllegalArgumentException Se já existir um grupo com o mesmo nome.
@@ -241,7 +241,7 @@ public class GroupService {
      * Se o grupo tiver apenas um membro, ele será excluído.
      * Caso o utilizador que saiu do grupo seja o criador do mesmo, este cargo será ocupado pelo próximo membro do grupo.
      *
-     * @param user Utilizador a ser removido.
+     * @param user  Utilizador a ser removido.
      * @param group Grupo do qual o utilizador será removido.
      */
     @Transactional
@@ -249,7 +249,7 @@ public class GroupService {
         group = groupRepository.findById(group.getId()).orElseThrow(() -> new RuntimeException("Group not found"));
         int groupElements = group.getUsers().size();
 
-        if (groupElements <= 1) {
+        if (groupElements <= 1 && !group.isPublic()) {
             groupRepository.delete(group);
         } else {
             List<User> initial = group.getUsers();
@@ -257,7 +257,7 @@ public class GroupService {
             group.setUsers(initial);
 
             if (user.getId().equals(group.getCreatedBy())) {
-                group.setCreatedBy(group.getUsers().get(1).getId());
+                group.setCreatedBy(group.getUsers().getFirst().getId());
             }
             groupRepository.save(group);
             System.out.println("Utilizador removido do grupo: " + group.getName());
@@ -267,7 +267,7 @@ public class GroupService {
     /**
      * Remove um utilizador de todos os grupos públicos onde as suas permissões são insuficientes.
      *
-     * @param user Utilizador a ser removido.
+     * @param user           Utilizador a ser removido.
      * @param newPermissions Novas permissões do utilizador.
      */
     @Transactional
@@ -285,7 +285,7 @@ public class GroupService {
     /**
      * Gera o próximo endereço multicast disponível.
      *
-     * @param baseAddress Endereço base.
+     * @param baseAddress   Endereço base.
      * @param usedAddresses Conjunto de endereços já em uso.
      * @return O próximo endereço disponível.
      * @throws RuntimeException Se não houver endereços disponíveis.

@@ -23,8 +23,8 @@ public class MulticastListener {
      * <p>Este método cria um socket multicast e conecta-se ao grupo especificado, associando-se a uma interface de rede,
      * e começa a receber e a processar as mensagens enviadas ao grupo.</p>
      *
-     * @param group O grupo multicast ao qual se deseja conectar.
-     * @param host O nome da interface de rede que será utilizada para o multicast.
+     * @param group   O grupo multicast ao qual se deseja conectar.
+     * @param host    O nome da interface de rede que será utilizada para o multicast.
      * @param service O serviço de mensagens utilizado para salvar as mensagens recebidas.
      */
     public void handleMulticastMessages(Group group, String host, MessageService service) {
@@ -50,9 +50,9 @@ public class MulticastListener {
      * no serviço de mensagens. Isto apenas é feito caso estas não sejam mensagens previamente lidas pelo server, de forma
      * a não salvar mensagens duplicadas na base de dados.</p>
      *
-     * @param socket O socket multicast que está ouvindo as mensagens.
+     * @param socket         O socket multicast que está ouvindo as mensagens.
      * @param messageService O serviço responsável por salvar as mensagens recebidas.
-     * @param name O nome do grupo multicast que está sendo escutado.
+     * @param name           O nome do grupo multicast que está sendo escutado.
      */
     private void startReceivingMessages(MulticastSocket socket, MessageService messageService, String name) {
         new Thread(() -> {
@@ -70,11 +70,7 @@ public class MulticastListener {
 
                     String sender;
                     String content;
-                    if (splitMessage.length != 2) {
-                        if (!receivedMessage.startsWith("/")) {
-                            System.out.println("ERRO: Formato inválido para mensagem multicast");
-                        }
-                    } else {
+                    if (splitMessage.length == 2) {
                         sender = splitMessage[0].trim();
                         content = splitMessage[1].trim();
 

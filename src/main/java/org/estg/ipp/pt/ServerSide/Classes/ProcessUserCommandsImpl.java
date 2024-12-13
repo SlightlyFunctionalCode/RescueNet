@@ -339,7 +339,7 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
             }
         }
 
-        Message message = new Message(username, "null", operation.getName(), true);
+        Message message = new Message(username, operation.getRequiredPermission().name(), operation.getName(), true);
 
         long id = messageService.saveMessage(message);
         if (usersWithPermissionsOnline.isEmpty()) {
@@ -578,7 +578,6 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
 
             out.println("Você saiu do grupo");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, username + " saiu do grupo " + group.getName()));
-
         } catch (Exception e) {
             out.println("Erro: Erro ao sair do Grupo");
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, username + " teve um erro ao sair do Grupo"));
