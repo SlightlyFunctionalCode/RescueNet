@@ -30,7 +30,7 @@ public class Client {
      * Método principal que inicia o cliente e apresenta o menu de opções.
      *
      * <p>Este método cria uma conexão com o servidor e mostra um menu com opções para o utilizador.
-     * O utilizador pode escolher entre se registrar, fazer login ou sair da aplicação.
+     * O utilizador pode escolher entre fazer o registo, fazer o login ou sair da aplicação.
      * Dependendo da escolha, o método chama o método apropriado para lidar com o registo ou login.</p>
      *
      * @param args Argumentos de linha de comando.
@@ -68,7 +68,7 @@ public class Client {
     /**
      * Método para lidar com o registo de um novo utilizador.
      *
-     * <p>Este método solicita ao utilizador o nome de utilizador, o email e a senha. O email é
+     * <p>Este método solicita ao utilizador o nome, o email e a senha. O email é
      * validado com uma expressão regular. Após a entrada dos dados, o cliente envia uma solicitação
      * de registo para o servidor. Caso o registo seja bem-sucedido, o servidor envia uma resposta
      * que é mostrada ao utilizador.</p>
@@ -105,7 +105,7 @@ public class Client {
     /**
      * Método para lidar com o login de um utilizador.
      *
-     * <p>Este método solicita ao utilizador o nome de utilizador ou email e a senha. A partir dessa
+     * <p>Este método solicita ao utilizador o nome ou email e a senha. A partir dessa
      * informação, o cliente envia uma solicitação de login para o servidor. Se o login for bem-sucedido,
      * o cliente irá tentar iniciar uma sessão de chat multicast. Caso contrário, será mostrada uma mensagem
      * de erro.</p>
@@ -148,6 +148,4 @@ public class Client {
             System.out.println(Constants.ERROR_GENERIC);
         }
     }
-
-
 }

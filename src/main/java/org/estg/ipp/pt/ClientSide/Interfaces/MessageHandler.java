@@ -3,7 +3,7 @@ package org.estg.ipp.pt.ClientSide.Interfaces;
 import java.io.IOException;
 
 /**
- * A interface {@code MessageHandler} define o contrato para classes responsáveis por
+ * A interface {@code MessageHandler} define o contrato para as classes responsáveis por
  * enviar e receber mensagens num sistema de chat.
  *
  * <p>Implementações dessa interface devem ser capazes de enviar mensagens para um destino
@@ -23,10 +23,10 @@ public interface MessageHandler {
     void sendMessage(String message) throws IOException;
 
     /**
-     * Inicia o recebimento de mensagens de outros participantes.
+     * Inicia a receção de mensagens de outros participantes.
      *
      * <p>Este método permite que o sistema comece a receber mensagens enviadas por
-     * outros utilizadores no chat. As mensagens recebidas são passadas para o receptor
+     * outros utilizadores no chat. As mensagens recebidas são passadas para o recetor
      * especificado.</p>
      *
      * @param receiver o objeto que irá receber as mensagens.

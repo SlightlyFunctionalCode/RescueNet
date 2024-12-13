@@ -2,7 +2,7 @@ package org.estg.ipp.pt.ClientSide.Interfaces;
 
 /**
  * A interface {@code InputHandler} define o contrato para classes responsáveis por
- * processar a entrada do utilizador num sistema de chat.
+ * processar a entrada de mensagens do utilizador num sistema de chat.
  *
  * <p>Implementações dessa interface devem ser capazes de ler as entradas do utilizador,
  * interpretar comandos ou mensagens, e encaminhá-las para os manipuladores apropriados
@@ -11,10 +11,10 @@ package org.estg.ipp.pt.ClientSide.Interfaces;
 public interface InputHandler {
 
     /**
-     * Processa a entrada do utilizador, interpretando comandos ou mensagens.
+     * Processa a entrada do utilizador, interpretando os comandos ou as mensagens.
      *
      * <p>Este método é responsável por capturar e processar as entradas fornecidas
-     * pelo usuário no sistema de chat. Isso inclui a interpretação de comandos (como
+     * pelo utilizador no sistema de chat. Isso inclui a interpretação de comandos (como
      * "/logout" ou "/commands") e o envio de mensagens normais para o sistema de chat.</p>
      *
      * @param name o nome do utilizador que está a fornecer a entrada.

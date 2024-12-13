@@ -1,11 +1,11 @@
 package org.estg.ipp.pt.ClientSide.Interfaces;
 
 /**
- * A interface {@code MessageReceiver} define o contrato para classes responsáveis por
- * processar mensagens recebidas num sistema de chat.
+ * A interface {@code MessageReceiver} define o contrato para as classes responsáveis por
+ * processar as mensagens recebidas num sistema de chat.
  *
- * <p>Implementações dessa interface devem ser capazes de lidar com as mensagens
- * recebidas, por exemplo, exibindo-as no chat ou realizando outras ações necessárias
+ * <p>As implementações desta interface devem ser capazes de lidar com as mensagens
+ * recebidas, por exemplo, mostrá-las no chat ou realizar outras ações necessárias
  * com o conteúdo da mensagem.</p>
  */
 public interface MessageReceiver {

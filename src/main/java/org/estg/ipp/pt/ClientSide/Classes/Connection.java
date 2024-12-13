@@ -46,9 +46,8 @@ public class Connection {
         out = new PrintWriter(socket.getOutputStream(), true);
     }
 
-    /*TODO: change*/
     /**
-     * Reconecta ao servidor usando o endereço padrão {@code "localhost"} e a porta {@code 5000}.
+     * Reconecta ao servidor através do {@code serverIP} e o {@code serverPort}.
      *
      * <p>O método fecha a conexão existente antes de tentar reconectar.</p>
      */

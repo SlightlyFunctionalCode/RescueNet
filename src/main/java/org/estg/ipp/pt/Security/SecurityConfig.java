@@ -10,22 +10,22 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * A classe {@code SecurityConfig} configura as regras de segurança para a aplicação.
  *
- * <p>Esta configuração desativa a proteção CSRF, desabilita a autenticação básica HTTP e o login de formulário,
- * permitindo que todas as requisições sejam acessadas sem necessidade de autenticação.</p>
- *
- * <p>O método {@code securityFilterChain} define as configurações de segurança para a aplicação,
- * incluindo o desabilitar de CSRF e autenticação, permitindo o acesso irrestrito.</p>
+ * <p>Esta configuração desativa a proteção CSRF, a autenticação básica HTTP e o formulário de login,
+ * permitindo que todas as requisições sejam acedidas sem a necessidade de autenticação.</p>
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     /**
-     * Define a configuração de segurança para a aplicação, desabilitando CSRF,
-     * a autenticação básica HTTP e o login de formulário.
+     * Define a configuração de segurança para a aplicação, desativa o CSRF,
+     * a autenticação básica HTTP e o formulário login.
      *
      * <p>Este método cria um {@code SecurityFilterChain} que permite o acesso irrestrito
      * a todas as requisições e desativa a autenticação básica e o login de formulário.</p>
+     *
+     * <p>Isto é feito para que o {@code LogController} possa ser acessado sem autenticação, de forma a permitir o acesso
+     * pelo browser do pdf gerado com os logs</p>
      *
      * @param http a instância do {@link HttpSecurity} usada para configurar a segurança.
      * @return o {@link SecurityFilterChain} configurado.

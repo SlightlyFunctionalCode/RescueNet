@@ -28,13 +28,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 /**
- * Classe principal do servidor que gere as conexões com os clientes e executa os comandos internos e de utilizadores.
- * A classe é responsável por gerir os ‘sockets’, executar comandos, e manter as estatísticas do servidor.
- * Além disso, a classe escuta e processa as solicitações recebidas dos clientes, e comunica-se com diferentes
- * serviços, como {@link ExecuteInternalCommands}, {@link ExecuteUserCommandsImpl}, {@link GroupService},
- * {@link LogService}, e {@link MessageService}.
+ * Classe principal do servidor que gere as conexões com os clientes e executa os comandos internos e os de utilizadores.
+ * A classe é responsável por gerir os ‘sockets’, executar os comandos, e manter as estatísticas do servidor, através de
+ * classes auxiliares, como o {@link ExecuteInternalCommands} e o {@link ExecuteInternalCommands}.
+ * Também contém instâncias do {@link GroupService}, do {@link LogService}, do {@link UserService}, e do {@link MessageService},
+ * para gerir os grupos, logs, utilizadores e mensagens, respetivamente.
  *
- * <p>Esta classe é a aplicação principal do servidor e inicializa os componentes Spring necessários.</p>
+ * <p>Esta classe é também responsável por encontrar e inicializar os componentes Spring necessários.</p>
  */
 @SpringBootApplication(scanBasePackages = {"org.estg.ipp.pt.ServerSide", "org.estg.ipp.pt.Security"})
 public class Server {
@@ -69,7 +69,7 @@ public class Server {
     public final ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline = new ConcurrentHashMap<>();
 
     /**
-     * Mapa para armazenar as conexões de clientes ativas.
+     * Mapa para armazenar as conexões de clientes ativas, com o nome do mesmo e a socket
      */
     private static final ConcurrentHashMap<String, Socket> clients = new ConcurrentHashMap<>();
 
@@ -102,11 +102,10 @@ public class Server {
     /**
      * Bean que inicializa o servidor, configura o serviço multicast, e começa a escutar por conexões de clientes.
      *
-     * @param executeInternalCommands Componente para executar comandos internos.
      * @return CommandLineRunner para inicializar o servidor.
      */
     @Bean
-    public CommandLineRunner startServer(ExecuteInternalCommands executeInternalCommands) {
+    public CommandLineRunner startServer() {
         return args -> {
             int serverPort = 5000;
 
@@ -142,7 +141,7 @@ public class Server {
     }
 
     /**
-     * Recupera o ‘socket’ de um utilizador conectado com base no nome de utilizador.
+     * Recupera o ‘socket’ de um utilizador conectado com base no nome do mesmo.
      *
      * @param username Nome do utilizador.
      * @return ‘Socket’ correspondente ao utilizador.
@@ -168,7 +167,7 @@ public class Server {
     }
 
     /**
-     * Retorna o número de clientes atualmente conectados ao servidor.
+     * Devolve o número de clientes atualmente conectados ao servidor.
      *
      * @return Número de clientes conectados.
      */
@@ -177,7 +176,7 @@ public class Server {
     }
 
     /**
-     * Adiciona um novo utilizador e sua conexão ao mapa de conexões.
+     * Adiciona um novo utilizador e a sua conexão ao mapa de conexões.
      *
      * @param username Nome do utilizador.
      * @param socket   Socket do utilizador.
@@ -188,7 +187,7 @@ public class Server {
 
     /**
      * Método que lida com a comunicação de um cliente conectado ao servidor.
-     * Processa as solicitações recebidas, executando comandos internos ou de utilizador conforme necessário.
+     * Processa as solicitações recebidas e executa comandos internos ou de utilizador conforme necessário.
      *
      * @param clientSocket Conexão com o cliente.
      * @param serverStats  Estatísticas do servidor.
@@ -244,7 +243,8 @@ public class Server {
     }
 
     /**
-     * Mostra as estatísticas do servidor a cada minuto.
+     * Mostra as estatísticas do servidor a cada minuto. Nomeadamente o número de utilizadores conectados e o número de
+     * comandos utilizados.
      *
      * @param serverStats Estatísticas do servidor.
      */

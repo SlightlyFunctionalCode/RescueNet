@@ -1,26 +1,19 @@
 package org.estg.ipp.pt.ClientSide.Interfaces;
 
-import java.io.IOException;
-
 /**
- * A interface {@code CommandHandler} define o contrato para classes responsáveis por
- * processar e executar comandos recebidos no contexto de um chat.
+ * A interface {@code CommandHandler} define o contrato para as classes responsáveis por
+ * processar as respostas do servidor a comandos introduzidos pelo utilizador.
  *
- * <p>Implementações dessa interface devem ser capazes de interpretar e reagir a comandos
- * específicos, como comandos de chat (/logout, /commands, etc.), e executar as ações associadas.</p>
+ * <p>As implementações desta interface devem ser capazes de processar as respostas do servidor.</p>
  */
 public interface CommandHandler {
 
     /**
-     * Processa e executa um comando recebido.
+     * Processa e executa as ações necessárias em resposta à mensagem do servidor.
      *
-     * <p>Este método é responsável por processar um comando fornecido pelo utilizador no chat,
-     * realizando a ação associada ao comando. Isso pode incluir, por exemplo, sair do chat
-     * ou visualizar a lista de comandos disponíveis.</p>
-     *
-     * @param command o comando a ser processado (exemplo: "/logout", "/commands").
+     * @param command o comando a ser processado.
      * @param name o nome do utilizador que está a enviar o comando.
-     * @param chatService o serviço de chat que pode ser utilizado para executar ações no chat.
+     * @param chatService o serviço de chat que pode ser utilizado para executar as ações no chat.
      */
     void handleCommand(String command, String name, ChatService chatService);
 }
