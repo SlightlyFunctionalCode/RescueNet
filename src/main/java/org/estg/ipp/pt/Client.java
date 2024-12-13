@@ -47,7 +47,7 @@ public class Client {
         if (args.length == 1) {
             serverAdress = args[0];
         }
-        
+
         connection = new Connection(serverAdress, 5000);
         Scanner scanner = new Scanner(System.in);
         boolean keepRunning = true;
