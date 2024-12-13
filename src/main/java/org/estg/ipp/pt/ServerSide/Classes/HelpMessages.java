@@ -3,13 +3,13 @@ package org.estg.ipp.pt.ServerSide.Classes;
 import org.estg.ipp.pt.ServerSide.Services.LogService;
 
 /**
- * Classe contendo mensagens de ajuda para os comandos executados no sistema.
+ * Classe que contém as mensagens de ajuda para os comandos executados no sistema.
  *
- * Esta classe define mensagens de ajuda em formato de texto para vários comandos disponíveis no sistema, como
+ * <p>Esta classe define mensagens de ajuda em formato de bloco de string para vários comandos disponíveis no sistema, como
  * comandos de exportação, aprovação, rejeição, alteração de permissões, e outros comandos relacionados à gestão de grupos
- * e comunicação entre os utilizadores.
+ * e comunicação entre os utilizadores.</p>
  *
- * A classe é **final** e não pode ser instanciada, já que apenas contém constantes estáticas de texto.
+ * A classe é **final** e não pode ser instanciada, já que apenas contém constantes estáticas de texto.</p>
  */
 public final class HelpMessages {
     public static final String EXPORT_HELP = """

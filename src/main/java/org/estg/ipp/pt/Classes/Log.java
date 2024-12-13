@@ -44,7 +44,7 @@ public class Log {
     }
 
     /**
-     * Retorna o identificador único do log.
+     * Devolve o identificador único do log.
      *
      * @return O id do log.
      */

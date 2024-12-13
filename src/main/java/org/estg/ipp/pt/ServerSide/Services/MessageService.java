@@ -4,36 +4,32 @@ import jakarta.persistence.EntityNotFoundException;
 import org.estg.ipp.pt.Classes.Message;
 import org.estg.ipp.pt.ServerSide.Repositories.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * <p><strong>Serviço responsável por gerir operações relacionadas a mensagens.</strong></p>
+ * Serviço responsável por gerir operações relacionadas a mensagens.
  *
- * <p>Esta classe fornece funcionalidades para manipular mensagens, incluindo operações
- * de criação, leitura, atualização e exclusão (CRUD). Além disso, oferece métodos
- * específicos para recuperar mensagens não lidas, pendentes de aprovação e mensagens
+ * <p>Esta classe fornece as funcionalidades para manipular as mensagens, o que inclui as operações
+ * de criação, de leitura, de atualização e de exclusão (CRUD). Além disso, oferece os métodos
+ * específicos para recuperar as mensagens não lidas, pendentes de aprovação e as mensagens
  * associadas a grupos.</p>
  *
  * <h3>Funcionalidades principais:</h3>
  * <ul>
- *     <li>Salvar novas mensagens.</li>
+ *     <li>Guardar novas mensagens.</li>
  *     <li>Excluir mensagens existentes pelo ID.</li>
  *     <li>Atualizar o conteúdo de mensagens.</li>
  *     <li>Recuperar conteúdo de mensagens.</li>
  *     <li>Identificar mensagens não lidas ou pendentes de aprovação.</li>
- *     <li>Gerenciar o status de leitura de mensagens.</li>
+ *     <li>Gere o status de leitura de mensagens.</li>
  * </ul>
  *
  * <p>A classe utiliza o repositório {@code MessageRepository} para interagir com a base de dados
- * e é anotada com {@code @Service}, indicando que faz parte da camada de serviços da aplicação.</p>
+ * e é anotada com {@code @Service}, o que indica que faz parte da camada de serviços da aplicação.</p>
  */
 @Service
 public class MessageService {
@@ -41,7 +37,7 @@ public class MessageService {
     private MessageRepository messageRepository;
 
     /**
-     * Salva uma nova mensagem no repositório.
+     * Guarda uma nova mensagem no repositório.
      *
      * @param message A mensagem a ser salva.
      * @return O ID da mensagem salva.
@@ -135,7 +131,7 @@ public class MessageService {
      * @param groupName O nome do grupo.
      * @return Uma lista das mensagens mais recentes do grupo.
      */
-    public List<Message> getLastestGroupMessages(String groupName) {
+    public List<Message> getLatestGroupMessages(String groupName) {
         return messageRepository.findLatestChatMessagesByGroup(groupName);
     }
 

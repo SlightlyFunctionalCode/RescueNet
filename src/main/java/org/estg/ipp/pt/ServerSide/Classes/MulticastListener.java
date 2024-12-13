@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 import java.net.*;
 
 /**
- * Classe responsável por escutar mensagens de multicast num grupo específico e processá-las.
+ * Classe responsável por escutar as mensagens de multicast num grupo específico e processá-las.
  *
- * Esta classe permite escutar mensagens de grupos multicast, recebendo as mensagens enviadas e processando-as
- * para armazená-las via o serviço de mensagens. Ela também gerencia a conexão com o grupo multicast, incluindo
- * a criação de um ‘socket’ de multicast, a gestão de ‘interface’ de rede e a receção das mensagens.
+ * <p>Esta classe permite escutar as mensagens de grupos multicast, receber as mensagens enviadas e processá-las
+ * para armazená-las via o serviço de mensagens. Ela também gere a conexão com o grupo multicast, o que inclui
+ * a criação de um ‘socket’ de multicast e a gestão de ‘interface’ de rede.</p>
  */
 @Component
 public class MulticastListener {
@@ -20,8 +20,8 @@ public class MulticastListener {
     /**
      * Método para iniciar a escuta de mensagens multicast de um grupo.
      *
-     * Este método cria um socket multicast e se conecta ao grupo especificado, associando-se a uma interface de rede,
-     * e então começa a receber e processar as mensagens enviadas ao grupo.
+     * <p>Este método cria um socket multicast e conecta-se ao grupo especificado, associando-se a uma interface de rede,
+     * e começa a receber e a processar as mensagens enviadas ao grupo.</p>
      *
      * @param group O grupo multicast ao qual se deseja conectar.
      * @param host O nome da interface de rede que será utilizada para o multicast.
@@ -44,10 +44,11 @@ public class MulticastListener {
     }
 
     /**
-     * Método responsável por iniciar a recepção das mensagens do socket multicast em uma nova thread.
+     * Método responsável por iniciar a receção das mensagens do socket multicast em uma nova thread.
      *
-     * Este método recebe as mensagens enviadas para o grupo multicast e as processa para salvar
-     * no serviço de mensagens. Caso as mensagens estejam no formato correto, elas são armazenadas.
+     * <p>Este método recebe as mensagens enviadas para o grupo multicast e processa-as para depois armazenar
+     * no serviço de mensagens. Isto apenas é feito caso estas não sejam mensagens previamente lidas pelo server, de forma
+     * a não salvar mensagens duplicadas na base de dados.</p>
      *
      * @param socket O socket multicast que está ouvindo as mensagens.
      * @param messageService O serviço responsável por salvar as mensagens recebidas.

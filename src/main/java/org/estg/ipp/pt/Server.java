@@ -159,7 +159,7 @@ public class Server {
         try {
             Socket socket = clients.remove(username);
             if (socket != null) {
-                socket.close(); // Fechar a conexão
+                socket.close();
             }
         } catch (Exception e) {
             System.err.println("Erro ao efetuar logout: " + e.getMessage());

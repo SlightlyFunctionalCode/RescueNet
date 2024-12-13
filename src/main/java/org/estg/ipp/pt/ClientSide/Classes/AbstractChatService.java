@@ -114,7 +114,7 @@ public abstract class AbstractChatService implements ChatService {
     /**
      * Define o nome do utilizador associado ao serviço de chat.
      *
-     * @param name o novo nome do usuário.
+     * @param name o novo nome do utilizador.
      */
     public void setName(String name) {
         this.name = name;

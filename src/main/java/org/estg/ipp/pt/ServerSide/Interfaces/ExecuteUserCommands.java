@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>Processamento e execução de comandos enviados pelos utilizadores.</li>
  * </ul>
  *
- * <p>Esta interface é implementada por classes responsáveis por interpretar e executar comandos
+ * <p>Esta interface é implementada por classes responsáveis por interpretar e executar os comandos
  * originados de clientes conectados ao servidor.</p>
  *
  * @see Permissions
@@ -24,8 +24,8 @@ public interface ExecuteUserCommands {
     /**
      * Executa um comando enviado por um utilizador.
      *
-     * <p>Este método processa o comando com base nos parâmetros fornecidos, utilizando os detalhes do utilizador,
-     * a solicitação associada e quaisquer permissões que possam ser relevantes.</p>
+     * <p>Este método processa o comando com base nos parâmetros fornecidos, a partir dos detalhes do utilizador,
+     * da solicitação associada e quaisquer permissões que possam ser relevantes.</p>
      *
      * @param command O comando enviado pelo utilizador.
      * @param request A solicitação original associada ao comando.

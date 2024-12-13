@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A classe {@code ExecuteInternalCommandsImpl} implementa a interface {@link ExecuteInternalCommands}
- * e é responsável por processar e executar comandos internos recebidos pelo servidor.
+ * e é responsável por processar e executar os comandos internos recebidos pelo servidor.
  *
  * <p>Esta classe verifica se um comando é um comando interno válido e, em seguida, encaminha o comando para
  * o respetivo processamento por meio da classe {@link ProcessInternalCommands}.</p>
@@ -48,7 +48,7 @@ public class ExecuteInternalCommandsImpl implements ExecuteInternalCommands {
      * @param out o {@link PrintWriter} usado para enviar respostas ao cliente.
      * @param clientSocket o {@link Socket} do cliente.
      * @param groupList a lista de grupos associados ao servidor.
-     * @param usersWithPermissionsOnline o mapa contendo os utilizadores online e as suas permissões.
+     * @param usersWithPermissionsOnline o mapa que contém os utilizadores online e as suas permissões.
      */
     public void handleInternalCommand(String command, String payload, PrintWriter out, Socket clientSocket, List<Group> groupList, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
         switch (command) {

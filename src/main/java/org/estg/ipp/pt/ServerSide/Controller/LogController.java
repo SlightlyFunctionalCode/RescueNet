@@ -17,13 +17,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 /**
- * O controlador {@code LogController} gerencia as requisições HTTP relacionadas a relatórios de logs.
+ * O controlador {@code LogController} gere os pedidos HTTP relacionadas a relatórios de logs.
  *
- * <p>Este controlador fornece um endpoint para download de relatórios em PDF baseados nos logs. O PDF pode ser gerado
+ * <p>Este controlador fornece um endpoint para o download de relatórios em PDF baseados nos logs. O PDF pode ser gerado
  * de acordo com diferentes filtros: por tag, por intervalo de datas ou ambos.</p>
  *
- * <p>O relatório gerado é retornado como um arquivo PDF para o cliente, com a possibilidade de personalizar os filtros
- * através dos parâmetros da requisição.</p>
+ * <p>O relatório gerado é devolvido como um arquivo PDF para o cliente.</p>
  */
 @RestController
 public class LogController {
@@ -36,15 +35,12 @@ public class LogController {
 
     /**
      * Endpoint para gerar e fazer o download de um relatório em PDF com base em filtros de tag e intervalo de datas.
-     *
-     * <p>O relatório pode ser filtrado por tag, por intervalo de datas, ou por ambos. Se nenhum filtro for fornecido,
-     * uma exceção será lançada.</p>
+     * Se nenhum filtro for fornecido, uma exceção será lançada.</p>
      *
      * @param tag A tag de filtro para o relatório (opcional).
      * @param startDate A data inicial do intervalo (opcional).
      * @param endDate A data final do intervalo (opcional).
-     * @return Um {@link ResponseEntity} contendo o arquivo PDF gerado.
-     * @throws IOException Se ocorrer um erro na criação do relatório em PDF.
+     * @return Um {@link ResponseEntity} que contém o arquivo PDF gerado.
      * @throws DocumentException Se ocorrer um erro ao gerar o documento PDF.
      * @throws IllegalArgumentException Se nenhum parâmetro (tag, startDate, endDate) for fornecido.
      */
@@ -52,34 +48,25 @@ public class LogController {
     public ResponseEntity<ByteArrayResource> downloadPdfReport(
             @RequestParam(required = false) TagType tag,
             @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate) throws IOException, DocumentException {
+            @RequestParam(required = false) LocalDateTime endDate) throws IllegalArgumentException, DocumentException {
 
-        // Generate the PDF in memory
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
         if (tag != null && startDate != null && endDate != null) {
-            // Generate report for date range and tag
             logService.generatePdfReportByDateRangeAndTag(startDate, endDate, tag, byteArrayOutputStream);
         } else if (tag != null) {
-            // Generate a report for tag
             logService.generatePdfReportByTag(tag, byteArrayOutputStream);
         } else if (startDate != null && endDate != null) {
-            // Generate a report for date range
             logService.generatePdfReportByDateRange(startDate, endDate, byteArrayOutputStream);
         } else {
-            // Handle the case where no parameters are provided
             throw new IllegalArgumentException("At least one parameter (tag, startDate, endDate) must be provided");
         }
 
-
-        // Create a ByteArrayResource from the byte array
         ByteArrayResource resource = new ByteArrayResource(byteArrayOutputStream.toByteArray());
 
-        // Set up the response headers
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=log_report.pdf");
 
-        // Return the response entity with the PDF content
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentLength(resource.contentLength())

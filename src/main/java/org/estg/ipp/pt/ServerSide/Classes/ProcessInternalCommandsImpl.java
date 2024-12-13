@@ -25,8 +25,9 @@ import static org.estg.ipp.pt.ServerSide.Services.NotificationHandler.notifyGrou
 /**
  * Implementação do processamento de comandos internos no sistema.
  *
- * Esta classe lida com os comandos internos do sistema, como confirmar a leitura de mensagens,
- * registrar, fazer login, logout e lidar com solicitações pendentes.
+ * <p>Esta classe lida com os comandos internos do sistema, como confirmar a leitura de mensagens, o
+ * registo, o login e o logout de utilizadores e enviar para o utilizador mensagens privadas, pedidos de aprovação e
+ * mensagens recentes de grupos multicast para o mesmo</p>
  */
 @Component
 public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
@@ -40,7 +41,7 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
     private MessageService messageService;
 
     /**
-     * Processa a confirmação de leitura de uma mensagem.
+     * Processa a confirmação de leitura de uma mensagem privada.
      *
      * @param payload O conteúdo da mensagem de confirmação.
      */
@@ -51,19 +52,18 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
                 String messageId = confirmMatcher.group("id");
 
                 if (messageId == null) {
-                    System.err.println("Failed to mark message as read");
+                    System.err.println("Falha ao marcar a mensagem como lida");
                     return;
                 }
 
-                // Parse and mark as read
                 long messageIdLong = Long.parseLong(messageId);
                 messageService.markAsRead(messageIdLong);
-                System.out.println("Message " + messageId + " marked as read by Thread: " + Thread.currentThread().getName());
+                System.out.println("Mensagem " + messageId + " marcada como lida pela Thread: " + Thread.currentThread().getName());
             } else {
-                System.err.println("Invalid CONFIRM_READ payload: " + payload);
+                System.err.println("Payload de CONFIRM_READ inválido: " + payload);
             }
         } catch (Exception e) {
-            System.err.println("Error processing CONFIRM_READ: " + e.getMessage());
+            System.err.println("Erro ao processar o CONFIRM_READ: " + e.getMessage());
         }
     }
 
@@ -93,7 +93,7 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
                     out.println("FAILED: Utilizador com nome ou email já existente");
                     return;
                 }
-                System.out.println("Adicionando user ao grupo default");
+                System.out.println("A adicionar o user ao grupo 'GERAL'");
                 List<Group> groups = groupService.getAllGroups();
                 for (Group group : groups) {
                     if (group.isPublic() && Permissions.fromPermissions(user.getPermissions()) > Permissions.fromPermissions(group.getRequiredPermissions())) {
@@ -101,9 +101,9 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
                     }
                 }
 
-                out.println("SUCESSO: Utilizador registrado com sucesso");
+                out.println("SUCESSO: Utilizador registado com sucesso");
             } catch (Exception e) {
-                out.println("ERRO: Falha ao registrar utilizador - " + e.getMessage());
+                out.println("ERRO: Falha ao registar o utilizador - " + e.getMessage());
             }
         } else {
             out.println("ERRO: Formato inválido para REGISTER ");
@@ -116,7 +116,7 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
      * @param payload O conteúdo da mensagem de login.
      * @param out O fluxo de saída para responder ao cliente.
      * @param clientSocket O ‘socket’ do cliente que está a fazer login.
-     * @param usersWithPermissionsOnline O mapa de utilizador com permissões online.
+     * @param usersWithPermissionsOnline O mapa de utilizadores com permissões online.
      */
     public void handleLogin(String payload, PrintWriter out, Socket clientSocket, ConcurrentHashMap<String, Permissions> usersWithPermissionsOnline) {
         if (payload == null || payload.isEmpty()) {
@@ -154,9 +154,9 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
     }
 
     /**
-     * Envia as mensagens não lidas para o utilizador especificado.
+     * Envia as mensagens privadas não lidas para o utilizador especificado.
      *
-     * @param username O nome do utilizador que receberá as mensagens não lidas.
+     * @param username O nome do utilizador que receberá as mensagens.
      */
     private void sendUnreadChatMessage(String username) {
         List<Message> unreadMessages = messageService.getUnreadMessages(username);
@@ -180,7 +180,7 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
             return;
         }
 
-        List<Message> unreadMessages = messageService.getLastestGroupMessages(user.getCurrentGroup().getName());
+        List<Message> unreadMessages = messageService.getLatestGroupMessages(user.getCurrentGroup().getName());
 
         for (Message unreadMessage : unreadMessages) {
             unreadMessage.setContent(unreadMessage.getSender() + ":" + unreadMessage.getContent());
@@ -189,7 +189,7 @@ public class ProcessInternalCommandsImpl implements ProcessInternalCommands {
     }
 
     /**
-     * Realiza o login do utilizador, verificando a autenticação e a disponibilidade.
+     * Realiza o login do utilizador e verifica a autenticação e a disponibilidade.
      *
      * @param user O utilizador que está a tentar fazer login.
      * @param password A senha fornecida pelo utilizador.

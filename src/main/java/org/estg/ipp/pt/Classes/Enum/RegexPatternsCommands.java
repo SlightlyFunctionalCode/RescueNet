@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  * </ul>
  */
 public enum RegexPatternsCommands {
-    APPROVE("^/approve(?:\\s(?<help>-h))?(?:\\s(?<id>\\d+)\\s(?<requester>[^\\s:]+))?:(?<username>.+)$"),                                 // Approve-specific regex
+    APPROVE("^/approve(?:\\s(?<help>-h))?(?:\\s(?<id>\\d+)\\s(?<requester>[^\\s:]+))?:(?<username>.+)$"),
     REJECT("^/reject(?:\\s(?<help>-h))?(?:\\s(?<id>\\d+)\\s(?<requester>[^\\s:]+))?:(?<username>.+)$"),
     EXPORT("^/export(?:\\s(?<help>-h))?(?:\\s(?<startDate>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}))?(?:\\s(?<endDate>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}))?(?:\\s(?<tag>[^\\s:]+))?:(?<username>.+)$"),
     REQUEST("^(?<command>/\\w+|\\w+)(?:\\s+(?<requester>(?:[^\\s:]+(?:\\s[^\\s:]+)*)))?:(?<payload>.*)$"),

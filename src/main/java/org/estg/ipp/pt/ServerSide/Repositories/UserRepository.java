@@ -10,9 +10,9 @@ import java.util.Optional;
 /**
  * Interface de repositório para a entidade {@link User}.
  *
- * Esta interface estende o {@link JpaRepository}, oferecendo métodos para realizar operações CRUD
- * básicas sobre o repositório de utilizadores. Além disso, fornece consultas personalizadas para encontrar
- * utilizadores com base em nome ou e-mail, bem como verificar a existência de utilizadores com esses atributos.
+ * <p>Esta interface estende o {@link JpaRepository} e oferece os métodos para realizar as operações CRUD
+ * básicas sobre o repositório de utilizadores. Além disso, fornece as consultas personalizadas para encontrar
+ * utilizadores com base em nome ou e-mail, bem como verificar a existência de utilizadores com esses atributos.</p>
  *
  * <p>A interface {@link UserRepository} permite:</p>
  * <ul>
@@ -21,8 +21,6 @@ import java.util.Optional;
  *     <li>Verificar se um utilizador existe com um nome específico.</li>
  *     <li>Verificar se um utilizador existe com um e-mail específico.</li>
  * </ul>
- *
- * <p>O repositório utiliza o Spring Data JPA para facilitar o acesso ao banco de dados e permitir a execução de consultas.</p>
  *
  * @see User
  * @see JpaRepository
@@ -34,7 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Encontra um utilizador pelo seu nome.
      *
      * @param name O nome do utilizador.
-     * @return Um {@link Optional} contendo o utilizador encontrado, ou vazio se o utilizador não for encontrado.
+     * @return Um {@link Optional} que contém o utilizador encontrado, ou vazio se o utilizador não for encontrado.
      */
     Optional<User> findByName(String name);
 
@@ -42,7 +40,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Encontra um utilizador pelo seu e-mail.
      *
      * @param nameOrEmail O e-mail ou nome do utilizador.
-     * @return Um {@link Optional} contendo o utilizador encontrado, ou vazio se o utilizador não for encontrado.
+     * @return Um {@link Optional} que contém o utilizador encontrado, ou vazio se o utilizador não for encontrado.
      */
     @Query ("SELECT u from User u WHERE u.name = :nameOrEmail OR u.email = :nameOrEmail")
     Optional<User> findByEmailOrName(String nameOrEmail);

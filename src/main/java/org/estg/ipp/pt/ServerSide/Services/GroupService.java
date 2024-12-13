@@ -18,15 +18,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Serviço para gerir grupos no sistema.
+ * Serviço para gerir os grupos no sistema.
  *
- * <p>O serviço oferece funcionalidades para inicializar grupos padrão,
- * adicionar ou remover utilizadores de grupos, verificar a associação de utilizadores,
- * e criar ou manipular grupos personalizados.</p>
+ * <p>O serviço oferece funcionalidades para inicializar os grupos base,
+ * adicionar ou remover utilizadores de grupos, verificar a associação de utilizadores a grupos
+ * e criar ou manipular os grupos personalizados.</p>
  *
  * <p><b>Funcionalidades principais:</b></p>
  * <ol>
- *   <li>Inicialização de grupos padrão.</li>
+ *   <li>Inicialização dos grupos base.</li>
  *   <li>Adição de utilizadores a grupos existentes.</li>
  *   <li>Verificação e recuperação de grupos com base em utilizadores e permissões.</li>
  *   <li>Criação de grupos personalizados.</li>
@@ -46,9 +46,9 @@ public class GroupService {
     private UserRepository userRepository;
 
     /**
-     * Inicializa os grupos padrão no sistema.
+     * Inicializa os grupos base no sistema.
      *
-     * <p>Os grupos padrão criados incluem:</p>
+     * <p>Os grupos base criados incluem:</p>
      * <ul>
      *   <li>GERAL: Grupo público sem restrição de permissões.</li>
      *   <li>LOW_LEVEL: Grupo público com permissões de baixo nível.</li>
@@ -60,7 +60,6 @@ public class GroupService {
      */
     public void initializeDefaultGroups() {
         if (groupRepository.count() == 0) {
-            // Criação dos grupos base
             Group groupGeral = new Group();
             groupGeral.setName("GERAL");
             groupGeral.setAddress("230.0.0.0");
@@ -75,12 +74,12 @@ public class GroupService {
             groupLowLevel.setPublic(true);
             groupLowLevel.setRequiredPermissions(Permissions.LOW_LEVEL);
 
-            Group groupMidiumLevel = new Group();
-            groupMidiumLevel.setName("MEDIUM_LEVEL");
-            groupMidiumLevel.setAddress("230.0.0.2");
-            groupMidiumLevel.setPort(4448);
-            groupMidiumLevel.setPublic(true);
-            groupMidiumLevel.setRequiredPermissions(Permissions.MEDIUM_LEVEL);
+            Group groupMediumLevel = new Group();
+            groupMediumLevel.setName("MEDIUM_LEVEL");
+            groupMediumLevel.setAddress("230.0.0.2");
+            groupMediumLevel.setPort(4448);
+            groupMediumLevel.setPublic(true);
+            groupMediumLevel.setRequiredPermissions(Permissions.MEDIUM_LEVEL);
 
             Group groupHighLevel = new Group();
             groupHighLevel.setName("HIGH_LEVEL");
@@ -89,10 +88,9 @@ public class GroupService {
             groupHighLevel.setPublic(true);
             groupHighLevel.setRequiredPermissions(Permissions.HIGH_LEVEL);
 
-            // Salvando os grupos no repositório
             groupRepository.save(groupGeral);
             groupRepository.save(groupLowLevel);
-            groupRepository.save(groupMidiumLevel);
+            groupRepository.save(groupMediumLevel);
             groupRepository.save(groupHighLevel);
 
             System.out.println("Grupos base criados com sucesso!");
@@ -157,7 +155,7 @@ public class GroupService {
      * @return Lista de todos os grupos.
      */
     public List<Group> getAllGroups() {
-        return groupRepository.findAll(); // Retorna todos os grupos no banco de dados
+        return groupRepository.findAll();
     }
 
     /**
@@ -239,7 +237,9 @@ public class GroupService {
     }
 
     /**
-     * Remove um utilizador de um grupo. Se o grupo tiver apenas um membro, ele será excluído.
+     * Remove um utilizador de um grupo.
+     * Se o grupo tiver apenas um membro, ele será excluído.
+     * Caso o utilizador que saiu do grupo seja o criador do mesmo, este cargo será ocupado pelo próximo membro do grupo.
      *
      * @param user Utilizador a ser removido.
      * @param group Grupo do qual o utilizador será removido.
@@ -265,7 +265,7 @@ public class GroupService {
     }
 
     /**
-     * Remove um utilizador de todos os grupos públicos onde suas permissões são insuficientes.
+     * Remove um utilizador de todos os grupos públicos onde as suas permissões são insuficientes.
      *
      * @param user Utilizador a ser removido.
      * @param newPermissions Novas permissões do utilizador.

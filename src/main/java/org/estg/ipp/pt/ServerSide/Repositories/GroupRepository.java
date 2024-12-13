@@ -9,20 +9,16 @@ import java.util.Optional;
 
 /**
  * Interface de repositório para a entidade {@link Group}.
- *
- * Esta interface estende o {@link JpaRepository}, fornecendo métodos para realizar operações CRUD
- * básicas sobre o repositório de grupos. Além disso, fornece consultas personalizadas para encontrar
+ * Esta interface estende o {@link JpaRepository} e fornece os métodos para realizar as operações CRUD
+ * básicas sobre o repositório de grupos. Além disso, fornece as consultas personalizadas para encontrar
  * grupos com base nos seus atributos.
  *
  * <p>A interface {@link GroupRepository} permite:</p>
  * <ul>
  *     <li>Encontrar um grupo pelo nome.</li>
- *     <li>Verificar a existência de um grupo pelo nome.</li>
  *     <li>Verificar a associação de um grupo com um utilizador pelo ID.</li>
  *     <li>Buscar grupos com base na visibilidade pública.</li>
  * </ul>
- *
- * <p>O repositório utiliza o Spring Data JPA, que facilita o acesso ao banco de dados.</p>
  *
  * @see Group
  * @see JpaRepository
@@ -34,17 +30,9 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
      * Encontra um grupo pelo seu nome.
      *
      * @param name Nome do grupo a ser encontrado.
-     * @return Um {@link Optional} contendo o grupo encontrado ou vazio caso não haja nenhum grupo com o nome fornecido.
+     * @return Um {@link Optional} que contém o grupo encontrado ou vazio caso não haja nenhum grupo com o nome fornecido.
      */
     Optional<Group> findByName(String name);
-
-    /**
-     * Verifica se um grupo com o nome fornecido existe.
-     *
-     * @param name Nome do grupo a ser verificado.
-     * @return {@code true} se um grupo com o nome fornecido existir, caso contrário {@code false}.
-     */
-    boolean existsByName(String name);
 
     /**
      * Verifica se existe um grupo com o ID fornecido que contenha o utilizador com o ID fornecido.

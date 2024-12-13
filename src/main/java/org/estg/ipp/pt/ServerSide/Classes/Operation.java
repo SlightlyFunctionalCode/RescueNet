@@ -4,9 +4,6 @@ import org.estg.ipp.pt.Classes.Enum.Permissions;
 
 /**
  * Classe que representa uma operação com um nome e uma permissão necessária para sua execução.
- *
- * Esta classe é utilizada para armazenar informações sobre uma operação específica que pode ser realizada num sistema,
- * incluindo o nome da operação e a permissão necessária para que ela seja executada.
  */
 public class Operation {
     private final String name;

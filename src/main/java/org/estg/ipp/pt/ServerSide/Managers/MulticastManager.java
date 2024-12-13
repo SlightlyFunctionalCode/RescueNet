@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.*;
 
 /**
- * A classe {@code MulticastManager} gerencia a comunicação via multicast usando um ‘socket’ multicast.
+ * A classe {@code MulticastManager} gere a comunicação via multicast através dum ‘socket’ multicast.
  *
  * <p>Esta classe fornece os métodos necessários para enviar e receber mensagens num grupo multicast
  * especificado por um endereço IP de grupo e uma porta. Ela utiliza a classe {@link MulticastSocket} para
- * estabelecer a comunicação com o grupo e gerir o envio e recebimento de pacotes.</p>
+ * estabelecer a comunicação com o grupo e gerir o envio e a receção de pacotes.</p>
  *
  * <p>Principais funcionalidades:</p>
  * <ul>
@@ -46,16 +46,15 @@ public class MulticastManager {
      *
      * @param groupAddress O endereço IP do grupo multicast.
      * @param port A porta do grupo multicast.
-     * @throws IOException Se ocorrer um erro ao criar o socket ou ao se conectar ao grupo multicast.
+     * @throws IOException Se ocorrer um erro ao criar o socket ou ao conectar ao grupo multicast.
      */
     public MulticastManager(String groupAddress, int port) throws IOException {
         this.groupAddress = groupAddress;
         this.port = port;
-        this.socket = new MulticastSocket(port);  // Usar MulticastSocket em vez de DatagramSocket
+        this.socket = new MulticastSocket(port);
         socket.setReuseAddress(true);
         this.group = InetAddress.getByName(groupAddress);
 
-        // Fazer o socket "entrar" no grupo multicast
         socket.joinGroup(new InetSocketAddress(group, port).getAddress());
     }
 
@@ -73,7 +72,7 @@ public class MulticastManager {
 
     /**
      * Inicia uma nova thread para receber mensagens do grupo multicast.
-     * As mensagens recebidas serão exibidas no console.
+     * As mensagens recebidas serão exibidas no terminal.
      */
     public void receiveMessages() {
         new Thread(() -> {
@@ -97,12 +96,12 @@ public class MulticastManager {
      * @throws IOException Se ocorrer um erro ao sair do grupo ou fechar o socket.
      */
     public void close() throws IOException {
-        socket.leaveGroup(group);  // Deixa o grupo ao fechar
+        socket.leaveGroup(group);
         socket.close();
     }
 
     /**
-     * Retorna o endereço do grupo multicast.
+     * Devolve o endereço do grupo multicast.
      *
      * @return O endereço do grupo multicast.
      */
@@ -111,7 +110,7 @@ public class MulticastManager {
     }
 
     /**
-     * Retorna a porta do grupo multicast.
+     * Devolve a porta do grupo multicast.
      *
      * @return A porta do grupo multicast.
      */

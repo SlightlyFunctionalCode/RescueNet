@@ -14,12 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p><b>Funcionalidades:</b></p>
  * <ul>
- *   <li>Verificação de comandos internos.</li>
- *   <li>Manipulação de comandos internos com base no contexto do cliente e do servidor.</li>
+ *   <li>Verificação e manipulação dos comandos internos com base no contexto do cliente e do servidor.</li>
  *   <li>Fornecimento de acesso ao processador de comandos internos.</li>
  * </ul>
  *
- * <p>Esta interface é implementada por classes que executam comandos internos do servidor.</p>
+ * <p>Esta interface é implementada por classes que executam os comandos internos do servidor.</p>
  *
  * @see Permissions
  * @see Group

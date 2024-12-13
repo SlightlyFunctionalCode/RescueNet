@@ -13,15 +13,15 @@ import java.net.*;
 import static org.estg.ipp.pt.Server.getUserSocket;
 
 /**
- * Classe responsável por gerir o envio de notificações e mensagens para utilizadores e grupos.
+ * Classe responsável por gerir o envio de notificações e as mensagens para utilizadores e grupos.
  *
- * <p>Esta classe fornece métodos para enviar notificações para utilizadores específicos,
- * mensagens diretas para utilizadores e mensagens multicast para grupos.</p>
+ * <p>Esta classe fornece métodos para enviar as notificações para utilizadores específicos, as
+ * mensagens privadas para utilizadores e as mensagens multicast para grupos.</p>
  *
  * <p><b>Funcionalidades principais:</b></p>
  * <ol>
- *   <li>Envio de notificações para um utilizador, verificando se o ‘socket’ está disponível.</li>
- *   <li>Envio de mensagens diretas para um utilizador, verificando a disponibilidade do utilizador.</li>
+ *   <li>Envio de notificações para um utilizador.</li>
+ *   <li>Envio de mensagens privadas para um utilizador, verificando a disponibilidade do utilizador.</li>
  *   <li>Envio de mensagens para grupos usando multicast, gerir a criação e comunicação com o gestor de multicast.</li>
  * </ol>
  *
@@ -41,7 +41,7 @@ public class NotificationHandler {
      *
      * <p>Este método verifica se o socket do utilizador está disponível e, caso não esteja ou
      * esteja fechado, mostra uma mensagem de erro. Caso contrário, envia a mensagem para o utilizador
-     * através do socket.</p>
+     * através do socket. Este método não guarda as mensagens caso o utilizador esteja offline</p>
      *
      * @param username O nome do utilizador para quem a notificação será enviada.
      * @param message A mensagem a ser enviada ao utilizador.
@@ -64,10 +64,10 @@ public class NotificationHandler {
     }
 
     /**
-     * Envia uma mensagem direta para um utilizador específico.
+     * Envia uma mensagem privada para um utilizador específico.
      *
      * <p>Este método tenta enviar uma mensagem para o socket do utilizador destino. Se o utilizador
-     * estiver offline, a mensagem será guardada para ser enviada quando o utilizador fizer login.</p>
+     * estiver offline, a mensagem será guardada para ser enviada quando o utilizador ficar online.</p>
      *
      * @param targetUsername O nome do utilizador para quem a mensagem será enviada.
      * @param message A mensagem a ser enviada ao utilizador.
@@ -92,7 +92,7 @@ public class NotificationHandler {
      * Envia uma mensagem para um grupo usando multicast.
      *
      * <p>Este método utiliza o serviço de gestão de multicast para enviar a mensagem para todos os
-     * membros de um grupo. Se o grupo não existir, será criado e configurado antes de enviar a mensagem.</p>
+     * membros de um grupo. Se o mesmo não existir, será criado e configurado antes de enviar a mensagem.</p>
      *
      * @param notifyGroup O grupo para o qual a mensagem será enviada.
      * @param message A mensagem a ser enviada ao grupo.

@@ -28,7 +28,7 @@ public class MulticastChatService extends AbstractChatService implements Message
      *
      * @param groupAddress o endereço do grupo multicast.
      * @param port a porta do grupo multicast.
-     * @param name o nome do usuário que inicia o chat.
+     * @param name o nome do utilizador que inicia o chat.
      * @param serverSocket o ‘socket’ de comunicação com o servidor.
      * @param host o nome ou endereço do host do servidor.
      * @throws IOException se ocorrer um erro ao configurar o chat ou o servidor.

@@ -4,15 +4,17 @@ import org.estg.ipp.pt.Server;
 import org.springframework.stereotype.Component;
 
 /**
- * Classe que mantém e fornece estatísticas relacionadas ao servidor, como o número total de comandos executados e o número de utilizadores conectados.
- * Esta classe é thread-safe, utilizando métodos sincronizados para garantir que as estatísticas sejam atualizadas e acessadas de forma segura em um ambiente multi-threaded.
+ * Classe que mantém e fornece as estatísticas relacionadas ao servidor, como o número total de comandos executados e o
+ * número de utilizadores online.
+ * Esta classe é thread-safe, e utiliza métodos sincronizados para garantir que as estatísticas sejam atualizadas e
+ * acedidas de forma segura em um ambiente multi-threaded.
  */
 @Component
 public class ServerStats {
     private int totalCommandsExecuted = 0;
 
     /**
-     * Incrementa o contador de comandos executados no servidor.
+     * Aumenta o contador de comandos executados no servidor.
      * Este método é sincronizado para garantir a segurança em ambientes multi-threaded.
      */
     public synchronized void incrementCommandsExecuted() {
@@ -20,7 +22,7 @@ public class ServerStats {
     }
 
     /**
-     * Retorna o número total de comandos executados no servidor.
+     * Devolve o número total de comandos executados no servidor.
      * Este método é sincronizado para garantir a segurança em ambientes multi-threaded.
      *
      * @return O número total de comandos executados.
@@ -30,7 +32,7 @@ public class ServerStats {
     }
 
     /**
-     * Retorna o número de utilizadores atualmente conectados ao servidor.
+     * Devolve o número de utilizadores atualmente conectados ao servidor.
      * Este método é sincronizado para garantir a segurança em ambientes multi-threaded.
      *
      * @return O número de utilizadores conectados.

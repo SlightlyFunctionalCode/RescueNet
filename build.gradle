@@ -9,18 +9,17 @@ group = 'org.estg.ipp.pt'
 version = '1.0-SNAPSHOT'
 
 application {
-    // Define uma classe principal padrão (opcional, se precisar de uma execução direta)
     mainClass = 'org.estg.ipp.pt.Server'
 }
 
 bootJar {
-    archiveBaseName.set('server')  // Nome base para o arquivo JAR
-    version = '1.0-SNAPSHOT'  // Versão do JAR
-    mainClass.set('org.estg.ipp.pt.Server')  // Classe principal do Spring Boot para o Server
+    archiveBaseName.set('server')
+    version = '1.0-SNAPSHOT'
+    mainClass.set('org.estg.ipp.pt.Server')
 }
 
 jar {
-    enabled = false  // Desabilitar a criação de JAR "normal" (não com Spring Boot)
+    enabled = false
 }
 
 repositories {
@@ -69,7 +68,6 @@ tasks.register('runServer', JavaExec) {
 }
 
 
-// Configuração do JAR para o cliente
 task clientJar(type: Jar) {
     archiveBaseName = 'client'
     from sourceSets.main.output

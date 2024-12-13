@@ -12,9 +12,9 @@ import java.util.List;
 /**
  * Interface de repositório para a entidade {@link Log}.
  *
- * Esta interface estende o {@link JpaRepository}, fornecendo métodos para realizar operações CRUD
- * básicas sobre o repositório de logs. Além disso, fornece consultas personalizadas para encontrar
- * logs com base em critérios específicos como tag e intervalo de datas.
+ * <p>Esta interface estende o {@link JpaRepository} e fornece os métodos para realizar as operações CRUD
+ * básicas sobre o repositório de logs. Além disso, fornece as consultas personalizadas para encontrar
+ * logs com base em critérios específicos como tag e intervalo de datas.</p>
  *
  * <p>A interface {@link LogRepository} permite:</p>
  * <ul>
@@ -22,8 +22,6 @@ import java.util.List;
  *     <li>Buscar logs dentro de um intervalo de datas.</li>
  *     <li>Buscar logs por tag num intervalo de datas.</li>
  * </ul>
- *
- * <p>O repositório utiliza o Spring Data JPA, facilitando o acesso ao banco de dados com consultas personalizadas.</p>
  *
  * @see Log
  * @see JpaRepository

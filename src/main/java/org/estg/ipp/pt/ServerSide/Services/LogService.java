@@ -21,10 +21,9 @@ import java.util.Map;
 /**
  * Serviço para gerir os logs do sistema.
  *
- * <p>O serviço fornece funcionalidades para salvar logs, buscar logs por
- * diferentes critérios (tag, intervalo de datas ou combinação de ambos) e
- * gerar relatórios em PDF. O objetivo é centralizar a gestão de logs e
- * facilitar o rastreamento de eventos importantes no sistema.</p>
+ * <p>O serviço fornece as funcionalidades para guardar os logs, buscar logs  e gerar relatórios em PDF por diferentes
+ * critérios (tag, intervalo de datas ou combinação de ambos). O objetivo é centralizar a gestão de logs e facilitar o
+ * rastreamento de eventos importantes no sistema.</p>
  */
 @Service
 public class LogService {
@@ -32,54 +31,12 @@ public class LogService {
     private LogRepository logRepository;
 
     /**
-     * Salva um log no repositório.
+     * Guarda um log no repositório.
      *
      * @param log Objeto de log a ser salvo.
      */
     public void saveLog(Log log) {
         logRepository.save(log);
-    }
-
-    /**
-     * Retorna todos os logs registados.
-     *
-     * @return Lista de todos os logs.
-     */
-    public List<Log> findAllLogs() {
-        return logRepository.findAll();
-    }
-
-    /**
-     * Retorna logs filtrados por uma tag específica.
-     *
-     * @param tag Tag para filtrar os logs.
-     * @return Lista de logs filtrados pela tag.
-     */
-    public List<Log> findLogsByTag(TagType tag) {
-        return logRepository.findByTag(tag);
-    }
-
-    /**
-     * Retorna logs num intervalo de datas especificado.
-     *
-     * @param startDate Data inicial do intervalo.
-     * @param endDate Data final do intervalo.
-     * @return Lista de logs no intervalo especificado.
-     */
-    public List<Log> findLogsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        return logRepository.findByDateRange(startDate, endDate);
-    }
-
-    /**
-     * Retorna logs filtrados por tag e intervalo de datas.
-     *
-     * @param tag Tag para filtrar os logs.
-     * @param startDate Data inicial do intervalo.
-     * @param endDate Data final do intervalo.
-     * @return Lista de logs que atendem aos critérios.
-     */
-    public List<Log> findLogsByTagAndDateRange(TagType tag, LocalDateTime startDate, LocalDateTime endDate) {
-        return logRepository.findByTagAndDateRange(tag, startDate, endDate);
     }
 
     /**
@@ -111,7 +68,7 @@ public class LogService {
     }
 
     /**
-     * Gera um relatório em PDF de logs com base em um intervalo de datas.
+     * Gera um relatório em PDF de logs com base num intervalo de datas.
      *
      * @param startDate Data inicial do intervalo.
      * @param endDate Data final do intervalo.
@@ -144,10 +101,10 @@ public class LogService {
         document.add(title);
         document.add(new Paragraph("\n"));
 
-        PdfPTable table = new PdfPTable(3); // 3 columns
-        table.setWidthPercentage(100); // Table width is 100% of page
+        PdfPTable table = new PdfPTable(3);
+        table.setWidthPercentage(100);
 
-        float[] columnWidths = {1, 2, 3}; // Adjust as needed
+        float[] columnWidths = {1, 2, 3};
         table.setWidths(columnWidths);
 
         addTableHeader(table);
@@ -205,7 +162,7 @@ public class LogService {
     }
 
     /**
-     * Retorna a cor associada a uma tag.
+     * Devolve a cor associada a uma tag.
      *
      * @param tag Tag do log.
      * @return Cor associada à tag.

@@ -15,21 +15,17 @@ import java.util.List;
 /**
  * Interface de repositório para a entidade {@link Message}.
  *
- * Esta interface estende o {@link JpaRepository}, fornecendo métodos para realizar operações CRUD
- * básicas sobre o repositório de mensagens. Além disso, fornece consultas personalizadas para encontrar
- * mensagens com base em critérios específicos, como leitura, solicitações de aprovação, destinatário,
- * remetente, e grupos de chat.
+ * <p>Esta interface estende o {@link JpaRepository} e  fornece os métodos para realizar as operações CRUD
+ * básicas sobre o repositório de mensagens. Além disso, fornece as consultas personalizadas para encontrar as
+ * mensagens com base em critérios específicos, como o estado de leitura, se é uma solicitações de aprovação, o destinatário,
+ * o remetente, e pelos grupos de chat.</p>
  *
  * <p>A interface {@link MessageRepository} permite:</p>
  * <ul>
- *     <li>Buscar mensagens não lidas entre um remetente e um destinatário específico.</li>
- *     <li>Buscar mensagens não lidas para um destinatário específico.</li>
- *     <li>Buscar mensagens de chat que são solicitações de aprovação.</li>
+ *     <li>Buscar as mensagens não lidas para um destinatário específico.</li>
+ *     <li>Buscar as mensagens de chat que são solicitações de aprovação.</li>
  *     <li>Buscar as últimas mensagens de chat de um grupo, limitadas a 30.</li>
- *     <li>Verificar se um remetente tem solicitações de aprovação pendentes.</li>
  * </ul>
- *
- * <p>O repositório utiliza o Spring Data JPA, facilitando o acesso ao banco de dados com consultas personalizadas.</p>
  *
  * @see Message
  * @see JpaRepository
@@ -38,7 +34,7 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
     /**
-     * Encontra mensagens não lidas para um destinatário específico.
+     * Encontra as mensagens não lidas para um destinatário específico.
      *
      * @param receiver O destinatário das mensagens.
      * @return Uma lista de mensagens que não foram lidas pelo destinatário especificado.
@@ -46,7 +42,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findMessageByIsReadIsFalseAndReceiver(String receiver);
 
     /**
-     * Encontra mensagens de chat que são solicitações de aprovação.
+     * Encontra as mensagens de chat que são solicitações de aprovação.
      *
      * @return Uma lista de mensagens que são solicitações de aprovação.
      */
@@ -63,13 +59,4 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findLatestChatMessagesByGroup(
            String groupName
     );
-
-    /**
-     * Verifica se um remetente tem mensagens de aprovação pendentes.
-     *
-     * @param sender O remetente das mensagens.
-     * @return {@code true} se existir pelo menos uma mensagem de solicitação de aprovação pendente do remetente,
-     *         caso contrário, {@code false}.
-     */
-    boolean existsBySenderAndIsApprovalRequestIsTrue(String sender);
 }

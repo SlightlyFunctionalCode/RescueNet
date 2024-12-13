@@ -13,11 +13,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *   <li>Exportação de logs com base em critérios específicos.</li>
  *   <li>Gestão das permissões de permissões dos utilizadores.</li>
- *   <li>Gestão dos grupos, como criação, entrada e saída dos mesmos.</li>
- *   <li>Envio de mensagens e gestão de aprovações.</li>
+ *   <li>Gestão dos grupos, como a criação, a entrada e a saída dos mesmos.</li>
+ *   <li>Envio de mensagens privadas, alertas e gestão de aprovações.</li>
+ *   <li>Visualização dos grupos e comandos disponíveis.</li>
  * </ul>
  *
- * <p>Esta interface é implementada por classes que gerem a lógica de comandos recebidos de utilizador conectados ao sistema.</p>
+ * <p>Esta interface é implementada por classes que gerem a lógica de comandos recebidos de utilizadores conectados ao sistema.</p>
  *
  * @see Permissions
  * @see TagType

@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 /**
- * Serviço para gerir utilizadores no sistema.
+ * Serviço para gerir os utilizadores no sistema.
  *
- * <p>Este serviço oferece funcionalidades para registrar, autenticar, atualizar permissões e
- * gerir grupos de utilizadores. Ele também garante que o utilizador padrão "admin" seja
- * inicializado caso não exista.</p>
+ * <p>Este serviço oferece as funcionalidades para registar, autenticar, atualizar permissões e
+ * gerir os grupos de utilizadores. Ele também garante que o utilizador padrão "admin" seja
+ * inicializado caso este não exista.</p>
  *
  * <p><b>Funcionalidades principais:</b></p>
  * <ol>
@@ -30,7 +30,7 @@ import java.util.Optional;
 @Service
 public class UserService {
     @Autowired
-    private UserRepository userRepository;  // Ensure this is injected correctly by Spring
+    private UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
 
@@ -56,7 +56,7 @@ public class UserService {
      * Regista um novo utilizador no sistema.
      *
      * <p>Este método valida se o nome de utilizador ou o email já existem. Se não, ele
-     * cria o utilizador com a senha criptografada e o salva no banco de dados.</p>
+     * cria o utilizador com a senha encriptada e o guarda na base de dados.</p>
      *
      * @param user O utilizador a ser registado.
      * @return 1 se o utilizador foi registado com sucesso, 0 se o nome de utilizador ou email
@@ -73,10 +73,8 @@ public class UserService {
             return 0;
         }
 
-        // Encode the password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        // Save the user in the database
         userRepository.save(user);
         System.out.println("User registered successfully");
         return 1;
@@ -86,8 +84,8 @@ public class UserService {
      * Autentica um utilizador com base no nome de utilizador ou email e senha.
      *
      * <p>Este método busca o utilizador pelo nome ou email. Se encontrado, verifica se a senha
-     * fornecida corresponde à senha armazenada. Se a autenticação for bem-sucedida, retorna o
-     * utilizador, caso contrário, retorna null.</p>
+     * fornecida corresponde à senha armazenada. Se a autenticação for bem-sucedida, devolve o
+     * utilizador, caso contrário, devolve null.</p>
      *
      * @param user O utilizador que se pretende autenticar.
      * @param password A senha fornecida pelo utilizador.
@@ -106,7 +104,7 @@ public class UserService {
     /**
      * Recupera um utilizador pelo nome de utilizador ou email.
      *
-     * <p>Este método retorna o utilizador associado ao nome ou email fornecido, ou null se o utilizador
+     * <p>Este método devolve o utilizador associado ao nome ou email fornecido, ou null se o utilizador
      * não for encontrado.</p>
      *
      * @param usernameOrEmail O nome ou email do utilizador a ser recuperado.
@@ -121,7 +119,7 @@ public class UserService {
     /**
      * Recupera um utilizador pelo nome de utilizador.
      *
-     * <p>Este método retorna o utilizador associado ao nome fornecido, ou null se o utilizador
+     * <p>Este método devolve o utilizador associado ao nome fornecido, ou null se o utilizador
      * não for encontrado.</p>
      *
      * @param username O nome de utilizador do utilizador a ser recuperado.
@@ -136,7 +134,7 @@ public class UserService {
      * Associa um utilizador a um grupo.
      *
      * <p>Este método verifica se o utilizador já pertence ao grupo fornecido. Caso contrário,
-     * ele associa o utilizador ao grupo e salva as alterações.</p>
+     * ele associa o utilizador ao grupo e guarda as alterações.</p>
      *
      * @param user  O utilizador a ser associado ao grupo.
      * @param group O grupo ao qual o utilizador será associado.
@@ -155,31 +153,26 @@ public class UserService {
     /**
      * Atualiza as permissões de um utilizador.
      *
-     * <p>Este método busca o utilizador pelo nome e, se encontrado, atualiza suas permissões
-     * com o valor fornecido. Retorna true se a atualização foi bem-sucedida e false se o
+     * <p>Este método busca o utilizador pelo nome e, se encontrado, atualiza as suas permissões
+     * com o valor fornecido. Devolve true se a atualização foi bem-sucedida e false se o
      * utilizador não foi encontrado.</p>
      *
      * @param username       O nome do utilizador cujas permissões serão atualizadas.
      * @param newPermissions As novas permissões a serem atribuídas ao utilizador.
-     * @return true se as permissões foram atualizadas com sucesso, false se o utilizador não
-     * foi encontrado.
      */
-    public boolean updateUserPermissions(String username, Permissions newPermissions) {
+    public void updateUserPermissions(String username, Permissions newPermissions) {
         Optional<User> userOptional = userRepository.findByName(username);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
-            Permissions previousPermission = user.getPermissions();
             user.setPermissions(newPermissions);
 
             userRepository.save(user);
 
             System.out.println("Permissões do utilizador atualizadas com sucesso.");
-            return true;
         } else {
             System.out.println("Utilizador não encontrado.");
-            return false;
         }
     }
 }
