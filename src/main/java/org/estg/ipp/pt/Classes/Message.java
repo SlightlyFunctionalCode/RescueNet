@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 
 /**
  * A classe {@code Message} representa uma mensagem trocada entre dois utilizadores,
- * com informações sobre o remetente, destinatário, conteúdo, e estado de leitura.
+ * com as informações sobre o remetente, o destinatário, o conteúdo, e o estado de leitura e/ou
+ * se é um pedido de aprovação.
  *
  * <p>Esta classe é uma entidade JPA mapeada para uma tabela na base de dados.</p>
  */
@@ -29,14 +30,14 @@ public class Message {
     private boolean isApprovalRequest = false;
 
     /**
-     * Construtor padrão.
-     * Necessário para o JPA.
+     * Construtor padrão, é necessário para o JPA.
      */
     public Message() {
     }
 
     /**
-     * Construtor completo para inicialização de todos os campos, exceto {@code id} e {@code timestamp}.
+     * Construtor completo para facilitar a inicialização de todos os campos, exceto o {@code id} e o {@code timestamp}
+     * que são gerados automaticamente.
      *
      * @param sender            O remetente da mensagem.
      * @param receiver          O destinatário da mensagem.
@@ -54,7 +55,7 @@ public class Message {
     }
 
     /**
-     * Construtor para inicialização de campos com leitura padrão.
+     * Construtor para o caso de ser um pedido de aprovação.
      *
      * @param sender            O remetente da mensagem.
      * @param receiver          O destinatário da mensagem.
@@ -70,7 +71,7 @@ public class Message {
     }
 
     /**
-     * Construtor básico para inicialização de uma mensagem padrão.
+     * Construtor básico para o caso de ser uma mensagem padrão.
      *
      * @param sender   O remetente da mensagem.
      * @param receiver O destinatário da mensagem.
@@ -84,7 +85,7 @@ public class Message {
     }
 
     /**
-     * Retorna o identificador único da mensagem.
+     * Devolve o identificador único da mensagem.
      *
      * @return O id da mensagem.
      */
@@ -93,7 +94,7 @@ public class Message {
     }
 
     /**
-     * Retorna o remetente da mensagem.
+     * Devolve o remetente da mensagem.
      *
      * @return O remetente.
      */
@@ -102,7 +103,7 @@ public class Message {
     }
 
     /**
-     * Retorna o destinatário da mensagem.
+     * Devolve o destinatário da mensagem.
      *
      * @return O destinatário.
      */
@@ -111,7 +112,7 @@ public class Message {
     }
 
     /**
-     * Retorna o conteúdo da mensagem.
+     * Devolve o conteúdo da mensagem.
      *
      * @return O conteúdo.
      */
@@ -120,7 +121,7 @@ public class Message {
     }
 
     /**
-     * Retorna o carimbo de data/hora da mensagem.
+     * Devolve a data/hora da mensagem.
      *
      * @return A data e hora da mensagem.
      */
@@ -210,9 +211,9 @@ public class Message {
     }
 
     /**
-     * Retorna uma representação textual da mensagem.
+     * Devolve a representação textual da mensagem.
      *
-     * @return Uma ‘string’ contendo os dados da mensagem.
+     * @return A ‘string’ que contém os dados da mensagem.
      */
     @Override
     public String toString() {

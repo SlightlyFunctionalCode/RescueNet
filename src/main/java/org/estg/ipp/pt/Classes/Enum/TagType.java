@@ -1,7 +1,7 @@
 package org.estg.ipp.pt.Classes.Enum;
 
 /**
- * Enum {@code TagType} representa diferentes tipos de tags para categorizar logs de eventos, com cada tipo
+ * Enum {@code TagType} representa os diferentes tipos de tags para categorizar os logs do sistema, com cada tipo
  * associado a uma descrição que explica o seu propósito.
  *
  * <p>Os tipos de tags disponíveis incluem:</p>
@@ -44,7 +44,7 @@ public enum TagType {
     }
 
     /**
-     * Retorna a descrição do tipo de tag.
+     * Devolve a descrição do tipo de tag.
      *
      * @return A descrição associada ao tipo de tag.
      */
@@ -53,7 +53,7 @@ public enum TagType {
     }
 
     /**
-     * Retorna o nome da tag como uma string.
+     * Devolve o nome da tag como uma string.
      *
      * @return O nome da tag como string.
      */

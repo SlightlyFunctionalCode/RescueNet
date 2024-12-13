@@ -8,22 +8,19 @@ import java.util.regex.Pattern;
 
 /**
  * A classe {@code ServerMessageProcessor} é responsável por processar as mensagens recebidas do servidor.
- * Ela valida, extrai e processa os dados das mensagens e pode enviar confirmações de leitura para o servidor.
+ * Ela valida, extrai e processa os dados das mensagens e pode enviar as confirmações de leitura para o servidor.
  *
- * <p>Quando uma mensagem é recebida, ela verifica se contém um ID de mensagem, remove certos padrões de formatação e
+ * <p>Quando uma mensagem privada é recebida, ela verifica se contém um ID de mensagem, remove certos padrões de formatação e
  * envia uma confirmação de leitura para o servidor.</p>
  */
 public class ServerMessageProcessor {
 
     /**
-     * Processa a mensagem recebida do servidor, verifica se ela contém um ID de mensagem e envia uma confirmação de leitura.
-     *
-     * <p>Este método analisa a mensagem recebida para identificar um possível ID de mensagem. Caso seja encontrado um ID,
-     * ele envia uma confirmação de leitura para o servidor e limpa a mensagem, removendo certos padrões de formatação antes
-     * de retorná-la.</p>
+     * Processa a mensagem recebida do servidor e caso esta seja uma mensagem privada, verifica se ela contém um ID de
+     * mensagem e envia uma confirmação de leitura da mesma.
      *
      * @param message a mensagem recebida do servidor.
-     * @param out o {@link PrintWriter} utilizado para enviar mensagens de volta ao servidor.
+     * @param out o {@link PrintWriter} utilizado para enviar as mensagens de volta ao servidor.
      * @return a mensagem processada, sem o ID de mensagem e com a formatação corrigida.
      */
     public String processIncomingMessage(String message, PrintWriter out) {

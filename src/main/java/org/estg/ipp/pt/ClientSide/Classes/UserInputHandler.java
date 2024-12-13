@@ -16,6 +16,10 @@ import java.util.Scanner;
  *
  * <p>Ela permite ao utilizador enviar mensagens normais, executar comandos e se desconectar do chat
  * através de comandos especiais como "/logout".</p>
+ *
+ * @see CommandHandler
+ * @see MessageHandler
+ * @see ChatService
  */
 public class UserInputHandler implements InputHandler {
     private final CommandHandler commandHandler;
@@ -23,10 +27,10 @@ public class UserInputHandler implements InputHandler {
     private final ChatService chatService;
 
     /**
-     * Constrói um manipulador de entrada do utilizador com os manipuladores de comandos, mensagens e o serviço de chat.
+     * Constrói um {@code UserInputHandler} com um {@code CommandHandler}, um {@code MessageHandler} e um {@code ChatService}.
      *
-     * @param commandHandler o manipulador de comandos para processar comandos de chat.
-     * @param messageHandler o manipulador de mensagens para enviar mensagens do utilizador.
+     * @param commandHandler o processador de comandos para processar os comandos de chat.
+     * @param messageHandler o processador de mensagens para enviar e receber as mensagens do utilizador.
      * @param chatService o serviço de chat responsável por gerir a comunicação.
      */
     public UserInputHandler(CommandHandler commandHandler, MessageHandler messageHandler, ChatService chatService) {
@@ -36,18 +40,18 @@ public class UserInputHandler implements InputHandler {
     }
 
     /**
-     * Inicia o processo de captura de entrada do utilizador e envia comandos ou mensagens conforme a entrada.
+     * Inicia o processo de captura de entrada do utilizador e envia comandos por TCP ou mensagens multicast conforme a entrada.
      *
-     * <p>O método monitora a entrada do utilizador, permitindo o envio de mensagens para o chat ou a execução
-     * de comandos. Caso o comando "/logout" seja digitado, a sessão de chat é encerrada. Caso contrário,
-     * ele envia mensagens normais para o servidor.</p>
+     * <p>O método monitoriza a entrada do utilizador, de forma a permitir o envio de mensagens para o chat ou a execução
+     * de comandos. Caso o comando "/logout" seja introduzido, a sessão de chat é encerrada. Caso contrário,
+     * ele envia mensagens normais para o grupo multicast</p>
      *
      * @param name o nome do utilizador, incluído em todas as mensagens enviadas.
      */
     public void handleInput(String name) {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Digite a mensagem (/logout para sair): ");
-        System.out.println("Digite /commands para visualizar os comandos disponíveis:");
+        System.out.println("Introduza a mensagem (/logout para sair): ");
+        System.out.println("Introduza /commands para visualizar os comandos disponíveis:");
         boolean shouldExit = false;
 
         while (!shouldExit) {

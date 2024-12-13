@@ -1,11 +1,11 @@
 package org.estg.ipp.pt.ClientSide.Classes.Constants;
 
 /**
- * A classe {@code Constants} armazena todas as constantes usadas na aplicação.
+ * A classe {@code Constants} armazena todas as constantes utilizadas no client-side.
  *
- * <p>Esta classe é final e não pode ser instanciada. Ela contém mensagens
+ * <p>Esta classe é final e não pode ser instanciada. Apenas contém as mensagens
  * de texto e ‘strings’ formatadas utilizadas em diversas partes da
- * aplicação, como menus, mensagens de erro e respostas de comandos.</p>
+ * aplicação client-side, como nos menus, nas mensagens de erro e nas respostas de comandos.</p>
  */
 public final class Constants {
 
@@ -18,14 +18,15 @@ public final class Constants {
             ============================
             Escolha uma opção:\s""";
 
-    public static final String EXITING_APP = "Encerrando o cliente...";
-    public static final String INPUT_USER_NAME = "Digite o seu nome de utilizador: ";
-    public static final String INPUT_USER_EMAIL = "Digite o seu email: ";
-    public static final String INPUT_USER_PASSWORD = "Digite a sua password: ";
-    public static final String INPUT_USER_NAME_EMAIL = "Digite o seu nome/email: ";
+    public static final String EXITING_APP = "A encerrar o cliente...";
+    public static final String INPUT_USER_NAME = "Introduza o seu nome de utilizador: ";
+    public static final String INPUT_USER_EMAIL = "Introduza o seu email: ";
+    public static final String INPUT_USER_PASSWORD = "Introduza a sua password: ";
+    public static final String INPUT_USER_NAME_EMAIL = "Introduza o seu nome/email: ";
 
+    // Mensagens de erro
     public static final String ERROR_GENERIC = "ERRO: Ocorreu um erro";
-    public static final String ERROR_INVALID_CREDENTIALS = "Falha ao iniciar sessão. Verifique suas credenciais.";
+    public static final String ERROR_INVALID_CREDENTIALS = "Falha ao iniciar a sessão. Por favor, verifique as suas credenciais.";
     public static final String ERROR_LOGIN = "Ocorreu um erro ao efetuar o Login";
     public static final String ERROR_SIGN_UP = "Ocorreu um erro ao efetuar o Registo";
     public static final String ERROR_INVALID_EMAIL = "Email inválido. Certifique-se de que contém '@' e '.' após o '@'. Tente novamente.";
@@ -39,7 +40,7 @@ public final class Constants {
     public static final String ERROR_LEAVING_CHAT = "Erro: Ocorreu um erro ao sair do chat multicast";
 
     // Respostas de Comandos
-    public static final String SERVER_PENDING = "Aguardando aprovação...";
+    public static final String SERVER_PENDING = "A aguardar a aprovação...";
     public static final String SERVER_SUCCESS = "Comando aprovado e executado.";
     public static final String SERVER_APPROVE = "Aprovado e executado.";
     public static final String SERVER_REJECT = "Rejeitado.";
@@ -47,7 +48,7 @@ public final class Constants {
     public static final String SERVER_END_HELP = "--END HELP--";
 
     /**
-     * Construtor privado para impedir a instância da classe.
+     * Construtor privado para impedir a criação de uma instância da classe.
      *
      * <p>Lança uma {@link UnsupportedOperationException} se for chamado.</p>
      */

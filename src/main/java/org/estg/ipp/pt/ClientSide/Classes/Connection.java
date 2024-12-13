@@ -7,11 +7,11 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 /**
- * A classe {@code Connection} gerencia uma conexão cliente-servidor baseada em ‘sockets’,
- * permitindo a troca de mensagens entre o cliente e o servidor.
+ * A classe {@code Connection} gere uma conexão cliente-servidor, TCP, baseada em ‘sockets’,
+ * e permite a troca de mensagens entre o cliente e o servidor.
  *
- * <p>Esta classe fornece métodos para se conectar, reconectar e fechar a conexão, bem como
- * para acessar os streams de entrada e saída associados ao ‘socket’.</p>
+ * <p>Esta classe fornece os métodos para se efetuar a conexão, a re-conexão e para fechar a conexão, bem como
+ * para acessar as streams de entrada e saída associados ao ‘socket’.</p>
  */
 public class Connection {
     private Socket socket;
@@ -46,6 +46,7 @@ public class Connection {
         out = new PrintWriter(socket.getOutputStream(), true);
     }
 
+    /*TODO: change*/
     /**
      * Reconecta ao servidor usando o endereço padrão {@code "localhost"} e a porta {@code 5000}.
      *
@@ -61,7 +62,7 @@ public class Connection {
     }
 
     /**
-     * Fecha a conexão com o servidor, encerrando o ‘socket’.
+     * Fecha a conexão com o servidor, e fecha o ‘socket’.
      *
      * @throws IOException se ocorrer um erro ao fechar o socket.
      */
@@ -70,25 +71,25 @@ public class Connection {
     }
 
     /**
-     * Retorna o stream de entrada associado ao ‘socket’.
+     * Devolve a stream de entrada associado ao ‘socket’.
      *
-     * @return o stream de entrada para leitura de mensagens do servidor.
+     * @return a stream de entrada para leitura de mensagens do servidor.
      */
     public BufferedReader getIn() {
         return in;
     }
 
     /**
-     * Retorna o stream de saída associado ao ‘socket’.
+     * Devolve a stream de saída associado ao ‘socket’.
      *
-     * @return o stream de saída para envio de mensagens ao servidor.
+     * @return a stream de saída para envio de mensagens ao servidor.
      */
     public PrintWriter getOut() {
         return out;
     }
 
     /**
-     * Retorna o ‘socket’ utilizado para a conexão.
+     * Devolve o ‘socket’ utilizado para a conexão.
      *
      * @return o ‘socket’ da conexão.
      */

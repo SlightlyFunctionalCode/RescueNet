@@ -4,19 +4,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Enum {@code RegexPatterns} contém padrões de expressões regulares para validação de entradas
- * de texto em diferentes contextos de autenticação e ações do utilizador, como registo, login,
- * confirmação de leitura, etc.
+ * Enum {@code RegexPatterns}, contém padrões de expressões regulares para a validação de entradas
+ * de texto em diferentes contextos de autenticação e ações do utilizador, como o registo, o login,
+ * a confirmação do estado ready e a confirmação de leitura.
  *
- * Cada padrão corresponde a uma operação específica e pode ser usado para validar ou extrair
- * dados de uma ‘string’ de entrada.
+ * <p>Cada padrão corresponde a uma operação específica e pode ser usado para validar ou extrair os
+ * dados de uma ‘string’ de entrada.</p>
  *
- * <p>Os padrões de expressão regular disponíveis são:</p>
+ * <p>Os padrões de expressões regulares disponíveis são:</p>
  * <ul>
- *     <li>{@code REGISTER} - Padrão para o registro de um utilizador (username, email, password).</li>
- *     <li>{@code LOGIN} - Padrão para o login de um utilizador (username, password).</li>
- *     <li>{@code READY} - Padrão para uma solicitação simples com o nome de utilizador.</li>
- *     <li>{@code CONFIRM_READ} - Padrão para a confirmação de leitura (com id).</li>
+ *     <li>{@code REGISTER} - Padrão para o registo de um utilizador (username, email, password).</li>
+ *     <li>{@code LOGIN} - Padrão para o login de um utilizador (username ou email, password).</li>
+ *     <li>{@code READY} - Padrão para a confirmação do estado do utilizador, ou seja, se este
+ *     já se encontra autenticado e pronto a receber mensagens.</li>
+ *     <li>{@code CONFIRM_READ} - Padrão para a confirmação de leitura de mensagens privadas (com id).</li>
  * </ul>
  */
 public enum RegexPatterns {
@@ -38,7 +39,7 @@ public enum RegexPatterns {
     }
 
     /**
-     * Retorna um {@link Matcher} que pode ser usado para verificar se a entrada corresponde
+     * Devolve um {@link Matcher} que pode ser usado para verificar se a entrada corresponde
      * ao padrão da expressão regular associada.
      *
      * @param input A string de entrada que será verificada contra a expressão regular.

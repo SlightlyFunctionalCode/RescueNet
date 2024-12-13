@@ -6,8 +6,8 @@ import org.estg.ipp.pt.Classes.Enum.TagType;
 import java.time.LocalDateTime;
 
 /**
- * A classe {@code Log} representa uma entrada de log no sistema, contendo informações sobre a data e hora,
- * o tipo de tag e a mensagem associada ao log.
+ * A classe {@code Log} representa uma entrada de ‘log’ no sistema, que contém as informações sobre a data e hora,
+ * o tipo de tag e a mensagem associada ao ‘log’.
  *
  * <p>Esta classe está mapeada para a tabela {@code logs} na base de dados.</p>
  */
@@ -25,17 +25,17 @@ public class Log {
 
     /**
      * Construtor sem argumentos.
-     * Requerido pelo JPA para instanciar objetos da entidade.
+     * Obrigatório pelo JPA para instanciar os objetos da entidade.
      */
     public Log() {
     }
 
     /**
-     * Construtor com parâmetros para inicialização fácil de logs.
+     * Construtor com parâmetros para a inicialização mais fácil de ‘logs’.
      *
      * @param dateTime A data e hora do log.
      * @param tag      O tipo de tag do log.
-     * @param message  A mensagem do log.
+     * @param message  A mensagem do ‘log’.
      */
     public Log(LocalDateTime dateTime, TagType tag, String message) {
         this.dateTime = dateTime;
@@ -53,7 +53,7 @@ public class Log {
     }
 
     /**
-     * Retorna a data e hora do log como uma string formatada.
+     * Devolve a data e a hora do ‘log’ como uma string formatada.
      *
      * @return A data e hora do log.
      */
@@ -71,7 +71,7 @@ public class Log {
     }
 
     /**
-     * Retorna o tipo de tag do log.
+     * Devolve o tipo de tag do log.
      *
      * @return O tipo de tag do log.
      */
@@ -89,7 +89,7 @@ public class Log {
     }
 
     /**
-     * Retorna a mensagem associada ao log.
+     * Devolve a mensagem associada ao log.
      *
      * @return A mensagem do log.
      */
