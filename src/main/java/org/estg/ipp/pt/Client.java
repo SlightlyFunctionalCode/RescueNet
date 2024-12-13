@@ -76,6 +76,7 @@ public class Client {
      * @param scanner O objeto Scanner utilizado para ler a entrada do utilizador.
      */
     private static void handleSignUp(Scanner scanner) {
+        connection.reconnect();
         System.out.print(Constants.INPUT_USER_NAME);
         String username = scanner.nextLine();
         String email;

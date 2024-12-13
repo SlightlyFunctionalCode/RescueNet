@@ -17,6 +17,8 @@ public class Connection {
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
+    private final String serverIP;
+    private final int serverPort;
 
     /**
      * Construtor que inicializa uma conexão com o servidor especificado.
@@ -26,6 +28,8 @@ public class Connection {
      * @throws IOException se ocorrer um erro ao abrir o ‘socket’ ou os streams.
      */
     public Connection(String serverAddress, int serverPort) throws IOException {
+        this.serverIP = serverAddress;
+        this.serverPort = serverPort;
         connect(serverAddress, serverPort);
     }
 
@@ -50,7 +54,7 @@ public class Connection {
     public void reconnect() {
         try {
             socket.close();
-            connect("localhost", 5000);
+            connect(serverIP, serverPort);
         } catch (IOException e) {
             System.out.println("Erro ao tentar reconectar: " + e.getMessage());
         }
