@@ -397,12 +397,12 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
                 for (Group group : groups) {
                     notifyGroup(group, operationName);
                 }
-                NotificationHandler.notify(requester, "SUCESSO: Sua solicitação de operação foi aprovada.");
+                NotificationHandler.notify(requester, "SUCESSO: A sua solicitação de operação foi aprovada.");
                 out.println("APPROVE: Aprovado com sucesso");
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Comando executado: " + operationName + " (por " + username + ")"));
 
             } else if (action.equals("/reject")) {
-                NotificationHandler.notify(requester, "ERRO: Sua solicitação de operação foi rejeitada.");
+                NotificationHandler.notify(requester, "ERRO: A sua solicitação de operação foi rejeitada.");
                 out.println("REJECT: Rejectado com sucesso");
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.SUCCESS, "Operação rejeitada."));
             } else {

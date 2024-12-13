@@ -37,7 +37,18 @@ public class Client {
      * @throws IOException Se ocorrer algum erro ao se conectar ao servidor.
      */
     public static void main(String[] args) throws IOException {
-        connection = new Connection("localhost", 5000);
+        String serverAdress = "localhost";
+
+        if (args.length != 0 && args.length != 1) {
+            System.out.println("Não deve ser usado nenhum argumento ou apenas deve ser usado um argumento que representa o ip do server");
+            return;
+        }
+
+        if (args.length == 1) {
+            serverAdress = args[0];
+        }
+        
+        connection = new Connection(serverAdress, 5000);
         Scanner scanner = new Scanner(System.in);
         boolean keepRunning = true;
         while (keepRunning) {
