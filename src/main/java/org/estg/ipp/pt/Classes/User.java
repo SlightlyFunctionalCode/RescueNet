@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A classe {@code User} representa um utilizador na aplicação, incluindo detalhes
- * como nome, email, permissões e associação a um grupo atual.
+ * A classe {@code User} representa um utilizador na aplicação e inclui detalhes
+ * como o nome, o email, as permissões e o grupo que o mesmo está atualmente.
  *
  * <p>Esta classe é uma entidade JPA mapeada para uma tabela na base de dados chamada "users".</p>
  */
@@ -37,7 +37,7 @@ public class User {
     private Group currentGroup;
 
     /**
-     * Retorna o identificador único do utilizador.
+     * Devolve o identificador único do utilizador.
      *
      * @return O id do utilizador.
      */
@@ -46,7 +46,7 @@ public class User {
     }
 
     /**
-     * Retorna o endereço de email do utilizador.
+     * Devolve o endereço de email do utilizador.
      *
      * @return O email do utilizador.
      */
@@ -64,7 +64,7 @@ public class User {
     }
 
     /**
-     * Retorna o nome do utilizador.
+     * Devolve o nome do utilizador.
      *
      * @return O nome do utilizador.
      */
@@ -82,7 +82,7 @@ public class User {
     }
 
     /**
-     * Retorna as permissões do utilizador.
+     * Devolve as permissões do utilizador.
      *
      * @return As permissões do utilizador.
      */
@@ -100,7 +100,7 @@ public class User {
     }
 
     /**
-     * Retorna a palavra-passe do utilizador.
+     * Devolve a palavra-passe do utilizador.
      *
      * @return A palavra-passe do utilizador.
      */
@@ -118,7 +118,7 @@ public class User {
     }
 
     /**
-     * Retorna o grupo atual ao qual o utilizador pertence.
+     * Devolve o grupo atual ao qual o utilizador pertence.
      *
      * @return O grupo atual.
      */
@@ -136,9 +136,9 @@ public class User {
     }
 
     /**
-     * Retorna uma representação textual do utilizador.
+     * Devolve a representação textual do utilizador.
      *
-     * @return Uma string contendo os dados do utilizador.
+     * @return Uma string que contém os dados do utilizador.
      */
     @Override
     public String toString() {
@@ -152,6 +152,12 @@ public class User {
                 '}';
     }
 
+    /**
+     * Verifica se os utilizadores comparados são iguais
+     *
+     * @param o objeto que se pretende comparar
+     * @return {@code true} se for igual, caso contrário, {@code false}.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

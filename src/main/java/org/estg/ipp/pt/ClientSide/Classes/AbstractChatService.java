@@ -10,15 +10,14 @@ import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.InetSocketAddress;
 
-
 /**
  * A classe abstrata {@code AbstractChatService} fornece uma implementação parcial para um serviço de chat
- * multicast, permitindo a comunicação em grupo por ‘sockets’ multicast.
+ * multicast, e permite a comunicação em grupo por ‘sockets’ multicast.
  *
- * <p>Esta classe implementa a ‘interface’ {@link ChatService} e gerência a configuração e o controlo
- * de um {@link MulticastSocket} para comunicação num grupo multicast.</p>
+ * <p>Esta classe implementa a ‘interface’ {@link ChatService} e gere a configuração e o controlo
+ * de um {@link MulticastSocket} para a comunicação num grupo multicast.</p>
  *
- * <p>Subclasses devem fornecer implementações específicas para métodos definidos na interface {@code ChatService}.</p>
+ * <p>As subclasses devem fornecer as implementações específicas para os métodos definidos na interface {@code ChatService}.</p>
  */
 public abstract class AbstractChatService implements ChatService {
     private InetAddress group;
@@ -35,7 +34,7 @@ public abstract class AbstractChatService implements ChatService {
      * @param port a porta usada para comunicação multicast.
      * @param host o nome da ‘interface’ de rede utilizada.
      * @param name o nome do utilizador associado ao serviço.
-     * @throws IOException se ocorrer um erro ao configurar o socket ou ingressar no grupo multicast.
+     * @throws IOException se ocorrer um erro ao configurar o socket ou juntar-se ao grupo multicast.
      */
     public AbstractChatService(String groupAddress, int port, String host, String name) throws IOException {
         this.group = InetAddress.getByName(groupAddress);
@@ -51,7 +50,7 @@ public abstract class AbstractChatService implements ChatService {
     }
 
     /**
-     * Encerra o serviço de chat, saindo do grupo multicast e fechando o socket.
+     * Fecha o serviço de chat ao sair do grupo multicast e ao fechar o socket multicast.
      */
     @Override
     public void stopChat() {
@@ -68,7 +67,7 @@ public abstract class AbstractChatService implements ChatService {
     }
 
     /**
-     * Retorna o endereço do grupo multicast.
+     * Devolve o endereço do grupo multicast.
      *
      * @return o endereço do grupo multicast.
      */
@@ -86,7 +85,7 @@ public abstract class AbstractChatService implements ChatService {
     }
 
     /**
-     * Retorna o socket multicast.
+     * Devolve o socket multicast.
      *
      * @return o socket multicast.
      */
@@ -104,7 +103,7 @@ public abstract class AbstractChatService implements ChatService {
     }
 
     /**
-     * Retorna o nome do utilizador associado ao serviço de chat.
+     * Devolve o nome do utilizador associado ao serviço de chat.
      *
      * @return o nome do utilizador.
      */
@@ -122,7 +121,7 @@ public abstract class AbstractChatService implements ChatService {
     }
 
     /**
-     * Retorna o nome do host ou ‘interface’ de rede utilizada.
+     * Devolve o nome do host ou ‘interface’ de rede utilizada.
      *
      * @return o nome do host ou interface.
      */
@@ -140,7 +139,7 @@ public abstract class AbstractChatService implements ChatService {
     }
 
     /**
-     * Retorna a porta usada para comunicação multicast.
+     * Devolve a porta usada para comunicação multicast.
      *
      * @return a porta utilizada.
      */

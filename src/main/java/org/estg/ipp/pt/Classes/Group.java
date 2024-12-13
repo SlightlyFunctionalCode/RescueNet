@@ -7,11 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A classe {@code Group} representa um grupo numa aplicação, contendo informações sobre o grupo, como nome,
- * endereço, porta, visibilidade e permissões necessárias. Também mantém a lista de utilizadores associados ao grupo.
+ * A classe {@code Group} representa um grupo de multicast, e contém as informações sobre o grupo, como o nome,
+ * o endereço, a porta, a privacidade e as permissões necessárias.
+ * Também mantém a lista de utilizadores associados ao grupo.
  *
- * <p>A classe mapeia a tabela {@code groups} no banco de dados e define um relacionamento {@code ManyToMany} com a
- * classe {@code User}, usando a tabela intermediária {@code group_user}.</p>
+ * <p>A classe mapeia a tabela {@code groups} na base de dados e define um relacionamento {@code ManyToMany} com a
+ * classe {@code User}, através da tabela intermediária {@code group_user}.</p>
  */
 @Entity
 @Table(name = "groups")
@@ -40,7 +41,7 @@ public class Group {
     private List<User> users = new ArrayList<>();
 
     /**
-     * Retorna o identificador do grupo.
+     * Devolve o identificador do grupo.
      *
      * @return O id do grupo.
      */
@@ -49,7 +50,7 @@ public class Group {
     }
 
     /**
-     * Retorna o nome do grupo.
+     * Devolve o nome do grupo.
      *
      * @return O nome do grupo.
      */
@@ -67,7 +68,7 @@ public class Group {
     }
 
     /**
-     * Retorna o endereço do grupo.
+     * Devolve o endereço do grupo.
      *
      * @return O endereço do grupo.
      */
@@ -85,7 +86,7 @@ public class Group {
     }
 
     /**
-     * Retorna a porta associada ao grupo.
+     * Devolve a porta associada ao grupo.
      *
      * @return A porta do grupo.
      */
@@ -103,7 +104,7 @@ public class Group {
     }
 
     /**
-     * Retorna o identificador do utilizadores que criou o grupo.
+     * Devolve o identificador do utilizador que criou o grupo.
      *
      * @return O id do criador do grupo.
      */
@@ -112,7 +113,7 @@ public class Group {
     }
 
     /**
-     * Define o identificador do utilizadores que criou o grupo.
+     * Define o identificador do utilizador que criou o grupo.
      *
      * @param createdBy O id do criador do grupo.
      */
@@ -121,7 +122,7 @@ public class Group {
     }
 
     /**
-     * Retorna a lista de utilizadores associados ao grupo.
+     * Devolve a lista de utilizadores associados ao grupo.
      *
      * @return A lista de utilizadores do grupo.
      */
@@ -132,7 +133,7 @@ public class Group {
     /**
      * Define a lista de utilizadores associados ao grupo.
      *
-     * @param users A lista de usuários.
+     * @param users A lista de utilizadores.
      */
     public void setUsers(List<User> users) {
         this.users = users;
@@ -148,7 +149,7 @@ public class Group {
     }
 
     /**
-     * Retorna se o grupo é público ou privado.
+     * Devolve se o grupo é público ou privado.
      *
      * @return {@code true} se o grupo for público, {@code false} caso contrário.
      */
@@ -157,7 +158,7 @@ public class Group {
     }
 
     /**
-     * Define a visibilidade do grupo.
+     * Define a privacidade do grupo.
      *
      * @param aPublic {@code true} se o grupo for público, {@code false} caso contrário.
      */
@@ -166,7 +167,7 @@ public class Group {
     }
 
     /**
-     * Retorna as permissões necessárias para fazer parte do grupo.
+     * Devolve as permissões necessárias para se fazer parte do grupo.
      *
      * @return As permissões necessárias.
      */

@@ -11,11 +11,11 @@ import java.net.Socket;
 import java.util.Scanner;
 
 /**
- * A classe {@code MulticastChatService} estende {@link AbstractChatService} e implementa a interface {@link MessageReceiver}.
- * Ela gerencia uma sessão de chat multicast, incluindo o envio e recebimento de mensagens, bem como o processamento de comandos do servidor.
+ * A classe {@code MulticastChatService} estende a {@link AbstractChatService} e implementa a interface {@link MessageReceiver}.
+ * Ela gere uma sessão de chat multicast, e inclui o envio e a receção de mensagens, bem como o processamento de comandos do servidor.
  *
  * <p>Esta classe conecta-se a um servidor, inicia a receção de mensagens num chat multicast e permite que o utilizador envie mensagens
- * e interaja com o chat por comandos.</p>
+ * e interaja com o servidor por comandos.</p>
  */
 public class MulticastChatService extends AbstractChatService implements MessageReceiver {
     private final MessageHandler messageHandler;
@@ -44,12 +44,12 @@ public class MulticastChatService extends AbstractChatService implements Message
     /**
      * Inicia a sessão de chat multicast.
      *
-     * <p>Este método envia uma mensagem de preparação para o servidor, começa a enviar uma mensagem indicando que o usuário entrou no chat,
-     * inicia a recepção de mensagens e processa comandos de entrada do usuário.</p>
+     * <p>Este método envia uma mensagem de pronto para o servidor (o READY), e começa a enviar uma mensagem a indicar
+     * que o utilizador entrou no chat. Também inicia a receção de mensagens e processa os comandos introduzidos pelo utilizador.</p>
      *
      * @param groupAddress o endereço do grupo multicast.
      * @param port a porta do grupo multicast.
-     * @param name o nome do usuário que entra no chat.
+     * @param name o nome do utilizador que entra no chat.
      * @throws IOException se ocorrer um erro ao conectar ou enviar mensagens.
      */
     @Override
@@ -78,7 +78,7 @@ public class MulticastChatService extends AbstractChatService implements Message
     }
 
     /**
-     * Recebe uma mensagem do grupo multicast e exibe-a na consola.
+     * Recebe uma mensagem do grupo multicast e exibe-a no terminal.
      *
      * @param message a mensagem recebida.
      */

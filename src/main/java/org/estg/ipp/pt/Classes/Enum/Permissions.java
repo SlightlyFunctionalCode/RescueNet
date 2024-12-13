@@ -1,7 +1,7 @@
 package org.estg.ipp.pt.Classes.Enum;
 
 /**
- * Enum {@code Permissions} representa diferentes níveis de permissões de acesso em um sistema.
+ * Enum {@code Permissions}, representa os diferentes níveis de permissões de acesso no sistema.
  * Cada nível de permissão é mapeado para um valor inteiro, e os métodos utilitários permitem a conversão entre
  * os valores inteiros e os valores da enumeração.
  *

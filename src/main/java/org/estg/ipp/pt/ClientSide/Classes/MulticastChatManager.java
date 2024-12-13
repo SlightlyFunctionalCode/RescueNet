@@ -10,10 +10,10 @@ import java.net.MulticastSocket;
 import java.net.InetAddress;
 
 /**
- * A classe {@code MulticastChatManager} gerencia o envio e o recebimento de mensagens
- * num grupo de multicast para implementar a funcionalidade de chat.
+ * A classe {@code MulticastChatManager} gere o envio e a receção de mensagens
+ * num grupo de multicast para implementar a funcionalidade de chat em grupo.
  *
- * <p>Essa classe utiliza ‘sockets’ multicast para comunicação entre participantes do chat.
+ * <p>Esta classe utiliza o ‘socket multicast’ para estabelecer a comunicação entre os participantes do chat.
  * As mensagens são enviadas como pacotes de dados e recebidas continuamente em uma thread separada.</p>
  */
 public class MulticastChatManager implements MessageHandler {
@@ -22,7 +22,7 @@ public class MulticastChatManager implements MessageHandler {
     private final MulticastSocket socket;
 
     /**
-     * Construtor para inicializar o gerenciador de chat multicast.
+     * Construtor para inicializar o {@code MulticastChatManager}.
      *
      * @param groupAddress o endereço do grupo multicast.
      * @param port a porta utilizada para comunicação.
@@ -48,12 +48,12 @@ public class MulticastChatManager implements MessageHandler {
     }
 
     /**
-     * Inicia o recebimento contínuo de mensagens do grupo multicast.
+     * Inicia a receção contínua de mensagens do grupo multicast.
      *
      * <p>As mensagens recebidas são encaminhadas para o método {@link MessageReceiver#onMessageReceived(String)}
-     * implementado pelo receptor fornecido.</p>
+     * implementado pelo recetor fornecido.</p>
      *
-     * @param receiver a instância de {@link MessageReceiver} para tratar mensagens recebidas.
+     * @param receiver a instância de {@link MessageReceiver} para tratar as mensagens recebidas.
      */
     public void startReceivingMessages(MessageReceiver receiver) {
         new Thread(() -> {
