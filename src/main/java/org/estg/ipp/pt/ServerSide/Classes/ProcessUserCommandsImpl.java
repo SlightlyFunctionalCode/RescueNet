@@ -217,6 +217,13 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
             logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, username + " teve um erro ao mudar as permissões de " + name));
             return;
         }
+
+        if(Permissions.fromPermissions(userWithPermissions.getPermissions()) < Permissions.fromPermissions(Permissions.HIGH_LEVEL)) {
+            out.println("ERRO: Não tem permissões suficientes para usar este comando!");
+            logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, username + " teve um erro ao mudar as permissões de " + name));
+            return;
+        }
+
         User userUpdated = userService.getUserByName(name);
         List<Group> groups = groupService.getAllGroups();
         System.out.println(userWithPermissions.getPermissions());
