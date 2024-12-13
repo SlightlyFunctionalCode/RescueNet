@@ -60,6 +60,13 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
             String tagString = exportMatcher.group("tag");
             String username = exportMatcher.group("username");
 
+            User user = userService.getUserByName(username);
+            if(Permissions.fromPermissions(user.getPermissions()) < Permissions.fromPermissions(Permissions.HIGH_LEVEL)) {
+                out.println("ERRO: Não tem permissões suficientes para usar este comando!");
+                logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, username + " teve um erro a exportar logs" + user.getName()));
+                return;
+            }
+
             try {
                 if (help != null) {
                     out.println(EXPORT_HELP);
@@ -458,7 +465,7 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
         try {
             Group groupToAdd = groupService.getGroupByName(group);
 
-            if (!Objects.equals(user.getId(), groupToAdd.getCreatedBy())) {
+            if (user.getId() != groupToAdd.getCreatedBy()) {
                 out.println("Este groupo não foi criado por si!");
                 logService.saveLog(new Log(LocalDateTime.now(), TagType.ERROR, username + " tentou adicionar um utilizador a um grupo que não foi criado por si"));
                 return;
