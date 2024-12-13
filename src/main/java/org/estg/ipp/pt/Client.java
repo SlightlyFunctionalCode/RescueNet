@@ -137,7 +137,7 @@ public class Client {
             String name = matcher.group("name");
 
             try {
-                MulticastChatService chatService = new MulticastChatService(groupAddress, port, name, connection.getSocket(), "localhost");
+                MulticastChatService chatService = new MulticastChatService(groupAddress, port, name, connection.getSocket(), connection.getServerIP());
                 chatService.startChat(groupAddress, port, name);
             } catch (IOException e) {
                 System.out.println(Constants.ERROR_STARTING_CHAT_SESSION);

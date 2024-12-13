@@ -311,8 +311,8 @@ public class ProcessUserCommandsImpl implements ProcessUserCommands {
 
         Operation operation = switch (command) {
             case "/evac" -> new Operation("Operação de evacuação em massa", Permissions.HIGH_LEVEL);
-            case "/resdist" -> new Operation("Distribuição de Recursos de Emergência", Permissions.LOW_LEVEL);
             case "/emerg" -> new Operation("Ativação de comunicações de Emergência", Permissions.MEDIUM_LEVEL);
+            case "/resdist" -> new Operation("Distribuição de Recursos de Emergência", Permissions.LOW_LEVEL);
             default -> null;
         };
 

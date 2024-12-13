@@ -95,4 +95,12 @@ public class Connection {
     public Socket getSocket() {
         return socket;
     }
+
+    public String getServerIP() {
+        return serverIP;
+    }
+
+    public int getServerPort() {
+        return serverPort;
+    }
 }
